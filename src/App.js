@@ -49,7 +49,8 @@ const UserIcon = () => (
   </svg>
 );
 
-// Sample mentors data
+// Replace the SAMPLE_MENTORS array in your App.js Part 1 with this:
+
 const SAMPLE_MENTORS = [
   {
     id: 1,
@@ -92,8 +93,8 @@ const SAMPLE_MENTORS = [
   },
   {
     id: 4,
-    name: "Dave Williams",
-    email: "dave@musicmentor.com",
+    name: "Your Test Mentor Profile",
+    email: "rashiedtyre@gmail.com", // YOUR EMAIL
     specialty: "Music Business & Booking", 
     experience: 15,
     rate: 45,
@@ -104,6 +105,7 @@ const SAMPLE_MENTORS = [
     tags: ["Booking", "Contracts", "Marketing", "Revenue"]
   }
 ];
+
 // Auth Modal Component
 const AuthModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
