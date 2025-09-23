@@ -1,5 +1,9 @@
 // availabilitySystem.js - Calendar data structure and utilities
 
+// Firebase imports at the top
+import { collection, doc, getDoc, setDoc, query, where, getDocs } from 'firebase/firestore';
+import { db } from './firebase';
+
 // 1. Mentor Availability Data Structure (stored in Firestore)
 const mentorAvailabilityExample = {
   mentorId: "mentor_123",
@@ -194,9 +198,6 @@ export const SAMPLE_MENTOR_AVAILABILITY = [
 ];
 
 // 7. Firebase Integration Functions
-import { collection, doc, getDoc, setDoc, query, where, getDocs } from 'firebase/firestore';
-import { db } from './firebase';
-
 export const saveMentorAvailability = async (mentorId, availabilityData) => {
   try {
     await setDoc(doc(db, 'mentorAvailability', mentorId), availabilityData);
