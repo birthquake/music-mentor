@@ -1,202 +1,200 @@
 import React, { useState, useEffect } from 'react';
+import { auth } from './firebase';
+import { 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut
+} from 'firebase/auth';
 import './App.css';
 
-// Simple components for our MVP
-const Header = () => (
-  <header className="header">
-    <div className="container">
-      <h1>MusicMentor</h1>
-      <p>Get expert music advice in 15 minutes</p>
-    </div>
-  </header>
-);
+// Simple Auth Modal
+const AuthModal = ({ isOpen, onClose }) => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-const MentorCard = ({ mentor, onBook }) => (
-  <div className="mentor-card">
-    <div className="mentor-info">
-      <h3>{mentor.name}</h3>
-      <p className="specialty">{mentor.specialty}</p>
-      <p className="experience">{mentor.experience} years experience</p>
-      <p className="rate">${mentor.rate}/15min session</p>
-    </div>
-    <div className="mentor-actions">
-      <button onClick={() => onBook(mentor)} className="book-btn">
-        Book Session
-      </button>
-    </div>
-  </div>
-);
-
-const BookingModal = ({ mentor, isOpen, onClose, onConfirm }) => {
-  const [selectedTime, setSelectedTime] = useState('');
-  const [message, setMessage] = useState('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+      }
+      onClose();
+    } catch (error) {
+      setError(error.message);
+      console.error('Auth error:', error);
+    }
+    
+    setLoading(false);
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <h2>Book Session with {mentor?.name}</h2>
-        <div className="booking-form">
-          <label>
-            Preferred Time:
-            <select 
-              value={selectedTime} 
-              onChange={e => setSelectedTime(e.target.value)}
-            >
-              <option value="">Select a time</option>
-              <option value="morning">Morning (9-12pm)</option>
-              <option value="afternoon">Afternoon (1-5pm)</option>
-              <option value="evening">Evening (6-9pm)</option>
-            </select>
-          </label>
-          
-          <label>
-            What do you need help with?
-            <textarea 
-              value={message}
-              onChange={e => setMessage(e.target.value)}
-              placeholder="Describe your specific question or challenge..."
-              rows="3"
-            />
-          </label>
-          
-          <div className="modal-actions">
-            <button onClick={onClose} className="cancel-btn">Cancel</button>
-            <button 
-              onClick={() => onConfirm(selectedTime, message)} 
-              className="confirm-btn"
-              disabled={!selectedTime || !message.trim()}
-            >
-              Request Session (${mentor?.rate})
-            </button>
+      <div className="modal-content auth-modal" onClick={e => e.stopPropagation()}>
+        <h2>{isLogin ? 'Sign In' : 'Create Account'}</h2>
+        
+        {error && (
+          <div style={{color: 'red', marginBottom: '1rem', padding: '0.5rem', background: '#fee', borderRadius: '4px'}}>
+            {error}
           </div>
-        </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="auth-form">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          
+          <button type="submit" className="auth-btn primary" disabled={loading}>
+            {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Create Account')}
+          </button>
+        </form>
+        
+        <p>
+          {isLogin ? "Don't have an account? " : "Have an account? "}
+          <button 
+            type="button" 
+            onClick={() => setIsLogin(!isLogin)}
+            style={{background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline'}}
+          >
+            {isLogin ? 'Sign up' : 'Sign in'}
+          </button>
+        </p>
       </div>
     </div>
   );
 };
 
-function App() {
-  const [mentors, setMentors] = useState([]);
-  const [selectedMentor, setSelectedMentor] = useState(null);
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [filter, setFilter] = useState('all');
+// Simple Header
+const Header = ({ user, onSignOut, onSignIn }) => (
+  <header className="header">
+    <div className="container">
+      <div className="header-content">
+        <div className="brand">
+          <h1>MusicMentor</h1>
+          <p>Expert music guidance in 15 minutes</p>
+        </div>
+        
+        <div className="header-actions">
+          {user ? (
+            <div className="user-menu">
+              <span style={{color: 'white', marginRight: '1rem'}}>
+                Welcome, {user.email}!
+              </span>
+              <button onClick={onSignOut} className="sign-out-btn">
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <button onClick={onSignIn} className="sign-in-btn">
+              Sign In
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  </header>
+);
 
-  // Sample data for MVP
+// Main App
+function App() {
+  const [user, setUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Listen for auth changes
   useEffect(() => {
-    const sampleMentors = [
-      {
-        id: 1,
-        name: "Sarah Chen",
-        specialty: "Guitar & Songwriting",
-        experience: 8,
-        rate: 35,
-        category: "guitar"
-      },
-      {
-        id: 2,
-        name: "Marcus Johnson",
-        specialty: "Music Production & Mixing",
-        experience: 12,
-        rate: 50,
-        category: "production"
-      },
-      {
-        id: 3,
-        name: "Elena Rodriguez",
-        specialty: "Vocal Technique & Performance",
-        experience: 6,
-        rate: 40,
-        category: "vocals"
-      },
-      {
-        id: 4,
-        name: "Dave Williams",
-        specialty: "Music Business & Booking",
-        experience: 15,
-        rate: 45,
-        category: "business"
-      }
-    ];
-    setMentors(sampleMentors);
+    console.log('Setting up auth listener...');
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      console.log('Auth state changed:', user);
+      setUser(user);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const handleBookMentor = (mentor) => {
-    setSelectedMentor(mentor);
-    setShowBookingModal(true);
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      console.log('Signed out successfully');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
-  const handleConfirmBooking = (time, message) => {
-    // In a real app, this would call your backend
-    alert(`Booking requested!\nMentor: ${selectedMentor.name}\nTime: ${time}\nMessage: ${message}`);
-    setShowBookingModal(false);
-    setSelectedMentor(null);
-  };
-
-  const filteredMentors = filter === 'all' 
-    ? mentors 
-    : mentors.filter(mentor => mentor.category === filter);
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
 
   return (
     <div className="App">
-      <Header />
+      <Header 
+        user={user}
+        onSignOut={handleSignOut}
+        onSignIn={() => {
+          console.log('Sign in button clicked');
+          setShowAuthModal(true);
+        }}
+      />
       
       <main className="main">
         <div className="container">
-          <section className="filters">
-            <h2>Find Your Music Mentor</h2>
-            <div className="filter-buttons">
-              <button 
-                className={filter === 'all' ? 'active' : ''} 
-                onClick={() => setFilter('all')}
-              >
-                All Mentors
-              </button>
-              <button 
-                className={filter === 'guitar' ? 'active' : ''} 
-                onClick={() => setFilter('guitar')}
-              >
-                Guitar
-              </button>
-              <button 
-                className={filter === 'production' ? 'active' : ''} 
-                onClick={() => setFilter('production')}
-              >
-                Production
-              </button>
-              <button 
-                className={filter === 'vocals' ? 'active' : ''} 
-                onClick={() => setFilter('vocals')}
-              >
-                Vocals
-              </button>
-              <button 
-                className={filter === 'business' ? 'active' : ''} 
-                onClick={() => setFilter('business')}
-              >
-                Business
-              </button>
-            </div>
-          </section>
-
-          <section className="mentors-grid">
-            {filteredMentors.map(mentor => (
-              <MentorCard 
-                key={mentor.id}
-                mentor={mentor}
-                onBook={handleBookMentor}
-              />
-            ))}
-          </section>
+          <div style={{textAlign: 'center', padding: '2rem'}}>
+            {user ? (
+              <div>
+                <h2>Welcome back!</h2>
+                <p>You are signed in as: {user.email}</p>
+                <p>User ID: {user.uid}</p>
+              </div>
+            ) : (
+              <div>
+                <h2>Please sign in to continue</h2>
+                <button 
+                  onClick={() => setShowAuthModal(true)}
+                  style={{
+                    background: '#667eea',
+                    color: 'white',
+                    border: 'none',
+                    padding: '1rem 2rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '1rem'
+                  }}
+                >
+                  Sign In
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
-      <BookingModal
-        mentor={selectedMentor}
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        onConfirm={handleConfirmBooking}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          console.log('Closing auth modal');
+          setShowAuthModal(false);
+        }}
       />
     </div>
   );
