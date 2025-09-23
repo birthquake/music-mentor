@@ -1,12 +1,10 @@
-// CalendarBooking.js - Calendar scheduling UI components
+// CalendarBooking.js - Step-by-step calendar booking
 
 import React, { useState, useEffect } from 'react';
 import { 
   generateAvailableSlots, 
   checkSlotAvailability, 
-  groupSlotsByDate, 
   formatSlotTime,
-  getMentorAvailability,
   getMentorBookings,
   SAMPLE_MENTOR_AVAILABILITY
 } from './availabilitySystem';
@@ -31,104 +29,215 @@ const ClockIcon = () => (
   </svg>
 );
 
-const VideoIcon = () => (
+const ArrowLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polygon points="23 7 16 12 23 17 23 7"></polygon>
-    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+    <path d="m15 18-6-6 6-6"/>
   </svg>
 );
 
-// Time Slot Component
-const TimeSlot = ({ slot, onSelect, isSelected, isBooked = false }) => {
-  const startTime = slot.start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
-  const endTime = slot.end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
-  
+const ArrowRightIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="m9 18 6-6-6-6"/>
+  </svg>
+);
+
+// Step 1: Date Selection Component
+const DateSelection = ({ availableDates, onSelectDate, onBack }) => {
   return (
-    <button
-      onClick={() => onSelect(slot)}
-      disabled={isBooked || !slot.available}
-      className={`time-slot ${isSelected ? 'selected' : ''} ${isBooked ? 'booked' : ''} ${!slot.available ? 'unavailable' : ''}`}
-    >
-      <span className="slot-time">{startTime} - {endTime}</span>
-      {isBooked && <span className="slot-status">Booked</span>}
-    </button>
+    <div className="step-content">
+      <div className="step-header">
+        <h3>Choose a date</h3>
+        <p>Select from available dates in the next few weeks</p>
+      </div>
+      
+      <div className="date-grid">
+        {availableDates.map(({ date, slots }) => {
+          const dayName = date.toLocaleDateString('en-US', { 
+            weekday: 'long',
+            month: 'short', 
+            day: 'numeric' 
+          });
+          const slotCount = slots.length;
+          
+          return (
+            <button
+              key={date.toDateString()}
+              onClick={() => onSelectDate(date, slots)}
+              className="date-option"
+            >
+              <div className="date-day">{dayName}</div>
+              <div className="date-slots">{slotCount} slot{slotCount !== 1 ? 's' : ''} available</div>
+            </button>
+          );
+        })}
+      </div>
+      
+      {availableDates.length === 0 && (
+        <div className="no-dates">
+          <CalendarIcon />
+          <h4>No availability found</h4>
+          <p>This mentor doesn't have available time slots in the next few weeks.</p>
+        </div>
+      )}
+    </div>
   );
 };
 
-// Day View Component
-const DayAvailability = ({ date, slots, onSlotSelect, selectedSlot }) => {
-  const daySlots = slots.filter(slot => 
-    slot.start.toDateString() === date.toDateString()
-  ).sort((a, b) => a.start - b.start);
-
-  if (daySlots.length === 0) {
-    return null;
-  }
-
-  const dayName = date.toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    month: 'short', 
+// Step 2: Time Selection Component
+const TimeSelection = ({ selectedDate, availableSlots, onSelectTime, onBack, selectedTime }) => {
+  const dayName = selectedDate.toLocaleDateString('en-US', { 
+    weekday: 'long',
+    month: 'long', 
     day: 'numeric' 
   });
 
   return (
-    <div className="day-availability">
-      <h4 className="day-header">
-        <CalendarIcon />
-        {dayName}
-      </h4>
-      <div className="time-slots-grid">
-        {daySlots.map(slot => (
-          <TimeSlot
-            key={slot.slotId}
-            slot={slot}
-            onSelect={onSlotSelect}
-            isSelected={selectedSlot?.slotId === slot.slotId}
-            isBooked={!slot.available}
-          />
-        ))}
+    <div className="step-content">
+      <div className="step-header">
+        <button onClick={onBack} className="back-button">
+          <ArrowLeftIcon /> Back to dates
+        </button>
+        <h3>{dayName}</h3>
+        <p>Choose your preferred time</p>
+      </div>
+      
+      <div className="time-grid">
+        {availableSlots.map(slot => {
+          const timeStr = slot.start.toLocaleTimeString([], { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+          });
+          
+          return (
+            <button
+              key={slot.slotId}
+              onClick={() => onSelectTime(slot)}
+              className={`time-option ${selectedTime?.slotId === slot.slotId ? 'selected' : ''}`}
+            >
+              {timeStr}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 };
 
-// Main Calendar Booking Component
+// Step 3: Booking Details Component
+const BookingDetails = ({ 
+  selectedDate, 
+  selectedTime, 
+  mentor, 
+  message, 
+  setMessage, 
+  videoPreferred, 
+  setVideoPreferred, 
+  onBack, 
+  onConfirm, 
+  loading 
+}) => {
+  const dayName = selectedDate.toLocaleDateString('en-US', { 
+    weekday: 'long',
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  const timeStr = selectedTime.start.toLocaleTimeString([], { 
+    hour: 'numeric', 
+    minute: '2-digit', 
+    hour12: true 
+  });
+
+  return (
+    <div className="step-content">
+      <div className="step-header">
+        <button onClick={onBack} className="back-button">
+          <ArrowLeftIcon /> Back to times
+        </button>
+        <h3>Confirm your session</h3>
+        <p>{dayName} at {timeStr}</p>
+      </div>
+      
+      <form onSubmit={onConfirm} className="booking-details-form">
+        <div className="form-group">
+          <label>What specific challenge can {mentor?.name?.split(' ')[0]} help you with?</label>
+          <textarea 
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            placeholder="Be specific about your question or challenge. This helps your mentor prepare for your session."
+            rows="4"
+            required
+          />
+        </div>
+        
+        <div className="form-group">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={videoPreferred}
+              onChange={e => setVideoPreferred(e.target.checked)}
+            />
+            <span>I'd prefer video for this session (recommended for technique questions)</span>
+          </label>
+        </div>
+
+        <div className="session-summary">
+          <h4>Session Summary</h4>
+          <div className="summary-details">
+            <div className="summary-item">
+              <CalendarIcon />
+              <span>{dayName} at {timeStr}</span>
+            </div>
+            <div className="summary-item">
+              <ClockIcon />
+              <span>15 minutes • ${mentor?.rate}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="booking-actions">
+          <button type="submit" className="confirm-btn" disabled={loading || !message.trim()}>
+            {loading ? 'Requesting...' : `Request Session ($${mentor?.rate})`}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// Main Step-by-Step Calendar Booking Component
 const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
-  // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY CONDITIONAL LOGIC
+  // All hooks at the top
   const [availableSlots, setAvailableSlots] = useState([]);
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [step, setStep] = useState('dates'); // 'dates', 'times', 'details'
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
   const [message, setMessage] = useState('');
   const [videoPreferred, setVideoPreferred] = useState(false);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
 
   const loadMentorAvailability = async () => {
     setLoading(true);
     try {
-      // For demo purposes, use sample data
-      // In production, this would fetch from getMentorAvailability(mentor.id)
       const mentorAvailability = SAMPLE_MENTOR_AVAILABILITY.find(
         m => m.mentorId === mentor?.id?.toString()
       );
 
       if (!mentorAvailability) {
-        console.log('No availability found for mentor');
         setAvailableSlots([]);
         setLoading(false);
         return;
       }
 
-      // Generate available slots
       const slots = generateAvailableSlots(mentorAvailability, 3);
-      
-      // Get existing bookings to check availability
       const existingBookings = await getMentorBookings(mentor.id.toString());
-      
-      // Check which slots are actually available
       const checkedSlots = checkSlotAvailability(slots, existingBookings);
       
-      setAvailableSlots(checkedSlots);
+      // Only show available slots
+      const availableOnly = checkedSlots.filter(slot => slot.available);
+      setAvailableSlots(availableOnly);
     } catch (error) {
       console.error('Error loading mentor availability:', error);
     }
@@ -141,17 +250,54 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     }
   }, [mentor?.id]);
 
-  const handleSlotSelect = (slot) => {
-    setSelectedSlot(slot);
+  // Group available slots by date
+  const availableDates = React.useMemo(() => {
+    const grouped = {};
+    availableSlots.forEach(slot => {
+      const dateKey = slot.start.toDateString();
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(slot);
+    });
+
+    return Object.keys(grouped)
+      .sort((a, b) => new Date(a) - new Date(b))
+      .slice(0, 14) // Show max 14 days
+      .map(dateKey => ({
+        date: new Date(dateKey),
+        slots: grouped[dateKey]
+      }));
+  }, [availableSlots]);
+
+  const handleSelectDate = (date, slots) => {
+    setSelectedDate(date);
+    setSelectedTime(null);
+    setStep('times');
+  };
+
+  const handleSelectTime = (slot) => {
+    setSelectedTime(slot);
+    setStep('details');
+  };
+
+  const handleBackToDates = () => {
+    setStep('dates');
+    setSelectedDate(null);
+    setSelectedTime(null);
+  };
+
+  const handleBackToTimes = () => {
+    setStep('times');
+    setSelectedTime(null);
   };
 
   const handleBooking = async (e) => {
     e.preventDefault();
-    if (!selectedSlot || !message.trim()) return;
+    if (!selectedTime || !message.trim()) return;
 
     setBookingLoading(true);
     try {
-      // Create booking with specific scheduled time
       await addDoc(collection(db, 'bookings'), {
         mentorId: mentor?.id,
         mentorName: mentor?.name,
@@ -160,15 +306,15 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
         userEmail: user?.email,
         message,
         videoPreferred,
-        status: 'confirmed', // Auto-confirm since specific time was selected
+        status: 'pending', // Requires mentor approval
         createdAt: serverTimestamp(),
-        scheduledStart: selectedSlot.start,
-        scheduledEnd: selectedSlot.end,
+        scheduledStart: selectedTime.start,
+        scheduledEnd: selectedTime.end,
         rate: mentor?.rate,
-        bookingType: 'scheduled' // vs 'preference-based'
+        bookingType: 'scheduled'
       });
 
-      onConfirm(`Scheduled for ${formatSlotTime(selectedSlot.start)}`, message, videoPreferred);
+      onConfirm(`Requested for ${formatSlotTime(selectedTime.start)}`, message, videoPreferred);
     } catch (error) {
       console.error('Error creating booking:', error);
       alert('Error creating booking. Please try again.');
@@ -176,115 +322,73 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     setBookingLoading(false);
   };
 
-  // EARLY RETURN AFTER ALL HOOKS
+  // Early return after all hooks
   if (!isOpen || !mentor || !user) return null;
-
-  // Group slots by date for display
-  const groupedSlots = groupSlotsByDate(availableSlots);
-  const sortedDates = Object.keys(groupedSlots).sort((a, b) => new Date(a) - new Date(b));
-  
-  // Get next 14 days for display
-  const displayDates = sortedDates.slice(0, 14);
-
-  if (loading) {
-    return (
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-content booking-modal" onClick={e => e.stopPropagation()}>
-          <div className="loading-slots">Loading available times...</div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content booking-modal calendar-booking-modal" onClick={e => e.stopPropagation()}>
+      <div className="modal-content booking-modal step-modal" onClick={e => e.stopPropagation()}>
         <div className="booking-header">
-          <h2>Schedule with {mentor?.name || 'Mentor'}</h2>
-          <p className="session-details">
-            <ClockIcon /> 15-minute session • ${mentor?.rate || 0}
-          </p>
+          <h2>Book Session with {mentor?.name}</h2>
+          <div className="step-indicator">
+            <span className={step === 'dates' ? 'active' : step !== 'dates' ? 'completed' : ''}>
+              1. Date
+            </span>
+            <ArrowRightIcon />
+            <span className={step === 'times' ? 'active' : step === 'details' ? 'completed' : ''}>
+              2. Time
+            </span>
+            <ArrowRightIcon />
+            <span className={step === 'details' ? 'active' : ''}>
+              3. Details
+            </span>
+          </div>
         </div>
 
-        {displayDates.length === 0 ? (
-          <div className="no-availability">
-            <CalendarIcon />
-            <h3>No availability found</h3>
-            <p>This mentor hasn't set up their schedule yet. Try booking with the preference system instead.</p>
-            <button onClick={onClose} className="cancel-btn">
-              Go Back
-            </button>
-          </div>
+        {loading ? (
+          <div className="loading-slots">Loading available times...</div>
         ) : (
-          <form onSubmit={handleBooking} className="calendar-booking-form">
-            <div className="availability-section">
-              <h3>Choose a time that works for you:</h3>
-              <div className="calendar-view">
-                {displayDates.map(dateStr => {
-                  const date = new Date(dateStr);
-                  return (
-                    <DayAvailability
-                      key={dateStr}
-                      date={date}
-                      slots={groupedSlots[dateStr]}
-                      onSlotSelect={handleSlotSelect}
-                      selectedSlot={selectedSlot}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            {selectedSlot && (
-              <div className="booking-details-section">
-                <div className="selected-time-display">
-                  <h4>Selected Time:</h4>
-                  <p className="selected-time">
-                    <CalendarIcon />
-                    {formatSlotTime(selectedSlot.start)}
-                  </p>
-                </div>
-
-                <div className="form-group">
-                  <label>What specific challenge can {mentor?.name?.split(' ')[0] || 'your mentor'} help you with?</label>
-                  <textarea 
-                    value={message}
-                    onChange={e => setMessage(e.target.value)}
-                    placeholder="Be specific about your question or challenge. This helps your mentor prepare for your session."
-                    rows="3"
-                    required
-                  />
-                </div>
-                
-                {mentor?.videoAvailable && (
-                  <div className="form-group">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={videoPreferred}
-                        onChange={e => setVideoPreferred(e.target.checked)}
-                      />
-                      <span>I'd prefer video for this session (recommended for technique questions)</span>
-                    </label>
-                  </div>
-                )}
-
-                <div className="booking-actions">
-                  <button type="button" onClick={onClose} className="cancel-btn">
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit"
-                    className="confirm-btn"
-                    disabled={bookingLoading || !selectedSlot || !message.trim()}
-                  >
-                    {bookingLoading ? 'Booking...' : `Confirm Session ($${mentor?.rate || 0})`}
-                  </button>
-                </div>
-              </div>
+          <>
+            {step === 'dates' && (
+              <DateSelection
+                availableDates={availableDates}
+                onSelectDate={handleSelectDate}
+                onBack={handleBackToDates}
+              />
             )}
-          </form>
+            
+            {step === 'times' && selectedDate && (
+              <TimeSelection
+                selectedDate={selectedDate}
+                availableSlots={availableDates.find(d => d.date.toDateString() === selectedDate.toDateString())?.slots || []}
+                onSelectTime={handleSelectTime}
+                onBack={handleBackToDates}
+                selectedTime={selectedTime}
+              />
+            )}
+            
+            {step === 'details' && selectedTime && (
+              <BookingDetails
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                mentor={mentor}
+                message={message}
+                setMessage={setMessage}
+                videoPreferred={videoPreferred}
+                setVideoPreferred={setVideoPreferred}
+                onBack={handleBackToTimes}
+                onConfirm={handleBooking}
+                loading={bookingLoading}
+              />
+            )}
+          </>
         )}
+        
+        <div className="modal-actions">
+          <button onClick={onClose} className="cancel-btn">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );
