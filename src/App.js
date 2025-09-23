@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { auth, db } from './firebase';
 import { 
   signInWithEmailAndPassword,
@@ -10,7 +11,9 @@ import {
   addDoc,
   serverTimestamp
 } from 'firebase/firestore';
+import MentorDashboard from './MentorDashboard';
 import './App.css';
+import './MentorDashboard.css';
 
 // Icons
 const StarIcon = ({ filled = false }) => (
@@ -46,6 +49,61 @@ const UserIcon = () => (
   </svg>
 );
 
+// Sample mentors data
+const SAMPLE_MENTORS = [
+  {
+    id: 1,
+    name: "Sarah Chen",
+    email: "sarah@musicmentor.com",
+    specialty: "Guitar & Songwriting",
+    experience: 8,
+    rate: 35,
+    rating: 4.9,
+    reviewCount: 127,
+    category: "guitar",
+    videoAvailable: true,
+    tags: ["Acoustic", "Electric", "Songwriting", "Theory"]
+  },
+  {
+    id: 2,
+    name: "Marcus Johnson", 
+    email: "marcus@musicmentor.com",
+    specialty: "Music Production & Mixing",
+    experience: 12,
+    rate: 55,
+    rating: 4.8,
+    reviewCount: 89,
+    category: "production",
+    videoAvailable: true,
+    tags: ["Logic Pro", "Ableton", "Mixing", "Mastering"]
+  },
+  {
+    id: 3,
+    name: "Elena Rodriguez",
+    email: "elena@musicmentor.com", 
+    specialty: "Vocal Technique & Performance",
+    experience: 6,
+    rate: 40,
+    rating: 5.0,
+    reviewCount: 203,
+    category: "vocals",
+    videoAvailable: true,
+    tags: ["Classical", "Pop", "Breathing", "Performance"]
+  },
+  {
+    id: 4,
+    name: "Dave Williams",
+    email: "dave@musicmentor.com",
+    specialty: "Music Business & Booking", 
+    experience: 15,
+    rate: 45,
+    rating: 4.7,
+    reviewCount: 156,
+    category: "business",
+    videoAvailable: false,
+    tags: ["Booking", "Contracts", "Marketing", "Revenue"]
+  }
+];
 // Auth Modal Component
 const AuthModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -125,19 +183,25 @@ const AuthModal = ({ isOpen, onClose }) => {
             {isLogin ? 'Sign up' : 'Sign in'}
           </button>
         </p>
+
+        {/* Mentor login hint */}
+        <div style={{marginTop: '1rem', padding: '0.75rem', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.875rem', color: '#0369a1'}}>
+          <strong>Mentors:</strong> Use sarah@musicmentor.com, marcus@musicmentor.com, elena@musicmentor.com, or dave@musicmentor.com with password "mentor123" to access dashboard
+        </div>
       </div>
     </div>
   );
 };
-
 // Header Component
-const Header = ({ user, onSignOut, onAuthClick }) => (
+const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => (
   <header className="header">
     <div className="container">
       <div className="header-content">
         <div className="brand">
-          <h1>MusicMentor</h1>
-          <p>Expert music guidance in 15 minutes</p>
+          <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>
+            <h1>MusicMentor</h1>
+            <p>Expert music guidance in 15 minutes</p>
+          </Link>
         </div>
         
         <div className="header-actions">
@@ -147,6 +211,14 @@ const Header = ({ user, onSignOut, onAuthClick }) => (
                 <UserIcon />
                 <span>{user.email}</span>
               </div>
+              
+              {/* Show dashboard link if user is a mentor */}
+              {mentorInfo && (
+                <Link to="/mentor-dashboard" className="dashboard-link">
+                  Dashboard
+                </Link>
+              )}
+              
               <button onClick={onSignOut} className="sign-out-btn">
                 Sign Out
               </button>
@@ -162,6 +234,31 @@ const Header = ({ user, onSignOut, onAuthClick }) => (
   </header>
 );
 
+// Add CSS for dashboard link
+const dashboardLinkStyles = `
+.dashboard-link {
+  color: white;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-link:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+`;
+
+// Inject the styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = dashboardLinkStyles;
+  document.head.appendChild(styleSheet);
+}
 // Mentor Card Component
 const MentorCard = ({ mentor, onBook, user }) => {
   const renderStars = (rating) => {
@@ -222,8 +319,7 @@ const MentorCard = ({ mentor, onBook, user }) => {
     </div>
   );
 };
-
-// Booking Modal Component
+// Booking Modal Component  
 const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
   const [selectedTime, setSelectedTime] = useState('');
   const [message, setMessage] = useState('');
@@ -333,108 +429,16 @@ const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
     </div>
   );
 };
-// Main App Component
-function App() {
-  const [user, setUser] = useState(null);
-  const [mentors, setMentors] = useState([]);
+// Homepage Component
+const Homepage = ({ user, onAuthClick }) => {
+  const [mentors] = useState(SAMPLE_MENTORS);
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [filter, setFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
-
-  // Auth state listener
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Load sample mentors
-  useEffect(() => {
-    const sampleMentors = [
-      {
-        id: 1,
-        name: "Sarah Chen",
-        specialty: "Guitar & Songwriting",
-        experience: 8,
-        rate: 35,
-        rating: 4.9,
-        reviewCount: 127,
-        category: "guitar",
-        videoAvailable: true,
-        tags: ["Acoustic", "Electric", "Songwriting", "Theory"]
-      },
-      {
-        id: 2,
-        name: "Marcus Johnson",
-        specialty: "Music Production & Mixing",
-        experience: 12,
-        rate: 55,
-        rating: 4.8,
-        reviewCount: 89,
-        category: "production",
-        videoAvailable: true,
-        tags: ["Logic Pro", "Ableton", "Mixing", "Mastering"]
-      },
-      {
-        id: 3,
-        name: "Elena Rodriguez",
-        specialty: "Vocal Technique & Performance",
-        experience: 6,
-        rate: 40,
-        rating: 5.0,
-        reviewCount: 203,
-        category: "vocals",
-        videoAvailable: true,
-        tags: ["Classical", "Pop", "Breathing", "Performance"]
-      },
-      {
-        id: 4,
-        name: "Dave Williams",
-        specialty: "Music Business & Booking",
-        experience: 15,
-        rate: 45,
-        rating: 4.7,
-        reviewCount: 156,
-        category: "business",
-        videoAvailable: false,
-        tags: ["Booking", "Contracts", "Marketing", "Revenue"]
-      },
-      {
-        id: 5,
-        name: "Aisha Patel",
-        specialty: "Piano & Music Theory",
-        experience: 10,
-        rate: 42,
-        rating: 4.9,
-        reviewCount: 178,
-        category: "piano",
-        videoAvailable: true,
-        tags: ["Classical", "Jazz", "Theory", "Composition"]
-      },
-      {
-        id: 6,
-        name: "Ryan Murphy",
-        specialty: "Drums & Rhythm",
-        experience: 7,
-        rate: 38,
-        rating: 4.6,
-        reviewCount: 94,
-        category: "drums",
-        videoAvailable: true,
-        tags: ["Rock", "Jazz", "Latin", "Technique"]
-      }
-    ];
-    setMentors(sampleMentors);
-  }, []);
 
   const handleBookMentor = (mentor) => {
     if (!user) {
-      setShowAuthModal(true);
+      onAuthClick();
       return;
     }
     setSelectedMentor(mentor);
@@ -447,6 +451,101 @@ function App() {
     setSelectedMentor(null);
   };
 
+  const filteredMentors = filter === 'all' 
+    ? mentors 
+    : mentors.filter(mentor => mentor.category === filter);
+
+  return (
+    <main className="main">
+      <div className="container">
+        <section className="hero-section">
+          <h2>Find Your Perfect Music Mentor</h2>
+          <p>Get personalized advice from experienced musicians in focused 15-minute sessions</p>
+        </section>
+
+        <section className="filters">
+          <div className="filter-buttons">
+            <button 
+              className={filter === 'all' ? 'active' : ''} 
+              onClick={() => setFilter('all')}
+            >
+              All Specialties
+            </button>
+            <button 
+              className={filter === 'guitar' ? 'active' : ''} 
+              onClick={() => setFilter('guitar')}
+            >
+              Guitar
+            </button>
+            <button 
+              className={filter === 'production' ? 'active' : ''} 
+              onClick={() => setFilter('production')}
+            >
+              Production
+            </button>
+            <button 
+              className={filter === 'vocals' ? 'active' : ''} 
+              onClick={() => setFilter('vocals')}
+            >
+              Vocals
+            </button>
+            <button 
+              className={filter === 'business' ? 'active' : ''} 
+              onClick={() => setFilter('business')}
+            >
+              Business
+            </button>
+          </div>
+        </section>
+
+        <section className="mentors-grid">
+          {filteredMentors.map(mentor => (
+            <MentorCard 
+              key={mentor.id}
+              mentor={mentor}
+              onBook={handleBookMentor}
+              user={user}
+            />
+          ))}
+        </section>
+      </div>
+
+      <BookingModal
+        mentor={selectedMentor}
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        onConfirm={handleConfirmBooking}
+        user={user}
+      />
+    </main>
+  );
+};
+// Main App Component
+function App() {
+  const [user, setUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [mentorInfo, setMentorInfo] = useState(null);
+
+  // Auth state listener
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+      
+      // Check if user is a mentor
+      if (user) {
+        const mentor = SAMPLE_MENTORS.find(m => m.email === user.email);
+        setMentorInfo(mentor || null);
+      } else {
+        setMentorInfo(null);
+      }
+      
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -454,10 +553,6 @@ function App() {
       console.error('Error signing out:', error);
     }
   };
-
-  const filteredMentors = filter === 'all' 
-    ? mentors 
-    : mentors.filter(mentor => mentor.category === filter);
 
   if (loading) {
     return (
@@ -468,93 +563,42 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <Header 
-        user={user}
-        onSignOut={handleSignOut}
-        onAuthClick={() => setShowAuthModal(true)}
-      />
-      
-      <main className="main">
-        <div className="container">
-          <section className="hero-section">
-            <h2>Find Your Perfect Music Mentor</h2>
-            <p>Get personalized advice from experienced musicians in focused 15-minute sessions</p>
-          </section>
-
-          <section className="filters">
-            <div className="filter-buttons">
-              <button 
-                className={filter === 'all' ? 'active' : ''} 
-                onClick={() => setFilter('all')}
-              >
-                All Specialties
-              </button>
-              <button 
-                className={filter === 'guitar' ? 'active' : ''} 
-                onClick={() => setFilter('guitar')}
-              >
-                Guitar
-              </button>
-              <button 
-                className={filter === 'production' ? 'active' : ''} 
-                onClick={() => setFilter('production')}
-              >
-                Production
-              </button>
-              <button 
-                className={filter === 'vocals' ? 'active' : ''} 
-                onClick={() => setFilter('vocals')}
-              >
-                Vocals
-              </button>
-              <button 
-                className={filter === 'business' ? 'active' : ''} 
-                onClick={() => setFilter('business')}
-              >
-                Business
-              </button>
-              <button 
-                className={filter === 'piano' ? 'active' : ''} 
-                onClick={() => setFilter('piano')}
-              >
-                Piano
-              </button>
-              <button 
-                className={filter === 'drums' ? 'active' : ''} 
-                onClick={() => setFilter('drums')}
-              >
-                Drums
-              </button>
-            </div>
-          </section>
-
-          <section className="mentors-grid">
-            {filteredMentors.map(mentor => (
-              <MentorCard 
-                key={mentor.id}
-                mentor={mentor}
-                onBook={handleBookMentor}
-                user={user}
+    <Router>
+      <div className="App">
+        <Header 
+          user={user}
+          onSignOut={handleSignOut}
+          onAuthClick={() => setShowAuthModal(true)}
+          mentorInfo={mentorInfo}
+        />
+        
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <Homepage 
+                user={user} 
+                onAuthClick={() => setShowAuthModal(true)} 
               />
-            ))}
-          </section>
-        </div>
-      </main>
+            } 
+          />
+          <Route 
+            path="/mentor-dashboard" 
+            element={
+              <MentorDashboard 
+                user={user} 
+                mentorInfo={mentorInfo} 
+              />
+            } 
+          />
+        </Routes>
 
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-      />
-
-      <BookingModal
-        mentor={selectedMentor}
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        onConfirm={handleConfirmBooking}
-        user={user}
-      />
-    </div>
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+        />
+      </div>
+    </Router>
   );
 }
 
