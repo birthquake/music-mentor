@@ -93,7 +93,9 @@ const DayAvailability = ({ date, slots, onSlotSelect, selectedSlot }) => {
 };
 
 // Main Calendar Booking Component
-const CalendarBooking = ({ mentor, user, onClose, onConfirm }) => {
+const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
+  // Early return if not open or missing required props
+  if (!isOpen || !mentor || !user) return null;
   const [availableSlots, setAvailableSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [message, setMessage] = useState('');
@@ -103,8 +105,10 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm }) => {
   const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
 
   useEffect(() => {
-    loadMentorAvailability();
-  }, [mentor.id]);
+    if (mentor?.id) {
+      loadMentorAvailability();
+    }
+  }, [mentor?.id]);
 
   const loadMentorAvailability = async () => {
     setLoading(true);
@@ -112,7 +116,7 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm }) => {
       // For demo purposes, use sample data
       // In production, this would fetch from getMentorAvailability(mentor.id)
       const mentorAvailability = SAMPLE_MENTOR_AVAILABILITY.find(
-        m => m.mentorId === mentor.id.toString()
+        m => m.mentorId === mentor?.id?.toString()
       );
 
       if (!mentorAvailability) {
@@ -150,18 +154,18 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm }) => {
     try {
       // Create booking with specific scheduled time
       await addDoc(collection(db, 'bookings'), {
-        mentorId: mentor.id,
-        mentorName: mentor.name,
-        mentorEmail: mentor.email,
-        userId: user.uid,
-        userEmail: user.email,
+        mentorId: mentor?.id,
+        mentorName: mentor?.name,
+        mentorEmail: mentor?.email,
+        userId: user?.uid,
+        userEmail: user?.email,
         message,
         videoPreferred,
         status: 'confirmed', // Auto-confirm since specific time was selected
         createdAt: serverTimestamp(),
         scheduledStart: selectedSlot.start,
         scheduledEnd: selectedSlot.end,
-        rate: mentor.rate,
+        rate: mentor?.rate,
         bookingType: 'scheduled' // vs 'preference-based'
       });
 
@@ -194,9 +198,9 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content booking-modal calendar-booking-modal" onClick={e => e.stopPropagation()}>
         <div className="booking-header">
-          <h2>Schedule with {mentor.name}</h2>
+          <h2>Schedule with {mentor?.name || 'Mentor'}</h2>
           <p className="session-details">
-            <ClockIcon /> 15-minute session • ${mentor.rate}
+            <ClockIcon /> 15-minute session • ${mentor?.rate || 0}
           </p>
         </div>
 
