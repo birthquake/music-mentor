@@ -552,3 +552,243 @@
     max-width: 100%;
   }
 }
+
+/* Calendar Booking Styles Part 1 - Add to MentorDashboard.css */
+
+/* Calendar Booking Modal */
+.calendar-booking-modal {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.calendar-booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Availability Section */
+.availability-section h3 {
+  color: #334155;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.calendar-view {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fafafa;
+}
+
+/* Loading State */
+.loading-slots {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+/* Calendar Booking Styles Part 2 - Day and Time Slots */
+
+/* Day Availability */
+.day-availability {
+  margin-bottom: 1.5rem;
+}
+
+.day-availability:last-child {
+  margin-bottom: 0;
+}
+
+.day-header {
+  color: #4f46e5;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+/* Time Slot Buttons */
+.time-slot {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.time-slot:hover:not(:disabled) {
+  border-color: #6366f1;
+  background: #f0f9ff;
+  transform: translateY(-1px);
+}
+
+.time-slot.selected {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: white;
+}
+
+.slot-time {
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.slot-status {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 0.25rem;
+}
+/* Calendar Booking Styles Part 3 - Button States and Selected Time */
+
+/* Time Slot States */
+.time-slot:disabled.booked {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #991b1b;
+  cursor: not-allowed;
+}
+
+.time-slot:disabled.unavailable {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* No Availability State */
+.no-availability {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.no-availability svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-availability h3 {
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+/* Selected Time Display */
+.booking-details-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+}
+
+.selected-time-display {
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.selected-time-display h4 {
+  color: #065f46;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.selected-time {
+  color: #047857;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+/* Calendar Booking Styles Part 4 - Mobile Responsive */
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .calendar-booking-modal {
+    max-width: 95vw;
+    margin: 1rem;
+  }
+  
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.375rem;
+  }
+  
+  .time-slot {
+    min-height: 45px;
+    padding: 0.375rem;
+    font-size: 0.8125rem;
+  }
+  
+  .calendar-view {
+    max-height: 300px;
+    padding: 0.75rem;
+  }
+  
+  .selected-time {
+    font-size: 1rem;
+  }
+}
+
+/* Calendar Icon Animations */
+.day-header svg {
+  transition: transform 0.2s ease;
+}
+
+.day-availability:hover .day-header svg {
+  transform: scale(1.1);
+}
+
+/* Booking Type Toggle (for future use) */
+.booking-type-toggle {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.booking-type-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.booking-type-btn.active {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #6366f1;
+}
