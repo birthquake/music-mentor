@@ -194,51 +194,97 @@ const AuthModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
-// Header Component
-const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => (
-  <header className="header">
-    <div className="container">
-      <div className="header-content">
-        <div className="brand">
-          <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>
-            <h1>MusicMentor</h1>
-            <p>Expert music guidance in 15 minutes</p>
-          </Link>
-        </div>
-        
-        <div className="header-actions">
-          {user ? (
-            <div className="user-menu">
-              <div className="user-info">
-                <UserIcon />
-                <span>{user.email}</span>
+// Updated Header Component for App.js
+const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const getUserInitials = (email) => {
+    if (!email) return 'U';
+    return email.charAt(0).toUpperCase();
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownOpen && !event.target.closest('.user-avatar') && !event.target.closest('.user-dropdown')) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [dropdownOpen]);
+
+  return (
+    <header className="header">
+      <div className="container">
+        <div className="header-content">
+          <div className="brand">
+            <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>
+              <h1>MusicMentor</h1>
+            </Link>
+          </div>
+          
+          <div className="header-actions">
+            {user ? (
+              <div className="user-menu">
+                <div className="user-avatar" onClick={toggleDropdown}>
+                  {getUserInitials(user.email)}
+                  <div className={`user-dropdown ${dropdownOpen ? 'active' : ''}`}>
+                    <button 
+                      className="dropdown-item"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        // Navigate to profile - you can implement this later
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                      View Profile
+                    </button>
+                    
+                    <Link 
+                      to={mentorInfo ? "/mentor-dashboard" : "/my-bookings"}
+                      className="dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                      </svg>
+                      {mentorInfo ? 'Mentor Dashboard' : 'My Bookings'}
+                    </Link>
+                    
+                    <button 
+                      className="dropdown-item"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        onSignOut();
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2z"/>
+                      </svg>
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
               </div>
-              
-              {/* Show appropriate dashboard link based on user type */}
-              {mentorInfo ? (
-                <Link to="/mentor-dashboard" className="dashboard-link">
-                  Dashboard
-                </Link>
-              ) : (
-                <Link to="/my-bookings" className="dashboard-link">
-                  My Bookings
-                </Link>
-              )}
-              
-              <button onClick={onSignOut} className="sign-out-btn">
-                Sign Out
+            ) : (
+              <button onClick={onAuthClick} className="sign-in-btn">
+                Sign In
               </button>
-            </div>
-          ) : (
-            <button onClick={onAuthClick} className="sign-in-btn">
-              Sign In
-            </button>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  </header>
-);
+    </header>
+  );
+};
 
 // Add CSS for dashboard link
 const dashboardLinkStyles = `
