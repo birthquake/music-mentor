@@ -792,3 +792,236 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   color: #6366f1;
 }
+
+/* Step-by-Step Calendar Booking Styles */
+
+.step-modal {
+  max-width: 500px;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.step-indicator span {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.step-indicator span.active {
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.step-indicator span.completed {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.step-indicator svg {
+  color: #d1d5db;
+  width: 12px;
+  height: 12px;
+}
+
+.step-content {
+  padding: 1.5rem 0;
+}
+
+.step-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.step-header h3 {
+  color: #1f2937;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.step-header p {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  color: #6366f1;
+  cursor: pointer;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  padding: 0.25rem 0;
+  transition: color 0.2s ease;
+}
+
+.back-button:hover {
+  color: #4f46e5;
+}
+
+/* Date Selection Styles */
+.date-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.date-option {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.date-option:hover {
+  border-color: #6366f1;
+  background: #f0f9ff;
+}
+
+.date-day {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.date-slots {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.no-dates {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #6b7280;
+}
+
+.no-dates svg {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Time Selection Styles */
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.time-option {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.75rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  text-align: center;
+}
+
+.time-option:hover {
+  border-color: #6366f1;
+  background: #f0f9ff;
+}
+
+.time-option.selected {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: white;
+}
+
+/* Booking Details Styles */
+.booking-details-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.session-summary {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.session-summary h4 {
+  color: #374151;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.summary-item svg {
+  color: #9ca3af;
+}
+
+.modal-actions {
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .step-modal {
+    max-width: 95vw;
+    margin: 1rem;
+  }
+  
+  .time-grid {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .time-option {
+    padding: 0.625rem 0.375rem;
+    font-size: 0.875rem;
+  }
+  
+  .date-option {
+    padding: 0.75rem;
+  }
+  
+  .step-indicator {
+    gap: 0.375rem;
+  }
+  
+  .step-indicator span {
+    font-size: 0.8125rem;
+  }
+}
