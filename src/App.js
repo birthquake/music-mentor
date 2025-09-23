@@ -11,6 +11,7 @@ import {
   addDoc,
   serverTimestamp
 } from 'firebase/firestore';
+import CalendarBooking from './CalendarBooking';
 import MentorDashboard from './MentorDashboard';
 import StudentDashboard from './StudentDashboard';
 import './App.css';
@@ -515,13 +516,13 @@ const Homepage = ({ user, onAuthClick }) => {
         </section>
       </div>
 
-      <BookingModal
-        mentor={selectedMentor}
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        onConfirm={handleConfirmBooking}
-        user={user}
-      />
+      <CalendarBooking
+  mentor={selectedMentor}
+  isOpen={showBookingModal}
+  onClose={() => setShowBookingModal(false)}
+  onConfirm={handleConfirmBooking}
+  user={user}
+/>
     </main>
   );
 };
