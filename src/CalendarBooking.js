@@ -94,8 +94,7 @@ const DayAvailability = ({ date, slots, onSlotSelect, selectedSlot }) => {
 
 // Main Calendar Booking Component
 const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
-  // Early return if not open or missing required props
-  if (!isOpen || !mentor || !user) return null;
+  // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY CONDITIONAL LOGIC
   const [availableSlots, setAvailableSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [message, setMessage] = useState('');
@@ -103,12 +102,6 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
-
-  useEffect(() => {
-    if (mentor?.id) {
-      loadMentorAvailability();
-    }
-  }, [mentor?.id]);
 
   const loadMentorAvailability = async () => {
     setLoading(true);
@@ -141,6 +134,12 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (mentor?.id) {
+      loadMentorAvailability();
+    }
+  }, [mentor?.id]);
 
   const handleSlotSelect = (slot) => {
     setSelectedSlot(slot);
@@ -176,6 +175,9 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     }
     setBookingLoading(false);
   };
+
+  // EARLY RETURN AFTER ALL HOOKS
+  if (!isOpen || !mentor || !user) return null;
 
   // Group slots by date for display
   const groupedSlots = groupSlotsByDate(availableSlots);
@@ -244,7 +246,7 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
                 </div>
 
                 <div className="form-group">
-                  <label>What specific challenge can {mentor.name.split(' ')[0]} help you with?</label>
+                  <label>What specific challenge can {mentor?.name?.split(' ')[0] || 'your mentor'} help you with?</label>
                   <textarea 
                     value={message}
                     onChange={e => setMessage(e.target.value)}
@@ -254,7 +256,7 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
                   />
                 </div>
                 
-                {mentor.videoAvailable && (
+                {mentor?.videoAvailable && (
                   <div className="form-group">
                     <label className="checkbox-label">
                       <input
@@ -276,7 +278,7 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
                     className="confirm-btn"
                     disabled={bookingLoading || !selectedSlot || !message.trim()}
                   >
-                    {bookingLoading ? 'Booking...' : `Confirm Session ($${mentor.rate})`}
+                    {bookingLoading ? 'Booking...' : `Confirm Session ($${mentor?.rate || 0})`}
                   </button>
                 </div>
               </div>
