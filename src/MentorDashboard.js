@@ -192,29 +192,45 @@ const MentorDashboard = ({ user, mentorInfo }) => {
   const [filter, setFilter] = useState('pending');
 
   useEffect(() => {
-    if (!user || !mentorInfo) return;
+  if (!user || !mentorInfo) {
+    console.log('No user or mentorInfo:', { user: !!user, mentorInfo: !!mentorInfo });
+    return;
+  }
 
-    // Query bookings for this mentor
-    const q = query(
-      collection(db, 'bookings'),
-      where('mentorId', '==', mentorInfo.id),
-      orderBy('createdAt', 'desc')
-    );
+  console.log('Setting up bookings query for mentor:', mentorInfo.id);
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  // Query bookings for this mentor - simplified version
+  const q = collection(db, 'bookings');
+
+  const unsubscribe = onSnapshot(q, 
+    (querySnapshot) => {
+      console.log('Query snapshot received, size:', querySnapshot.size);
       const bookingData = [];
       querySnapshot.forEach((doc) => {
-        bookingData.push({
-          id: doc.id,
-          ...doc.data()
-        });
+        const data = doc.data();
+        console.log('Found booking:', doc.id, data);
+        
+        // Filter for this mentor's bookings
+        if (data.mentorId === mentorInfo.id) {
+          bookingData.push({
+            id: doc.id,
+            ...data
+          });
+        }
       });
+      
+      console.log('Total bookings for this mentor:', bookingData.length);
       setBookings(bookingData);
       setLoading(false);
-    });
+    },
+    (error) => {
+      console.error('Error getting bookings:', error);
+      setLoading(false);
+    }
+  );
 
-    return () => unsubscribe();
-  }, [user, mentorInfo]);
+  return () => unsubscribe();
+}, [user, mentorInfo]);
 
   const handleAcceptBooking = async (bookingId) => {
     const bookingRef = doc(db, 'bookings', bookingId);
