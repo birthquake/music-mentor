@@ -178,7 +178,7 @@ const BookingDetails = ({
               checked={videoPreferred}
               onChange={e => setVideoPreferred(e.target.checked)}
             />
-            <span>I'd prefer video for this session (recommended for technique questions)</span>
+            <span className="checkbox-text">I'd prefer video for this session (recommended for technique questions)</span>
           </label>
         </div>
 
