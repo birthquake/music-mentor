@@ -12,6 +12,7 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import MentorDashboard from './MentorDashboard';
+import StudentDashboard from './StudentDashboard';
 import './App.css';
 import './MentorDashboard.css';
 
@@ -49,8 +50,7 @@ const UserIcon = () => (
   </svg>
 );
 
-// Replace the SAMPLE_MENTORS array in your App.js Part 1 with this:
-
+// Sample mentors data
 const SAMPLE_MENTORS = [
   {
     id: 1,
@@ -105,7 +105,6 @@ const SAMPLE_MENTORS = [
     tags: ["Booking", "Contracts", "Marketing", "Revenue"]
   }
 ];
-
 // Auth Modal Component
 const AuthModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -188,7 +187,7 @@ const AuthModal = ({ isOpen, onClose }) => {
 
         {/* Mentor login hint */}
         <div style={{marginTop: '1rem', padding: '0.75rem', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.875rem', color: '#0369a1'}}>
-          <strong>Mentors:</strong> Use sarah@musicmentor.com, marcus@musicmentor.com, elena@musicmentor.com, or dave@musicmentor.com with password "mentor123" to access dashboard
+          <strong>Mentors:</strong> Use sarah@musicmentor.com, marcus@musicmentor.com, elena@musicmentor.com with password "mentor123" to access dashboard
         </div>
       </div>
     </div>
@@ -214,10 +213,14 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => (
                 <span>{user.email}</span>
               </div>
               
-              {/* Show dashboard link if user is a mentor */}
-              {mentorInfo && (
+              {/* Show appropriate dashboard link based on user type */}
+              {mentorInfo ? (
                 <Link to="/mentor-dashboard" className="dashboard-link">
                   Dashboard
+                </Link>
+              ) : (
+                <Link to="/my-bookings" className="dashboard-link">
+                  My Bookings
                 </Link>
               )}
               
@@ -448,7 +451,7 @@ const Homepage = ({ user, onAuthClick }) => {
   };
 
   const handleConfirmBooking = (time, message, videoPreferred) => {
-    alert(`🎵 Session requested successfully!\n\nMentor: ${selectedMentor.name}\nTime preference: ${time}\nVideo: ${videoPreferred ? 'Yes' : 'Audio only'}\n\nYou'll receive a confirmation email shortly with next steps.`);
+    alert(`🎵 Session requested successfully!\n\nMentor: ${selectedMentor.name}\nTime preference: ${time}\nVideo: ${videoPreferred ? 'Yes' : 'Audio only'}\n\nYou can track your booking status in "My Bookings".`);
     setShowBookingModal(false);
     setSelectedMentor(null);
   };
@@ -590,6 +593,14 @@ function App() {
               <MentorDashboard 
                 user={user} 
                 mentorInfo={mentorInfo} 
+              />
+            } 
+          />
+          <Route 
+            path="/my-bookings" 
+            element={
+              <StudentDashboard 
+                user={user} 
               />
             } 
           />
