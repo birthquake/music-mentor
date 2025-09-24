@@ -212,19 +212,25 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
     const userProfileRef = doc(db, 'userProfiles', user.uid);
     const userProfileSnap = await getDoc(userProfileRef);
     
-    if (userProfileSnap.exists() && userProfileSnap.data().name) {
-      const name = userProfileSnap.data().name;
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-    }
-    
-    // Try mentor profile
-    const mentorProfileRef = doc(db, 'mentorProfiles', user.uid);
-    const mentorProfileSnap = await getDoc(mentorProfileRef);
-    
-    if (mentorProfileSnap.exists() && mentorProfileSnap.data().name) {
-      const name = mentorProfileSnap.data().name;
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-    }
+   if (userProfileSnap.exists()) {
+  const profileData = userProfileSnap.data();
+  if (profileData && profileData.name && profileData.name.trim()) {
+    const name = profileData.name.trim();
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  }
+}
+
+// Try mentor profile
+const mentorProfileRef = doc(db, 'mentorProfiles', user.uid);
+const mentorProfileSnap = await getDoc(mentorProfileRef);
+
+if (mentorProfileSnap.exists()) {
+  const profileData = mentorProfileSnap.data();
+  if (profileData && profileData.name && profileData.name.trim()) {
+    const name = profileData.name.trim();
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  }
+}
     
     // Fallback to email - temporary debug
 console.log('Profile lookup failed, falling back to email');
