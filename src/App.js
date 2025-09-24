@@ -226,8 +226,9 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
       return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     }
     
-    // Fallback to email
-    return user.email.charAt(0).toUpperCase();
+    // Fallback to email - temporary debug
+console.log('Profile lookup failed, falling back to email');
+return user.email.charAt(0).toUpperCase();
     
   } catch (error) {
     return user.email.charAt(0).toUpperCase();
