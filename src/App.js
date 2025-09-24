@@ -11,6 +11,7 @@ import {
   addDoc,
   serverTimestamp
 } from 'firebase/firestore';
+import { createBookingWithProfiles, getEnhancedMentors } from './profileHelpers';
 import UserProfile from './UserProfile';
 import MentorProfile from './MentorProfile';
 import CalendarBooking from './CalendarBooking';
@@ -383,19 +384,22 @@ const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
     setLoading(true);
     
     try {
-      // Save booking to Firestore
-      await addDoc(collection(db, 'bookings'), {
-        mentorId: mentor.id,
-        mentorName: mentor.name,
-        userId: user.uid,
-        userEmail: user.email,
-        preferredTime: selectedTime,
-        message,
-        videoPreferred,
-        status: 'pending',
-        createdAt: serverTimestamp(),
-        rate: mentor.rate
-      });
+      // Save booking to Firestore with profile integration
+const result = await createBookingWithProfiles({
+  mentorId: mentor.id,
+  mentorName: mentor.name,
+  userId: user.uid,
+  userEmail: user.email,
+  preferredTime: selectedTime,
+  message,
+  videoPreferred,
+  status: 'pending',
+  rate: mentor.rate
+});
+
+if (!result.success) {
+  throw new Error(result.error);
+}
       
       onConfirm(selectedTime, message, videoPreferred);
       
@@ -482,11 +486,19 @@ const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
   );
 };
 // Homepage Component
-const Homepage = ({ user, onAuthClick }) => {
-  const [mentors] = useState(SAMPLE_MENTORS);
+  const Homepage = ({ user, onAuthClick }) => {
+  const [mentors, setMentors] = useState(SAMPLE_MENTORS);
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+  const loadMentors = async () => {
+    const enhancedMentors = await getEnhancedMentors();
+    setMentors(enhancedMentors);
+  };
+  loadMentors();
+}, []);
 
   const handleBookMentor = (mentor) => {
     if (!user) {
@@ -643,13 +655,10 @@ function App() {
               />
             } 
           />
-          <Route 
-            path="/profile" 
-            element=
-              {<UserProfile user={user} 
-              />
-              } 
-              />
+  <Route 
+  path="/profile" 
+  element={<UserProfile user={user} />} 
+/>
 <Route 
   path="/mentor-profile" 
   element={<MentorProfile user={user} mentorInfo={mentorInfo} />} 
