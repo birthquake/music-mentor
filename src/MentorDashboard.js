@@ -55,25 +55,42 @@ const BookingCard = ({ booking, onAccept, onDecline }) => {
   const [studentName, setStudentName] = useState(null);
 
   // Get student name from profile
-  useEffect(() => {
-    const getStudentName = async () => {
-      if (!booking.studentId && !booking.userId) return;
+useEffect(() => {
+  const getStudentName = async () => {
+    console.log('Booking data:', booking);
+    console.log('Available fields:', Object.keys(booking));
+    
+    if (!booking.studentId && !booking.userId) {
+      console.log('No studentId or userId found in booking');
+      return;
+    }
+    
+    try {
+      const userId = booking.studentId || booking.userId;
+      console.log('Looking up user profile for ID:', userId);
       
-      try {
-        const userId = booking.studentId || booking.userId;
-        const userProfileRef = doc(db, 'userProfiles', userId);
-        const userProfileSnap = await getDoc(userProfileRef);
-        
-        if (userProfileSnap.exists() && userProfileSnap.data().name) {
-          setStudentName(userProfileSnap.data().name);
-        }
-      } catch (error) {
-        console.error('Error getting student name:', error);
+      const userProfileRef = doc(db, 'userProfiles', userId);
+      const userProfileSnap = await getDoc(userProfileRef);
+      
+      console.log('Profile exists?', userProfileSnap.exists());
+      if (userProfileSnap.exists()) {
+        console.log('Profile data:', userProfileSnap.data());
       }
-    };
+      
+      if (userProfileSnap.exists() && userProfileSnap.data().name) {
+        const profileName = userProfileSnap.data().name;
+        console.log('Found profile name:', profileName);
+        setStudentName(profileName);
+      } else {
+        console.log('No profile name found');
+      }
+    } catch (error) {
+      console.error('Error getting student name:', error);
+    }
+  };
 
-    getStudentName();
-  }, [booking.studentId, booking.userId]);
+  getStudentName();
+}, [booking.studentId, booking.userId]);
 
   const displayName = studentName || booking.studentName || booking.userEmail?.split('@')[0] || 'Student';
   const displayInitials = studentName ? 
