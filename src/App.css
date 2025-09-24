@@ -13,8 +13,8 @@
   --bg-elevated: #272727;
   --bg-hover: #3f3f3f;
   --text-primary: #ffffff;
-  --text-secondary: #aaaaaa;
-  --text-muted: #717171;
+  --text-secondary: #cccccc;
+  --text-muted: #aaaaaa;
   --accent-primary: #3ea6ff;
   --accent-hover: #65b8ff;
   --green: #00d563;
@@ -343,7 +343,7 @@ body {
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .stat svg {
@@ -390,7 +390,7 @@ body {
 
 .duration {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .book-btn {
