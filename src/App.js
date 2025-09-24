@@ -9,7 +9,9 @@ import {
 import { 
   collection, 
   addDoc,
-  serverTimestamp
+  serverTimestamp,
+  doc,
+  getDoc
 } from 'firebase/firestore';
 import { createBookingWithProfiles, getEnhancedMentors } from './profileHelpers';
 import UserProfile from './UserProfile';
@@ -200,27 +202,84 @@ const AuthModal = ({ isOpen, onClose }) => {
 // Updated Header Component for App.js
 const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userInitials, setUserInitials] = useState('U');
 
-  const getUserInitials = (email) => {
-    if (!email) return 'U';
+  const getUserInitials = async (user) => {
+  if (!user) return 'U';
+  
+  try {
+    // Import these at the top if not already imported
+    
+    // Try to get user profile first
+    const userProfileRef = doc(db, 'userProfiles', user.uid);
+    const userProfileSnap = await getDoc(userProfileRef);
+    
+    if (userProfileSnap.exists()) {
+      const userData = userProfileSnap.data();
+      if (userData.name) {
+        return userData.name
+          .split(' ')
+          .map(n => n[0])
+          .join('')
+          .toUpperCase()
+          .substring(0, 2);
+      }
+    }
+    
+    // Try mentor profile if user profile doesn't exist
+    const mentorProfileRef = doc(db, 'mentorProfiles', user.uid);
+    const mentorProfileSnap = await getDoc(mentorProfileRef);
+    
+    if (mentorProfileSnap.exists()) {
+      const mentorData = mentorProfileSnap.data();
+      if (mentorData.name) {
+        return mentorData.name
+          .split(' ')
+          .map(n => n[0])
+          .join('')
+          .toUpperCase()
+          .substring(0, 2);
+      }
+    }
+    
+    // Fallback to email initials
+    const email = user.email || '';
     return email.charAt(0).toUpperCase();
-  };
+    
+  } catch (error) {
+    console.error('Error getting user initials:', error);
+    // Fallback to email initials on error
+    const email = user.email || '';
+    return email.charAt(0).toUpperCase();
+  }
+};
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
   // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownOpen && !event.target.closest('.user-avatar') && !event.target.closest('.user-dropdown')) {
-        setDropdownOpen(false);
-      }
-    };
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (dropdownOpen && !event.target.closest('.user-avatar') && !event.target.closest('.user-dropdown')) {
+      setDropdownOpen(false);
+    }
+  };
 
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [dropdownOpen]);
+  document.addEventListener('click', handleClickOutside);
+  return () => document.removeEventListener('click', handleClickOutside);
+}, [dropdownOpen]);
+
+// Update user initials when user changes
+useEffect(() => {
+  if (user) {
+    getUserInitials(user).then(initials => {
+      setUserInitials(initials);
+    });
+  } else {
+    setUserInitials('U');
+  }
+}, [user]);
 
   return (
     <header className="header">
@@ -236,8 +295,8 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
             {user ? (
               <div className="user-menu">
                 <div className="user-avatar" onClick={toggleDropdown}>
-                  {getUserInitials(user.email)}
-                  <div className={`user-dropdown ${dropdownOpen ? 'active' : ''}`}>
+          {userInitials}                   
+  <div className={`user-dropdown ${dropdownOpen ? 'active' : ''}`}>
                     <Link 
   to={mentorInfo ? "/mentor-profile" : "/profile"}
   className="dropdown-item"
