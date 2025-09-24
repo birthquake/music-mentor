@@ -11,6 +11,8 @@ import {
   addDoc,
   serverTimestamp
 } from 'firebase/firestore';
+import UserProfile from './UserProfile';
+import MentorProfile from './MentorProfile';
 import CalendarBooking from './CalendarBooking';
 import MentorDashboard from './MentorDashboard';
 import StudentDashboard from './StudentDashboard';
@@ -235,18 +237,16 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
                 <div className="user-avatar" onClick={toggleDropdown}>
                   {getUserInitials(user.email)}
                   <div className={`user-dropdown ${dropdownOpen ? 'active' : ''}`}>
-                    <button 
-                      className="dropdown-item"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        // Navigate to profile - you can implement this later
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                      </svg>
-                      View Profile
-                    </button>
+                    <Link 
+  to={mentorInfo ? "/mentor-profile" : "/profile"}
+  className="dropdown-item"
+  onClick={() => setDropdownOpen(false)}
+>
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+  </svg>
+  {mentorInfo ? 'Mentor Profile' : 'My Profile'}
+</Link>
                     
                     <Link 
                       to={mentorInfo ? "/mentor-dashboard" : "/my-bookings"}
@@ -643,6 +643,17 @@ function App() {
               />
             } 
           />
+          <Route 
+            path="/profile" 
+            element=
+              {<UserProfile user={user} 
+              />
+              } 
+              />
+<Route 
+  path="/mentor-profile" 
+  element={<MentorProfile user={user} mentorInfo={mentorInfo} />} 
+/>
           <Route 
             path="/my-bookings" 
             element={
