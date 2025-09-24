@@ -7,7 +7,9 @@ import {
   query, 
   where, 
   getDocs,
-  updateDoc
+  updateDoc,
+  addDoc,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -91,6 +93,85 @@ export const getAllMentors = async () => {
     return { success: true, mentors };
   } catch (error) {
     console.error('Error getting mentors:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Add these functions to your profileHelpers.js file
+
+// Get display name for any user (checks both profile collections)
+export const getUserDisplayName = async (userId, userEmail) => {
+  try {
+    // First try to get from user profile
+    const userResult = await getUserProfile(userId);
+    if (userResult.success && userResult.profile.displayName) {
+      return userResult.profile.displayName;
+    }
+
+    // Then try mentor profile  
+    const mentorResult = await getMentorProfile(userId);
+    if (mentorResult.success && mentorResult.profile.displayName) {
+      return mentorResult.profile.displayName;
+    }
+
+    // Fallback to email
+    return userEmail || 'Unknown User';
+  } catch (error) {
+    console.error('Error getting display name:', error);
+    return userEmail || 'Unknown User';
+  }
+};
+
+// Get enhanced mentor data (combines SAMPLE_MENTORS with profiles)
+export const getEnhancedMentors = async () => {
+  try {
+    const { success, mentors } = await getAllMentors();
+    
+    if (success && mentors.length > 0) {
+      // Use profile data if available
+      return mentors.map(mentor => ({
+        id: mentor.userId,
+        name: mentor.displayName,
+        email: mentor.userId, // For backwards compatibility
+        specialty: mentor.bio.substring(0, 50) + '...',
+        experience: mentor.experience,
+        rate: mentor.rate,
+        rating: 4.8, // Default rating for now
+        reviewCount: Math.floor(Math.random() * 200) + 50, // Random for now
+        category: mentor.categories[0] || 'other',
+        videoAvailable: true,
+        tags: mentor.specialties || []
+      }));
+    } else {
+      // Fallback to SAMPLE_MENTORS if no profiles exist yet
+      return [];    
+    }
+  } catch (error) {
+    console.error('Error getting enhanced mentors:', error);
+    return [];// Fallback
+  }
+};
+
+// Enhanced booking creation that includes profile names
+export const createBookingWithProfiles = async (bookingData) => {
+  try {
+    // Get student display name
+    const studentName = await getUserDisplayName(bookingData.userId, bookingData.userEmail);
+    
+    // Get mentor display name  
+    const mentorName = await getUserDisplayName(bookingData.mentorId, '');
+
+    // Create booking with profile names
+    await addDoc(collection(db, 'bookings'), {
+      ...bookingData,
+      studentName,
+      mentorName: mentorName || bookingData.mentorName, // fallback to existing
+      createdAt: serverTimestamp()
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error creating booking with profiles:', error);
     return { success: false, error: error.message };
   }
 };
