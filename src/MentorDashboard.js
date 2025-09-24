@@ -77,8 +77,8 @@ useEffect(() => {
         console.log('Profile data:', userProfileSnap.data());
       }
       
-      if (userProfileSnap.exists() && userProfileSnap.data().name) {
-        const profileName = userProfileSnap.data().name;
+      if (userProfileSnap.exists() && (userProfileSnap.data().name || userProfileSnap.data().displayName)) {
+      const profileName = userProfileSnap.data().name || userProfileSnap.data().displayName;
         console.log('Found profile name:', profileName);
         setStudentName(profileName);
       } else {
