@@ -208,53 +208,33 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
   if (!user) return 'U';
   
   try {
-    // Import these at the top if not already imported
-    
     // Try to get user profile first
     const userProfileRef = doc(db, 'userProfiles', user.uid);
     const userProfileSnap = await getDoc(userProfileRef);
     
-    if (userProfileSnap.exists()) {
-      const userData = userProfileSnap.data();
-      if (userData.name) {
-        return userData.name
-          .split(' ')
-          .map(n => n[0])
-          .join('')
-          .toUpperCase()
-          .substring(0, 2);
-      }
+    if (userProfileSnap.exists() && userProfileSnap.data().name) {
+      const name = userProfileSnap.data().name;
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     }
     
-    // Try mentor profile if user profile doesn't exist
+    // Try mentor profile
     const mentorProfileRef = doc(db, 'mentorProfiles', user.uid);
     const mentorProfileSnap = await getDoc(mentorProfileRef);
     
-    if (mentorProfileSnap.exists()) {
-      const mentorData = mentorProfileSnap.data();
-      if (mentorData.name) {
-        return mentorData.name
-          .split(' ')
-          .map(n => n[0])
-          .join('')
-          .toUpperCase()
-          .substring(0, 2);
-      }
+    if (mentorProfileSnap.exists() && mentorProfileSnap.data().name) {
+      const name = mentorProfileSnap.data().name;
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     }
     
-    // Fallback to email initials
-    const email = user.email || '';
-    return email.charAt(0).toUpperCase();
+    // Fallback to email
+    return user.email.charAt(0).toUpperCase();
     
   } catch (error) {
-    console.error('Error getting user initials:', error);
-    // Fallback to email initials on error
-    const email = user.email || '';
-    return email.charAt(0).toUpperCase();
+    return user.email.charAt(0).toUpperCase();
   }
 };
 
-  const toggleDropdown = () => {
+const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
