@@ -8,7 +8,8 @@ import {
   doc,
   updateDoc,
   orderBy,
-  Timestamp
+  Timestamp,
+  getDoc
 } from 'firebase/firestore';
 
 // Icons
@@ -51,6 +52,33 @@ const CalendarIcon = () => (
 // Booking Card Component
 const BookingCard = ({ booking, onAccept, onDecline }) => {
   const [loading, setLoading] = useState(false);
+  const [studentName, setStudentName] = useState(null);
+
+  // Get student name from profile
+  useEffect(() => {
+    const getStudentName = async () => {
+      if (!booking.studentId && !booking.userId) return;
+      
+      try {
+        const userId = booking.studentId || booking.userId;
+        const userProfileRef = doc(db, 'userProfiles', userId);
+        const userProfileSnap = await getDoc(userProfileRef);
+        
+        if (userProfileSnap.exists() && userProfileSnap.data().name) {
+          setStudentName(userProfileSnap.data().name);
+        }
+      } catch (error) {
+        console.error('Error getting student name:', error);
+      }
+    };
+
+    getStudentName();
+  }, [booking.studentId, booking.userId]);
+
+  const displayName = studentName || booking.studentName || booking.userEmail?.split('@')[0] || 'Student';
+  const displayInitials = studentName ? 
+    studentName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) :
+    (booking.userEmail?.charAt(0).toUpperCase() || 'S');
 
   const handleAccept = async () => {
     setLoading(true);
@@ -111,10 +139,10 @@ const BookingCard = ({ booking, onAccept, onDecline }) => {
       <div className="booking-header">
         <div className="booking-user">
           <div className="user-avatar">
-            {booking.userEmail.charAt(0).toUpperCase()}
+            {displayInitials}
           </div>
           <div className="user-info">
-            <h4>{booking.userEmail}</h4>
+            <h4>{displayName}</h4>
             <p className="booking-date">
               <CalendarIcon />
               Requested {formatDate(booking.createdAt)}
@@ -170,7 +198,6 @@ const BookingCard = ({ booking, onAccept, onDecline }) => {
     </div>
   );
 };
-
 // Stats Component
 const StatsCard = ({ title, value, subtitle, icon }) => (
   <div className="stats-card">
