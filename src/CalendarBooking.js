@@ -1,13 +1,7 @@
 // CalendarBooking.js - Step-by-step calendar booking
 
 import React, { useState, useEffect } from 'react';
-import { 
-  generateAvailableSlots, 
-  checkSlotAvailability, 
-  formatSlotTime,
-  getMentorBookings,
-  SAMPLE_MENTOR_AVAILABILITY
-} from './availabilitySystem';
+import { getMentorBookings, checkSlotAvailability } from './availabilitySystem';
 import { getMentorProfile } from './profileHelpers';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
@@ -41,7 +35,6 @@ const ArrowRightIcon = () => (
     <path d="m9 18 6-6-6-6"/>
   </svg>
 );
-
 // Step 1: Date Selection Component
 const DateSelection = ({ availableDates, onSelectDate, onBack }) => {
   return (
@@ -77,7 +70,7 @@ const DateSelection = ({ availableDates, onSelectDate, onBack }) => {
         <div className="no-dates">
           <CalendarIcon />
           <h4>No availability found</h4>
-          <p>This mentor doesn't have available time slots in the next few weeks.</p>
+          <p>This mentor hasn't set their available time slots yet.</p>
         </div>
       )}
     </div>
@@ -124,7 +117,6 @@ const TimeSelection = ({ selectedDate, availableSlots, onSelectTime, onBack, sel
     </div>
   );
 };
-
 // Step 3: Booking Details Component
 const BookingDetails = ({ 
   selectedDate, 
@@ -206,7 +198,6 @@ const BookingDetails = ({
     </div>
   );
 };
-
 // Main Step-by-Step Calendar Booking Component
 const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   // All hooks at the top
@@ -219,75 +210,84 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
 
-  // Add this function to your CalendarBooking.js file
-// Replace the existing loadMentorAvailability function
-
-const loadMentorAvailabilityFromFirestore = async (mentor) => {
-  try {
-    // Import getMentorProfile at the top of your file
-    const { getMentorProfile } = require('./profileHelpers');
-    
-    // Get mentor profile from Firestore using their userId 
-    const profileResult = await getMentorProfile(mentor.userId || mentor.id);
-    
-    if (!profileResult.success) {
-      console.log('No mentor profile found for:', mentor.name);
-      return [];
-    }
-
-    const mentorProfile = profileResult.profile;
-    const weeklySchedule = mentorProfile.availability?.weeklySchedule;
-    
-    if (!weeklySchedule) {
-      console.log('No availability schedule found for mentor');
-      return [];
-    }
-
-    // Generate available slots for the next 3 weeks
-    const slots = [];
-    const today = new Date();
-    const endDate = new Date(today);
-    endDate.setDate(endDate.getDate() + 21); // 3 weeks
-
-    // Loop through each day in the next 3 weeks
-    for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dayName = d.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-      const daySchedule = weeklySchedule[dayName];
+  // Load mentor availability from Firestore
+  const loadMentorAvailability = async () => {
+    setLoading(true);
+    try {
+      // Get mentor profile from Firestore using their userId 
+      const profileResult = await getMentorProfile(mentor.userId || mentor.id);
       
-      // If this day is available and has time slots
-      if (daySchedule?.available && daySchedule.slots?.length > 0) {
-        daySchedule.slots.forEach((timeSlot, index) => {
-          const slotDate = new Date(d);
-          const [startHour, startMin] = timeSlot.start.split(':').map(Number);
-          const [endHour, endMin] = timeSlot.end.split(':').map(Number);
-          
-          const startTime = new Date(slotDate);
-          startTime.setHours(startHour, startMin, 0, 0);
-          
-          const endTime = new Date(slotDate);
-          endTime.setHours(endHour, endMin, 0, 0);
-          
-          // Only include future slots (not past times)
-          if (startTime > new Date()) {
-            slots.push({
-              slotId: `${slotDate.toDateString()}-${timeSlot.start}-${index}`,
-              start: startTime,
-              end: endTime,
-              available: true
-            });
-          }
-        });
+      if (!profileResult.success) {
+        console.log('No mentor profile found for:', mentor.name);
+        setAvailableSlots([]);
+        setLoading(false);
+        return;
       }
+
+      const mentorProfile = profileResult.profile;
+      const weeklySchedule = mentorProfile.availability?.weeklySchedule;
+      
+      if (!weeklySchedule) {
+        console.log('No availability schedule found for mentor');
+        setAvailableSlots([]);
+        setLoading(false);
+        return;
+      }
+
+      // Generate available slots for the next 3 weeks
+      const slots = [];
+      const today = new Date();
+      const endDate = new Date(today);
+      endDate.setDate(endDate.getDate() + 21); // 3 weeks
+
+      // Loop through each day in the next 3 weeks
+      for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+        const daySchedule = weeklySchedule[dayName];
+        
+        // If this day is available and has time slots
+        if (daySchedule?.available && daySchedule.slots?.length > 0) {
+          daySchedule.slots.forEach((timeSlot, index) => {
+            const slotDate = new Date(d);
+            const [startHour, startMin] = timeSlot.start.split(':').map(Number);
+            const [endHour, endMin] = timeSlot.end.split(':').map(Number);
+            
+            const startTime = new Date(slotDate);
+            startTime.setHours(startHour, startMin, 0, 0);
+            
+            const endTime = new Date(slotDate);
+            endTime.setHours(endHour, endMin, 0, 0);
+            
+            // Only include future slots (not past times)
+            if (startTime > new Date()) {
+              slots.push({
+                slotId: `${slotDate.toDateString()}-${timeSlot.start}-${index}`,
+                start: startTime,
+                end: endTime,
+                available: true
+              });
+            }
+          });
+        }
+      }
+
+      // Sort slots by time
+      const sortedSlots = slots.sort((a, b) => a.start - b.start);
+      
+      // Check against existing bookings
+      const existingBookings = await getMentorBookings(mentor.id.toString());
+      const checkedSlots = checkSlotAvailability(sortedSlots, existingBookings);
+      
+      // Only show available slots
+      const availableOnly = checkedSlots.filter(slot => slot.available);
+      setAvailableSlots(availableOnly);
+      
+    } catch (error) {
+      console.error('Error loading mentor availability from Firestore:', error);
+      setAvailableSlots([]);
     }
-
-    return slots.sort((a, b) => a.start - b.start);
-    
-  } catch (error) {
-    console.error('Error loading mentor availability from Firestore:', error);
-    return [];
-  }
-};
-
+    setLoading(false);
+  };
   useEffect(() => {
     if (mentor?.id) {
       loadMentorAvailability();
@@ -345,7 +345,6 @@ const loadMentorAvailabilityFromFirestore = async (mentor) => {
       await addDoc(collection(db, 'bookings'), {
         mentorId: mentor?.id,
         mentorName: mentor?.name,
-        mentorEmail: mentor?.email,
         userId: user?.uid,
         userEmail: user?.email,
         message,
@@ -358,14 +357,18 @@ const loadMentorAvailabilityFromFirestore = async (mentor) => {
         bookingType: 'scheduled'
       });
 
-      onConfirm(`Requested for ${formatSlotTime(selectedTime.start)}`, message, videoPreferred);
+      const timeStr = selectedTime.start.toLocaleTimeString([], { 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: true 
+      });
+      onConfirm(`Requested for ${timeStr}`, message, videoPreferred);
     } catch (error) {
       console.error('Error creating booking:', error);
       alert('Error creating booking. Please try again.');
     }
     setBookingLoading(false);
   };
-
   // Early return after all hooks
   if (!isOpen || !mentor || !user) return null;
 
