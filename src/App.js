@@ -515,7 +515,8 @@ if (!result.success) {
 };
 // Homepage Component
   const Homepage = ({ user, onAuthClick }) => {
-  const [mentors, setMentors] = useState(SAMPLE_MENTORS);
+  const [mentors, setMentors] = useState([]);
+  const [loading, setLoading] = useState(true);  
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -524,6 +525,7 @@ if (!result.success) {
   const loadMentors = async () => {
     const enhancedMentors = await getEnhancedMentors();
     setMentors(enhancedMentors);
+    setLoading(false);
   };
   loadMentors();
 }, []);
@@ -591,15 +593,19 @@ if (!result.success) {
         </section>
 
         <section className="mentors-grid">
-          {filteredMentors.map(mentor => (
-            <MentorCard 
-              key={mentor.id}
-              mentor={mentor}
-              onBook={handleBookMentor}
-              user={user}
-            />
-          ))}
-        </section>
+  {loading ? (
+    <div>Loading mentors...</div>
+  ) : (
+    filteredMentors.map(mentor => (
+      <MentorCard 
+        key={mentor.id}
+        mentor={mentor}
+        onBook={handleBookMentor}
+        user={user}
+      />
+    ))
+  )}
+</section>
       </div>
 
       <CalendarBooking
