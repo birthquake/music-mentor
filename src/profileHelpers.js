@@ -122,14 +122,6 @@ export const getUserDisplayName = async (userId, userEmail) => {
   }
 };
 
-// Get enhanced mentor data (combines SAMPLE_MENTORS with profiles)
-export const getEnhancedMentors = async () => {
-  try {
-    const { success, mentors } = await getAllMentors();
-    
-    if (success && mentors.length > 0) {
-      // Use profile data if available
-  // Replace this function in your profileHelpers.js:
 
 export const getEnhancedMentors = async () => {
   try {
@@ -151,15 +143,15 @@ export const getEnhancedMentors = async () => {
         videoAvailable: true,
         tags: mentor.specialties || []
       }));
-    } else {
-      // Return SAMPLE_MENTORS as fallback
-      return SAMPLE_MENTORS;
-    }
+   } else {
+  // Return empty array if no mentor profiles exist yet
+  return [];
+}
   } catch (error) {
-    console.error('Error getting enhanced mentors:', error);
-    // Return SAMPLE_MENTORS as fallback on error too
-    return SAMPLE_MENTORS;
-  }
+  console.error('Error getting enhanced mentors:', error);
+  // Return empty array on error too
+  return [];
+}
 };
 
 // Enhanced booking creation that includes profile names
