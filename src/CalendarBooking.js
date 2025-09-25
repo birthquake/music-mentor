@@ -8,6 +8,7 @@ import {
   getMentorBookings,
   SAMPLE_MENTOR_AVAILABILITY
 } from './availabilitySystem';
+import { getMentorProfile } from './profileHelpers';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import './MentorDashboard.css';
@@ -218,31 +219,74 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
 
-  const loadMentorAvailability = async () => {
-    setLoading(true);
-    try {
-      const mentorAvailability = SAMPLE_MENTOR_AVAILABILITY.find(
-        m => m.mentorId === mentor?.id?.toString()
-      );
+  // Add this function to your CalendarBooking.js file
+// Replace the existing loadMentorAvailability function
 
-      if (!mentorAvailability) {
-        setAvailableSlots([]);
-        setLoading(false);
-        return;
-      }
-
-      const slots = generateAvailableSlots(mentorAvailability, 3);
-      const existingBookings = await getMentorBookings(mentor.id.toString());
-      const checkedSlots = checkSlotAvailability(slots, existingBookings);
-      
-      // Only show available slots
-      const availableOnly = checkedSlots.filter(slot => slot.available);
-      setAvailableSlots(availableOnly);
-    } catch (error) {
-      console.error('Error loading mentor availability:', error);
+const loadMentorAvailabilityFromFirestore = async (mentor) => {
+  try {
+    // Import getMentorProfile at the top of your file
+    const { getMentorProfile } = require('./profileHelpers');
+    
+    // Get mentor profile from Firestore using their userId 
+    const profileResult = await getMentorProfile(mentor.userId || mentor.id);
+    
+    if (!profileResult.success) {
+      console.log('No mentor profile found for:', mentor.name);
+      return [];
     }
-    setLoading(false);
-  };
+
+    const mentorProfile = profileResult.profile;
+    const weeklySchedule = mentorProfile.availability?.weeklySchedule;
+    
+    if (!weeklySchedule) {
+      console.log('No availability schedule found for mentor');
+      return [];
+    }
+
+    // Generate available slots for the next 3 weeks
+    const slots = [];
+    const today = new Date();
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + 21); // 3 weeks
+
+    // Loop through each day in the next 3 weeks
+    for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+      const daySchedule = weeklySchedule[dayName];
+      
+      // If this day is available and has time slots
+      if (daySchedule?.available && daySchedule.slots?.length > 0) {
+        daySchedule.slots.forEach((timeSlot, index) => {
+          const slotDate = new Date(d);
+          const [startHour, startMin] = timeSlot.start.split(':').map(Number);
+          const [endHour, endMin] = timeSlot.end.split(':').map(Number);
+          
+          const startTime = new Date(slotDate);
+          startTime.setHours(startHour, startMin, 0, 0);
+          
+          const endTime = new Date(slotDate);
+          endTime.setHours(endHour, endMin, 0, 0);
+          
+          // Only include future slots (not past times)
+          if (startTime > new Date()) {
+            slots.push({
+              slotId: `${slotDate.toDateString()}-${timeSlot.start}-${index}`,
+              start: startTime,
+              end: endTime,
+              available: true
+            });
+          }
+        });
+      }
+    }
+
+    return slots.sort((a, b) => a.start - b.start);
+    
+  } catch (error) {
+    console.error('Error loading mentor availability from Firestore:', error);
+    return [];
+  }
+};
 
   useEffect(() => {
     if (mentor?.id) {
