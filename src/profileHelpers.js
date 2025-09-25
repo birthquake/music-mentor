@@ -129,26 +129,36 @@ export const getEnhancedMentors = async () => {
     
     if (success && mentors.length > 0) {
       // Use profile data if available
+  // Replace this function in your profileHelpers.js:
+
+export const getEnhancedMentors = async () => {
+  try {
+    const { success, mentors } = await getAllMentors();
+    
+    if (success && mentors.length > 0) {
+      // Use profile data if available
       return mentors.map(mentor => ({
-        id: mentor.userId,
+        id: mentor.userId,           // Firestore document ID (for backwards compatibility)
+        userId: mentor.userId,       // Also include as userId for CalendarBooking
         name: mentor.displayName,
-        email: mentor.userId, // For backwards compatibility
+        email: mentor.userId,        // For backwards compatibility
         specialty: mentor.bio.substring(0, 50) + '...',
         experience: mentor.experience,
         rate: mentor.rate,
-        rating: 4.8, // Default rating for now
+        rating: 4.8,                 // Default rating for now
         reviewCount: Math.floor(Math.random() * 200) + 50, // Random for now
         category: mentor.categories[0] || 'other',
         videoAvailable: true,
         tags: mentor.specialties || []
       }));
     } else {
-      // Fallback to SAMPLE_MENTORS if no profiles exist yet
-      return [];    
+      // Return SAMPLE_MENTORS as fallback
+      return SAMPLE_MENTORS;
     }
   } catch (error) {
     console.error('Error getting enhanced mentors:', error);
-    return [];// Fallback
+    // Return SAMPLE_MENTORS as fallback on error too
+    return SAMPLE_MENTORS;
   }
 };
 
