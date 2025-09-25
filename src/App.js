@@ -202,71 +202,22 @@ const AuthModal = ({ isOpen, onClose }) => {
 // Updated Header Component for App.js
 const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [userInitials, setUserInitials] = useState('U');
 
-  const getUserInitials = async (user) => {
-  if (!user) return 'U';
-  
-  try {
-    // Try to get user profile first
-    const userProfileRef = doc(db, 'userProfiles', user.uid);
-    const userProfileSnap = await getDoc(userProfileRef);
-    
-   if (userProfileSnap.exists()) {
-  const profileData = userProfileSnap.data();
-  if (profileData && profileData.name && profileData.name.trim()) {
-    const name = profileData.name.trim();
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-  }
-}
-
-// Try mentor profile
-const mentorProfileRef = doc(db, 'mentorProfiles', user.uid);
-const mentorProfileSnap = await getDoc(mentorProfileRef);
-
-if (mentorProfileSnap.exists()) {
-  const profileData = mentorProfileSnap.data();
-  if (profileData && profileData.name && profileData.name.trim()) {
-    const name = profileData.name.trim();
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-  }
-}
-    
-    // Fallback to email - temporary debug
-console.log('Profile lookup failed, falling back to email');
-return user.email.charAt(0).toUpperCase();
-    
-  } catch (error) {
-    return user.email.charAt(0).toUpperCase();
-  }
-};
-
-const toggleDropdown = () => {
+  const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
   // Close dropdown when clicking outside
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (dropdownOpen && !event.target.closest('.user-avatar') && !event.target.closest('.user-dropdown')) {
-      setDropdownOpen(false);
-    }
-  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownOpen && !event.target.closest('.user-menu-button') && !event.target.closest('.user-dropdown')) {
+        setDropdownOpen(false);
+      }
+    };
 
-  document.addEventListener('click', handleClickOutside);
-  return () => document.removeEventListener('click', handleClickOutside);
-}, [dropdownOpen]);
-
-// Update user initials when user changes
-useEffect(() => {
-  if (user) {
-    getUserInitials(user).then(initials => {
-      setUserInitials(initials);
-    });
-  } else {
-    setUserInitials('U');
-  }
-}, [user]);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [dropdownOpen]);
 
   return (
     <header className="header">
@@ -281,44 +232,48 @@ useEffect(() => {
           <div className="header-actions">
             {user ? (
               <div className="user-menu">
-                <div className="user-avatar" onClick={toggleDropdown}>
-          {userInitials}                   
-  <div className={`user-dropdown ${dropdownOpen ? 'active' : ''}`}>
-                    <Link 
-  to={mentorInfo ? "/mentor-profile" : "/profile"}
-  className="dropdown-item"
-  onClick={() => setDropdownOpen(false)}
->
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-  </svg>
-  {mentorInfo ? 'Mentor Profile' : 'My Profile'}
-</Link>
-                    
-                    <Link 
-                      to={mentorInfo ? "/mentor-dashboard" : "/my-bookings"}
-                      className="dropdown-item"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-                      </svg>
-                      {mentorInfo ? 'Mentor Dashboard' : 'My Bookings'}
-                    </Link>
-                    
-                    <button 
-                      className="dropdown-item"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        onSignOut();
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2z"/>
-                      </svg>
-                      Sign Out
-                    </button>
+                <div className="user-menu-button" onClick={toggleDropdown}>
+                  <div className="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                   </div>
+                </div>
+                <div className={`user-dropdown ${dropdownOpen ? 'active' : ''}`}>
+                  <Link 
+                    to={mentorInfo ? "/mentor-profile" : "/profile"}
+                    className="dropdown-item"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    {mentorInfo ? 'Mentor Profile' : 'My Profile'}
+                  </Link>
+                  
+                  <Link 
+                    to={mentorInfo ? "/mentor-dashboard" : "/my-bookings"}
+                    className="dropdown-item"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                    </svg>
+                    {mentorInfo ? 'Mentor Dashboard' : 'My Bookings'}
+                  </Link>
+                  
+                  <button 
+                    className="dropdown-item"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      onSignOut();
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2z"/>
+                    </svg>
+                    Sign Out
+                  </button>
                 </div>
               </div>
             ) : (
@@ -332,7 +287,6 @@ useEffect(() => {
     </header>
   );
 };
-
 // Add CSS for dashboard link
 const dashboardLinkStyles = `
 .dashboard-link {
@@ -349,6 +303,34 @@ const dashboardLinkStyles = `
 .dashboard-link:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: translateY(-1px);
+}
+
+.user-menu-button {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.user-menu-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  width: 24px;
+  height: 18px;
+  justify-content: space-between;
+}
+
+.hamburger-icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background-color: white;
+  border-radius: 1px;
+  transition: all 0.2s ease;
 }
 `;
 
