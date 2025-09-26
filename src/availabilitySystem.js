@@ -114,7 +114,8 @@ export const checkSlotAvailability = (slots, existingBookings) => {
   return slots.map(slot => {
     // Check if this slot conflicts with any existing booking
     const isBooked = existingBookings.some(booking => {
-      if (booking.status !== 'confirmed') return false;
+      // Since getMentorBookings already filters for pending/confirmed, we don't need to check status here
+      if (!booking.scheduledStart || !booking.scheduledEnd) return false;
       
       const bookingStart = booking.scheduledStart?.toDate ? booking.scheduledStart.toDate() : new Date(booking.scheduledStart);
       const bookingEnd = booking.scheduledEnd?.toDate ? booking.scheduledEnd.toDate() : new Date(booking.scheduledEnd);
@@ -228,15 +229,17 @@ export const getMentorBookings = async (mentorId) => {
   try {
     const q = query(
       collection(db, 'bookings'), 
-      where('mentorId', '==', mentorId),
-      where('status', '==', 'confirmed')
+      where('mentorId', '==', mentorId)
     );
     const querySnapshot = await getDocs(q);
     
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    }));
+    })).filter(booking => {
+      // Block availability for both pending and confirmed bookings
+      return booking.status === 'confirmed' || booking.status === 'pending';
+    });
   } catch (error) {
     console.error('Error getting mentor bookings:', error);
     return [];
