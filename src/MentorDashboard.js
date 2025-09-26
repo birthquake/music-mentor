@@ -264,8 +264,15 @@ if (data.mentorId == mentorInfo.id || data.mentorId === user.uid || data.mentorI
 }
       });
       
-      console.log('Total bookings for this mentor:', bookingData.length);
-      setBookings(bookingData);
+      // Sort bookings by creation date (newest first)
+const sortedBookings = bookingData.sort((a, b) => {
+  const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+  const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+  return dateB - dateA; // Newest first
+});
+
+console.log('Total bookings for this mentor:', sortedBookings.length);
+setBookings(sortedBookings);
       setLoading(false);
     },
     (error) => {
