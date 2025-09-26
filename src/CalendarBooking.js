@@ -35,6 +35,23 @@ const ArrowRightIcon = () => (
     <path d="m9 18 6-6-6-6"/>
   </svg>
 );
+
+// Toggle Component
+const Toggle = ({ checked, onChange, label }) => (
+  <div className="toggle-container">
+    <label className="toggle-label">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        className="toggle-input"
+      />
+      <span className="toggle-slider"></span>
+      <span className="toggle-text">{label}</span>
+    </label>
+  </div>
+);
+
 // Step 1: Date Selection Component
 const DateSelection = ({ availableDates, onSelectDate, onBack }) => {
   return (
@@ -117,6 +134,7 @@ const TimeSelection = ({ selectedDate, availableSlots, onSelectTime, onBack, sel
     </div>
   );
 };
+
 // Step 3: Booking Details Component
 const BookingDetails = ({ 
   selectedDate, 
@@ -154,7 +172,7 @@ const BookingDetails = ({
       
       <form onSubmit={onConfirm} className="booking-details-form">
         <div className="form-group">
-          <label>What specific challenge can {mentor?.name?.split(' ')[0]} help you with?</label>
+          <label>What specific challenge can {mentor?.name?.split(' ')[0]} help you with? <span style={{color: '#ef4444'}}>*</span></label>
           <textarea 
             value={message}
             onChange={e => setMessage(e.target.value)}
@@ -165,14 +183,11 @@ const BookingDetails = ({
         </div>
         
         <div className="form-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={videoPreferred}
-              onChange={e => setVideoPreferred(e.target.checked)}
-            />
-            <span className="checkbox-text">I'd prefer video for this session (recommended for technique questions)</span>
-          </label>
+          <Toggle
+            checked={videoPreferred}
+            onChange={e => setVideoPreferred(e.target.checked)}
+            label="I'd prefer video for this session (recommended for technique questions)"
+          />
         </div>
 
         <div className="session-summary">
@@ -198,6 +213,7 @@ const BookingDetails = ({
     </div>
   );
 };
+
 // Main Step-by-Step Calendar Booking Component
 const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   // All hooks at the top
@@ -288,6 +304,7 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     }
     setLoading(false);
   };
+
   useEffect(() => {
     if (mentor?.id) {
       loadMentorAvailability();
@@ -369,6 +386,7 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     }
     setBookingLoading(false);
   };
+
   // Early return after all hooks
   if (!isOpen || !mentor || !user) return null;
 
@@ -440,5 +458,76 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     </div>
   );
 };
+
+// Toggle and button styling
+const toggleStyles = `
+.toggle-container {
+  margin: 1rem 0;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 0.75rem;
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  background-color: #cbd5e0;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toggle-input:checked + .toggle-slider {
+  background-color: #3b82f6;
+}
+
+.toggle-input:checked + .toggle-slider::before {
+  transform: translateX(24px);
+}
+
+.toggle-text {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.confirm-btn:disabled {
+  background-color: #9ca3af !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.confirm-btn:disabled:hover {
+  background-color: #9ca3af !important;
+}
+`;
+
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = toggleStyles;
+  document.head.appendChild(styleSheet);
+}
 
 export default CalendarBooking;
