@@ -171,10 +171,17 @@ useEffect(() => {
 
       <div className="booking-details">
         <div className="booking-preferences">
-          <div className="preference-item">
-            <ClockIcon />
-            <span>Prefers {booking.preferredTime}</span>
-          </div>
+         <div className="preference-item">
+  <ClockIcon />
+  <span>
+    {booking.preferredTime 
+      ? `Prefers ${booking.preferredTime}` 
+      : booking.scheduledStart 
+        ? `Scheduled: ${new Date(booking.scheduledStart.seconds * 1000).toLocaleDateString()} at ${new Date(booking.scheduledStart.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
+        : 'Time preference not specified'
+    }
+  </span>
+</div>
           {booking.videoPreferred && (
             <div className="preference-item">
               <VideoIcon />
