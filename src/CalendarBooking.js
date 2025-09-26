@@ -510,7 +510,7 @@ const toggleStyles = `
 .toggle-text {
   font-size: 0.875rem;
   line-height: 1.4;
-  color: #374151;
+  color: #white;
 }
 
 .confirm-btn:disabled {
