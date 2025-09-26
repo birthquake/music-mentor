@@ -256,12 +256,12 @@ const MentorDashboard = ({ user, mentorInfo }) => {
         
         // Filter for this mentor's bookings
 // Filter for this mentor's bookings - handle both old numeric IDs and new Firestore IDs
-if (data.mentorId === mentorInfo.id || data.mentorId === user.uid) {
+if (data.mentorId == mentorInfo.id || data.mentorId === user.uid || data.mentorId == user.uid) {
   bookingData.push({
-            id: doc.id,
-            ...data
-          });
-        }
+    id: doc.id,
+    ...data
+  });
+}
       });
       
       console.log('Total bookings for this mentor:', bookingData.length);
