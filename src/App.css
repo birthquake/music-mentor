@@ -5,7 +5,6 @@
   padding: 0;
   box-sizing: border-box;
 }
-
 :root {
   /* Dark Theme Colors - YouTube Inspired with Better Contrast */
   --bg-primary: #0f0f0f;
@@ -22,6 +21,12 @@
   --red: #ff4444;
   --border-color: #3f3f3f;
   --border-hover: #666666;
+  
+  /* Enhanced text contrast variables for better readability */
+  --text-placeholder: rgba(255, 255, 255, 0.65); /* Better placeholder contrast */
+  --text-disabled: #999999; /* Disabled state text */
+  --text-instruction: #e8e8e8; /* For instruction/description text */
+  --text-subtle: #b8b8b8; /* For very subtle text that still needs to be readable */
 }
 
 body {
