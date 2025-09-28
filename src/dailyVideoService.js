@@ -27,6 +27,11 @@ class DailyVideoService {
       throw new Error('Daily.co API key not configured');
     }
 
+    console.log('🔍 Daily.co API Key present:', this.apiKey ? 'Yes' : 'No');
+    console.log('🔍 API Key prefix:', this.apiKey ? this.apiKey.substring(0, 8) + '...' : 'None');
+    console.log('🔍 Domain:', this.domain);
+    console.log('🔍 Booking details:', bookingDetails);
+
     const { scheduledStart, scheduledEnd, mentorName, studentName } = bookingDetails;
     
     // Calculate session duration (add 5 minutes buffer)
@@ -34,34 +39,17 @@ class DailyVideoService {
     const endTime = new Date(scheduledEnd.seconds * 1000);
     const durationMinutes = Math.ceil((endTime - startTime) / (1000 * 60)) + 5;
 
+    // Simplified room config for debugging
     const roomConfig = {
       name: `musicmentor-session-${bookingId}`,
-      privacy: 'private', // Only accessible via direct URL
-      properties: {
-        // Room expires 30 minutes after scheduled end time
-        exp: Math.floor(endTime.getTime() / 1000) + (30 * 60),
-        
-        // Enable features useful for mentoring
-        enable_screenshare: true,
-        enable_chat: true,
-        enable_knocking: true,
-        enable_prejoin_ui: true,
-        
-        // Limit to mentor + student only
-        max_participants: 2,
-        
-        // Auto-record sessions (optional)
-        start_cloud_recording: false,
-        
-        // Room metadata for identification
-        room_name: `${mentorName} & ${studentName} - Music Session`,
-        
-        // Automatically start transcription for lesson notes
-        enable_live_captions: true,
-      }
+      privacy: 'private'
     };
 
+    console.log('🔍 Room config:', roomConfig);
+
     try {
+      console.log('🔍 Making API request to:', `${DAILY_API_BASE_URL}/rooms`);
+      
       const response = await fetch(`${DAILY_API_BASE_URL}/rooms`, {
         method: 'POST',
         headers: {
@@ -71,23 +59,36 @@ class DailyVideoService {
         body: JSON.stringify(roomConfig)
       });
 
+      console.log('🔍 Response status:', response.status);
+      console.log('🔍 Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Failed to create Daily.co room: ${error.error}`);
+        const errorText = await response.text();
+        console.log('🔍 Error response body:', errorText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          errorData = { error: errorText };
+        }
+        
+        throw new Error(`Daily.co API Error (${response.status}): ${errorData.error || errorData.message || errorText}`);
       }
 
       const room = await response.json();
+      console.log('🔍 Successfully created room:', room);
       
       return {
         roomName: room.name,
         roomUrl: room.url,
         roomId: room.id,
-        expiresAt: new Date(room.config.exp * 1000),
+        expiresAt: room.config?.exp ? new Date(room.config.exp * 1000) : new Date(Date.now() + 24 * 60 * 60 * 1000),
         createdAt: new Date()
       };
 
     } catch (error) {
-      console.error('Error creating Daily.co room:', error);
+      console.error('❌ Error creating Daily.co room:', error);
       throw error;
     }
   }
