@@ -11,7 +11,7 @@ import {
   Timestamp,
   getDoc
 } from 'firebase/firestore';
-
+import { confirmBookingWithVideo } from './bookingVideoHelpers';
 // Icons
 const ClockIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -292,12 +292,16 @@ setBookings(sortedBookings);
 }, [user, mentorInfo]);
 
   const handleAcceptBooking = async (bookingId) => {
-    const bookingRef = doc(db, 'bookings', bookingId);
-    await updateDoc(bookingRef, {
-      status: 'confirmed',
-      confirmedAt: Timestamp.now()
-    });
-  };
+  try {
+    const result = await confirmBookingWithVideo(bookingId);
+    console.log('Booking confirmed:', result.message);
+    // Optionally show a success message to the user
+    // alert(result.message);
+  } catch (error) {
+    console.error('Error confirming booking:', error);
+    alert('Failed to confirm booking. Please try again.');
+  }
+};
 
   const handleDeclineBooking = async (bookingId) => {
     const bookingRef = doc(db, 'bookings', bookingId);
