@@ -156,10 +156,23 @@ export const canAccessVideoSession = (bookingData) => {
   const accessEnd = new Date(sessionEnd.getTime() + 30 * 60 * 1000);
   
   if (now < accessStart) {
-    const minutesUntil = Math.ceil((accessStart.getTime() - now.getTime()) / (1000 * 60));
+    const diffMs = accessStart.getTime() - now.getTime();
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.ceil((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    let timeUntil;
+    if (hours > 0) {
+      timeUntil = `${hours} hour${hours > 1 ? 's' : ''}`;
+      if (minutes > 0) {
+        timeUntil += ` ${minutes} min`;
+      }
+    } else {
+      timeUntil = `${minutes} min`;
+    }
+    
     return {
       canAccess: false,
-      reason: `Video opens ${minutesUntil} minutes before session start`
+      reason: `Video opens ${timeUntil} before session`
     };
   }
   
