@@ -12,6 +12,7 @@ import {
   getDoc
 } from 'firebase/firestore';
 import { confirmBookingWithVideo } from './bookingVideoHelpers';
+import { getVideoRoomStatus, canAccessVideoSession, getSessionTimeStatus } from './bookingVideoHelpers';
 // Icons
 const ClockIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
