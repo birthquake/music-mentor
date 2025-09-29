@@ -226,7 +226,6 @@ useEffect(() => {
               <VideoIcon />
               Join Video Session
             </button>
-            <p className="session-time">{getSessionTimeStatus(booking)}</p>
           </div>
         );
       }
@@ -235,7 +234,6 @@ useEffect(() => {
         <div className="video-status video-locked">
           <VideoIcon />
           <span>{accessCheck.reason}</span>
-          <p className="session-time">{getSessionTimeStatus(booking)}</p>
         </div>
       );
     })()}
