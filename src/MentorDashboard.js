@@ -200,6 +200,49 @@ useEffect(() => {
         </div>
       </div>
 
+{/* Video Access Section - for confirmed bookings with video */}
+{booking.status === 'confirmed' && booking.videoPreferred && (
+  <div className="video-access-section">
+    {(() => {
+      const videoStatus = getVideoRoomStatus(booking);
+      const accessCheck = canAccessVideoSession(booking);
+      
+      if (!videoStatus.hasVideo) {
+        return (
+          <div className="video-status video-unavailable">
+            <VideoIcon />
+            <span>Video room setup failed</span>
+          </div>
+        );
+      }
+      
+      if (videoStatus.status === 'ready' && accessCheck.canAccess) {
+        return (
+          <div className="video-ready">
+            <button 
+              onClick={() => window.open(videoStatus.meetingUrl, '_blank')}
+              className="join-video-btn"
+            >
+              <VideoIcon />
+              Join Video Session
+            </button>
+            <p className="session-time">{getSessionTimeStatus(booking)}</p>
+          </div>
+        );
+      }
+      
+      return (
+        <div className="video-status video-locked">
+          <VideoIcon />
+          <span>{accessCheck.reason}</span>
+          <p className="session-time">{getSessionTimeStatus(booking)}</p>
+        </div>
+      );
+    })()}
+  </div>
+)}
+
+
       {booking.status === 'pending' && (
         <div className="booking-actions">
           <button 
