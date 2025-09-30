@@ -1,4 +1,4 @@
-// MentorProfile.js - With Dark Theme Availability Management
+// MentorProfile.js - Improved Availability Management with 12-hour format
 import React, { useState, useEffect } from 'react';
 import { getMentorProfile, createMentorProfile, DEFAULT_MENTOR_PROFILE } from './profileHelpers';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -9,15 +9,70 @@ const MentorProfile = ({ user, mentorInfo }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
-  const [activeTab, setActiveTab] = useState('basic'); // 'basic' or 'availability'
+  const [activeTab, setActiveTab] = useState('basic');
+  const [copyMenuOpen, setCopyMenuOpen] = useState(null);
 
   const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const TIME_SLOTS = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-    '18:00', '18:30', '19:00', '19:30', '20:00', '20:30'
-  ];
+  
+  // Extended time slots from 6:00 AM to 11:00 PM in 15-minute increments
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let hour = 6; hour <= 23; hour++) {
+      for (let minute = 0; minute < 60; minute += 15) {
+        if (hour === 23 && minute > 0) break; // Stop at 11:00 PM
+        const time24 = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        slots.push(time24);
+      }
+    }
+    return slots;
+  };
+
+  const TIME_SLOTS = generateTimeSlots();
+
+  // Convert 24-hour time to 12-hour format
+  const formatTime12Hour = (time24) => {
+    const [hours, minutes] = time24.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+
+  // Parse various time input formats and convert to 24-hour format
+  const parseTimeInput = (input) => {
+    if (!input) return null;
+    
+    // Remove spaces and convert to lowercase
+    let cleaned = input.toLowerCase().replace(/\s/g, '');
+    
+    // Handle formats like "9am", "9:30pm", "930am", etc.
+    const timeRegex = /^(\d{1,2}):?(\d{2})?(am|pm)?$/;
+    const match = cleaned.match(timeRegex);
+    
+    if (!match) return null;
+    
+    let hours = parseInt(match[1]);
+    const minutes = match[2] ? parseInt(match[2]) : 0;
+    const period = match[3];
+    
+    // Convert to 24-hour format
+    if (period === 'pm' && hours !== 12) {
+      hours += 12;
+    } else if (period === 'am' && hours === 12) {
+      hours = 0;
+    }
+    
+    // Validate
+    if (hours < 6 || hours > 23 || minutes < 0 || minutes > 59) {
+      return null;
+    }
+    
+    // Round to nearest 15-minute increment
+    const roundedMinutes = Math.round(minutes / 15) * 15;
+    const finalMinutes = roundedMinutes === 60 ? 0 : roundedMinutes;
+    const finalHours = roundedMinutes === 60 ? hours + 1 : hours;
+    
+    return `${finalHours.toString().padStart(2, '0')}:${finalMinutes.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     if (user) {
@@ -32,7 +87,6 @@ const MentorProfile = ({ user, mentorInfo }) => {
         setProfile(result.profile);
         setHasProfile(true);
       } else {
-        // Use defaults with prefilled data from existing mentor info
         setProfile({
           ...DEFAULT_MENTOR_PROFILE,
           displayName: mentorInfo?.name || '',
@@ -55,14 +109,12 @@ const MentorProfile = ({ user, mentorInfo }) => {
 
     try {
       if (hasProfile) {
-        // Update existing profile
         await updateDoc(doc(db, 'mentorProfiles', user.uid), {
           ...profile,
           updatedAt: new Date()
         });
         alert('Mentor profile updated successfully!');
       } else {
-        // Create new profile
         const result = await createMentorProfile(user.uid, profile);
         if (result.success) {
           setHasProfile(true);
@@ -104,7 +156,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
 
   const addTimeSlot = (day) => {
     const currentSlots = profile.availability.weeklySchedule[day].slots || [];
-    const newSlot = { start: '09:00', end: '09:15' };
+    const newSlot = { start: '09:00', end: '10:00' };
     
     setProfile(prev => ({
       ...prev,
@@ -162,6 +214,50 @@ const MentorProfile = ({ user, mentorInfo }) => {
     }));
   };
 
+  // Copy slots from one day to selected days
+  const copySlotsToDay = (sourceDay, targetDay) => {
+    const sourceSlots = profile.availability.weeklySchedule[sourceDay].slots || [];
+    
+    setProfile(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        weeklySchedule: {
+          ...prev.availability.weeklySchedule,
+          [targetDay]: {
+            available: true,
+            slots: [...sourceSlots]
+          }
+        }
+      }
+    }));
+    
+    setCopyMenuOpen(null);
+  };
+
+  // Calculate visual timeline for a day (simplified)
+  const getTimelineBlocks = (slots) => {
+    if (!slots || slots.length === 0) return [];
+    
+    // Convert slots to percentage positions (6am = 0%, 11pm = 100%)
+    const startHour = 6;
+    const endHour = 23;
+    const totalHours = endHour - startHour;
+    
+    return slots.map(slot => {
+      const [startH, startM] = slot.start.split(':').map(Number);
+      const [endH, endM] = slot.end.split(':').map(Number);
+      
+      const startOffset = (startH - startHour) + (startM / 60);
+      const endOffset = (endH - startHour) + (endM / 60);
+      
+      return {
+        left: (startOffset / totalHours) * 100,
+        width: ((endOffset - startOffset) / totalHours) * 100
+      };
+    });
+  };
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -179,7 +275,6 @@ const MentorProfile = ({ user, mentorInfo }) => {
         </div>
       </div>
 
-      {/* Tab Navigation */}
       <div className="mentor-profile-tabs">
         <button 
           className={`mentor-tab ${activeTab === 'basic' ? 'active' : ''}`}
@@ -196,7 +291,6 @@ const MentorProfile = ({ user, mentorInfo }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="profile-form">
-        {/* Basic Info Tab */}
         {activeTab === 'basic' && (
           <div className="profile-section">
             <h3>Basic Information</h3>
@@ -256,12 +350,11 @@ const MentorProfile = ({ user, mentorInfo }) => {
           </div>
         )}
 
-        {/* Availability Tab */}
         {activeTab === 'availability' && (
           <div className="profile-section">
             <div className="availability-header">
               <h3>Set Your Availability</h3>
-              <p className="availability-description">Choose the days and times when you're available for mentoring sessions.</p>
+              <p className="availability-description">Choose the days and times when you're available for mentoring sessions (6:00 AM - 11:00 PM).</p>
             </div>
             
             <div className="availability-grid">
@@ -270,6 +363,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
                 const isAvailable = dayData?.available || false;
                 const slots = dayData?.slots || [];
                 const dayDisplayName = day.charAt(0).toUpperCase() + day.slice(1);
+                const timelineBlocks = getTimelineBlocks(slots);
                 
                 return (
                   <div key={day} className={`day-card ${isAvailable ? 'available' : 'unavailable'}`}>
@@ -287,70 +381,131 @@ const MentorProfile = ({ user, mentorInfo }) => {
                     </div>
                     
                     {isAvailable && (
-                      <div className="time-slots-container">
-                        {slots.length === 0 ? (
-                          <div className="empty-slots">
-                            <p className="empty-slots-text">No time slots added yet</p>
-                          </div>
-                        ) : (
-                          <div className="slots-list">
-                            {slots.map((slot, index) => (
-                              <div key={index} className="time-slot-item">
-                                <div className="time-inputs">
-                                  <div className="time-input-group">
-                                    <label className="time-label">From</label>
-                                    <select
-                                      value={slot.start}
-                                      onChange={(e) => updateTimeSlot(day, index, 'start', e.target.value)}
-                                      className="time-select"
-                                    >
-                                      {TIME_SLOTS.map(time => (
-                                        <option key={time} value={time}>{time}</option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                  <div className="time-separator">to</div>
-                                  <div className="time-input-group">
-                                    <label className="time-label">Until</label>
-                                    <select
-                                      value={slot.end}
-                                      onChange={(e) => updateTimeSlot(day, index, 'end', e.target.value)}
-                                      className="time-select"
-                                    >
-                                      {TIME_SLOTS.map(time => (
-                                        <option key={time} value={time}>{time}</option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => removeTimeSlot(day, index)}
-                                  className="remove-slot-btn"
-                                  aria-label="Remove time slot"
-                                >
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                  </svg>
-                                </button>
-                              </div>
-                            ))}
+                      <>
+                        {/* Visual Timeline */}
+                        {slots.length > 0 && (
+                          <div className="timeline-container">
+                            <div className="timeline-bar">
+                              {timelineBlocks.map((block, i) => (
+                                <div 
+                                  key={i}
+                                  className="timeline-block"
+                                  style={{
+                                    left: `${block.left}%`,
+                                    width: `${block.width}%`
+                                  }}
+                                />
+                              ))}
+                            </div>
+                            <div className="timeline-labels">
+                              <span>6 AM</span>
+                              <span>11 PM</span>
+                            </div>
                           </div>
                         )}
                         
-                        <button
-                          type="button"
-                          onClick={() => addTimeSlot(day)}
-                          className="add-slot-btn"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                          </svg>
-                          Add Time Slot
-                        </button>
-                      </div>
+                        <div className="time-slots-container">
+                          {slots.length === 0 ? (
+                            <div className="empty-slots">
+                              <p className="empty-slots-text">No time slots added yet</p>
+                            </div>
+                          ) : (
+                            <div className="slots-list">
+                              {slots.map((slot, index) => (
+                                <div key={index} className="time-slot-item">
+                                  <div className="time-inputs">
+                                    <div className="time-input-group">
+                                      <label className="time-label">From</label>
+                                      <select
+                                        value={slot.start}
+                                        onChange={(e) => updateTimeSlot(day, index, 'start', e.target.value)}
+                                        className="time-select"
+                                      >
+                                        {TIME_SLOTS.map(time => (
+                                          <option key={time} value={time}>
+                                            {formatTime12Hour(time)}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                    <div className="time-separator">to</div>
+                                    <div className="time-input-group">
+                                      <label className="time-label">Until</label>
+                                      <select
+                                        value={slot.end}
+                                        onChange={(e) => updateTimeSlot(day, index, 'end', e.target.value)}
+                                        className="time-select"
+                                      >
+                                        {TIME_SLOTS.map(time => (
+                                          <option key={time} value={time}>
+                                            {formatTime12Hour(time)}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeTimeSlot(day, index)}
+                                    className="remove-slot-btn"
+                                    aria-label="Remove time slot"
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          <div className="slot-actions">
+                            <button
+                              type="button"
+                              onClick={() => addTimeSlot(day)}
+                              className="add-slot-btn"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                              </svg>
+                              Add Time Slot
+                            </button>
+                            
+                            {slots.length > 0 && (
+                              <div className="copy-menu-container">
+                                <button
+                                  type="button"
+                                  onClick={() => setCopyMenuOpen(copyMenuOpen === day ? null : day)}
+                                  className="copy-slots-btn"
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                  </svg>
+                                  Copy to...
+                                </button>
+                                
+                                {copyMenuOpen === day && (
+                                  <div className="copy-dropdown">
+                                    {DAYS.filter(d => d !== day).map(targetDay => (
+                                      <button
+                                        key={targetDay}
+                                        type="button"
+                                        onClick={() => copySlotsToDay(day, targetDay)}
+                                        className="copy-option"
+                                      >
+                                        {targetDay.charAt(0).toUpperCase() + targetDay.slice(1)}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
                     )}
                     
                     {!isAvailable && (
@@ -367,15 +522,15 @@ const MentorProfile = ({ user, mentorInfo }) => {
               <h4 className="tips-title">Tips for setting availability:</h4>
               <ul className="tips-list">
                 <li>Set realistic time blocks - students book 15-minute sessions</li>
+                <li>Use "Copy to..." to quickly replicate your schedule across multiple days</li>
                 <li>Leave buffer time between sessions for notes and preparation</li>
-                <li>Consider your time zone when setting hours</li>
+                <li>Consider your time zone when setting hours (6 AM - 11 PM available)</li>
                 <li>You can always adjust your availability later</li>
               </ul>
             </div>
           </div>
         )}
 
-        {/* Submit Button */}
         <div className="form-actions">
           <button
             type="submit"
