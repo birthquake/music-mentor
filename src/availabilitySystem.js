@@ -109,19 +109,22 @@ export const formatSlotTime = (date) => {
   });
 };
 
-// 4. Check Slot Availability Against Existing Bookings
+// 4. Check Slot Availability Against Existing Bookings (with 15-min buffer)
 export const checkSlotAvailability = (slots, existingBookings) => {
   return slots.map(slot => {
-    // Check if this slot conflicts with any existing booking
+    // Check if this slot conflicts with any existing booking OR the 15-min buffer after
     const isBooked = existingBookings.some(booking => {
-      // Since getMentorBookings already filters for pending/confirmed, we don't need to check status here
       if (!booking.scheduledStart || !booking.scheduledEnd) return false;
       
       const bookingStart = booking.scheduledStart?.toDate ? booking.scheduledStart.toDate() : new Date(booking.scheduledStart);
       const bookingEnd = booking.scheduledEnd?.toDate ? booking.scheduledEnd.toDate() : new Date(booking.scheduledEnd);
       
-      // Check for overlap
-      return (slot.start < bookingEnd && slot.end > bookingStart);
+      // Add 15-minute buffer after booking ends
+      const bufferEnd = new Date(bookingEnd);
+      bufferEnd.setMinutes(bufferEnd.getMinutes() + 15);
+      
+      // Check for overlap with booking OR buffer period
+      return (slot.start < bufferEnd && slot.end > bookingStart);
     });
     
     return {
@@ -130,7 +133,6 @@ export const checkSlotAvailability = (slots, existingBookings) => {
     };
   });
 };
-
 // 5. Group Slots by Date for UI Display
 export const groupSlotsByDate = (slots) => {
   const grouped = {};
