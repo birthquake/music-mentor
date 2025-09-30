@@ -1,4 +1,1171 @@
-/* Preset buttons for quick time block setup */
+/* Complete MentorDashboard.css - Part 1: Root Variables & Basic Layout */
+
+/* Dark Theme Variables */
+:root {
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1c1c1c;
+  --bg-elevated: #272727;
+  --bg-hover: #3f3f3f;
+  --text-primary: #ffffff;
+  --text-secondary: #f1f1f1;
+  --text-muted: #cccccc;
+  --text-instruction: #e8e8e8;
+  --text-subtle: #b8b8b8;
+  --accent-primary: #3ea6ff;
+  --accent-hover: #65b8ff;
+  --green: #00d563;
+  --green-hover: #00c756;
+  --red: #ff4444;
+  --border-color: #3f3f3f;
+  --border-hover: #666666;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 24px;
+  min-height: 80vh;
+  background: var(--bg-primary);
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.mentor-welcome h1,
+.student-welcome h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.mentor-welcome p,
+.student-welcome p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.availability-description {
+  color: var(--text-instruction) !important;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stats-card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.stats-card:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.stats-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--accent-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.stats-content h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.stats-title {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+  font-size: 14px;
+}
+
+.stats-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* Filter Tabs */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.filter-tabs button {
+  padding: 8px 16px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 500;
+  border-radius: 18px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.filter-tabs button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.filter-tabs button.active {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
+}
+
+/* Not Mentor Message */
+.not-mentor {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+}
+
+.not-mentor h2 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+}
+
+.not-mentor p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+/* Complete MentorDashboard.css - Part 2: Bookings Section */
+
+/* Bookings Section */
+.bookings-section {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.loading-bookings {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.no-bookings {
+  text-align: center;
+  padding: 3rem;
+}
+
+.no-bookings h3 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.no-bookings p {
+  color: var(--text-secondary);
+}
+
+.bookings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Booking Card */
+.booking-card {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: var(--bg-elevated);
+  transition: all 0.2s ease;
+}
+
+.booking-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.booking-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-avatar,
+.mentor-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.user-info h4,
+.mentor-details h4 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.booking-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.booking-details {
+  margin-bottom: 1.5rem;
+}
+
+.booking-preferences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.preference-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.preference-item .rate,
+.price-tag {
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.booking-message,
+.your-question {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.booking-message h5,
+.your-question h5 {
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.booking-message p,
+.your-question p {
+  color: var(--text-primary);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.accept-btn, .decline-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.accept-btn {
+  background: var(--green);
+  color: white;
+}
+
+.accept-btn:hover:not(:disabled) {
+  background: var(--green-hover);
+  transform: translateY(-1px);
+}
+
+.decline-btn {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.decline-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.accept-btn:disabled, .decline-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Complete MentorDashboard.css - Part 3: Student Dashboard & Video Access */
+
+/* Student Dashboard Specific Styles */
+.student-booking-card {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  transition: all 0.2s ease;
+}
+
+.student-booking-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-elevated);
+  transform: translateY(-1px);
+}
+
+.student-booking-card .booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.mentor-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-info {
+  text-align: right;
+}
+
+.status-description {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+.booking-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.session-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.detail-item svg {
+  color: var(--text-muted);
+}
+
+.next-steps {
+  background: var(--bg-elevated);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--green);
+}
+
+.next-steps h5 {
+  color: var(--green);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.next-steps p {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-size: 0.875rem;
+}
+
+/* Video Access Section */
+.video-access-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--bg-elevated);
+}
+
+.video-ready {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.join-video-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.join-video-btn:hover {
+  background: #2c8ae6;
+}
+
+.video-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.video-unavailable {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+}
+
+.video-locked {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.session-time {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Complete MentorDashboard.css - Part 4: Calendar & Profile Forms */
+
+/* Calendar Booking Modal */
+.calendar-booking-modal {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.calendar-booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.availability-section h3 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.calendar-view {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  background: var(--bg-elevated);
+}
+
+.loading-slots {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+.day-availability {
+  margin-bottom: 1.5rem;
+}
+
+.day-header {
+  color: var(--accent-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.time-slot {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.time-slot:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.time-slot.selected {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+.slot-time {
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.slot-status {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 0.25rem;
+}
+
+.time-slot:disabled.booked {
+  background: var(--bg-elevated);
+  border-color: var(--red);
+  color: var(--red);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.time-slot:disabled.unavailable {
+  background: var(--bg-elevated);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.no-availability {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+.no-availability h3 {
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.selected-time-display {
+  background: var(--bg-elevated);
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.selected-time-display h4 {
+  color: var(--green);
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.selected-time {
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Step-by-Step Calendar Booking Styles */
+.step-modal {
+  max-width: 500px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.step-indicator span {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.step-indicator span.active {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.step-indicator span.completed {
+  color: var(--green);
+  font-weight: 500;
+}
+
+.step-content {
+  padding: 1.5rem 0;
+}
+
+.step-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.step-header h3 {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.step-header p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  padding: 0.25rem 0;
+  transition: color 0.2s ease;
+}
+
+.back-button:hover {
+  color: var(--accent-hover);
+}
+
+.date-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.date-option {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.date-option:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-hover);
+}
+
+.date-day {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.date-slots {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.no-dates {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.time-option {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.time-option:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.time-option.selected {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+.booking-details-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.checkbox-text {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.session-summary {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.session-summary h4 {
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.modal-actions {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+}
+
+/* Complete MentorDashboard.css - Part 5A: Profile Tabs & Availability */
+
+/* Mentor Profile Tabs */
+.mentor-profile-tabs {
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.mentor-tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.mentor-tab.active {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+.mentor-tab:hover:not(.active) {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+/* Availability Header */
+.availability-header {
+  margin-bottom: 2rem;
+}
+
+.availability-header h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.availability-header p {
+  margin: 0;
+  color: var(--text-instruction);
+}
+
+/* Availability Grid */
+.availability-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Day Card */
+.day-card {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.day-card.available {
+  border-color: var(--green);
+  background: var(--bg-elevated);
+}
+
+.day-card.unavailable {
+  border-color: var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.day-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.day-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+  background-color: var(--bg-hover);
+  border-radius: 24px;
+  transition: background-color 0.2s ease;
+  border: 1px solid var(--border-color);
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 20px;
+  height: 20px;
+  background-color: var(--text-primary);
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.toggle-input:checked + .toggle-slider {
+  background-color: var(--green);
+  border-color: var(--green);
+}
+
+.toggle-input:checked + .toggle-slider::before {
+  transform: translateX(24px);
+}
+
+/* Complete MentorDashboard.css - Part 5B: Time Slots & Timeline */
+
+/* Timeline Visualization */
+.timeline-container {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+}
+
+.timeline-bar {
+  position: relative;
+  height: 8px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-block {
+  position: absolute;
+  height: 100%;
+  background: var(--green);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Time Slots Container */
+.time-slots-container {
+  min-height: 60px;
+}
+
+.empty-slots {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.empty-slots-text {
+  color: var(--text-subtle) !important;
+  font-style: italic;
+  margin: 0 0 1rem 0;
+}
+
+.slots-list {
+  margin-bottom: 1rem;
+}
+
+.time-slot-item {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex: 1;
+}
+
+.time-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.time-label {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  color: var(--text-secondary) !important;
+  text-transform: uppercase;
+}
+
+.time-select {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  min-width: 80px;
+  cursor: pointer;
+}
+
+.time-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(62, 166, 255, 0.1);
+}
+
+.time-separator {
+  padding: 0 0.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.remove-slot-btn {
+  background: var(--red);
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.remove-slot-btn:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+/* Slot Actions */
+.slot-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.slot-actions .add-slot-btn {
+  flex: 1;
+}
+
+.add-slot-btn {
+  background: var(--green);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  justify-content: center;
+}
+
+.add-slot-btn:hover {
+  background: var(--green-hover);
+  transform: translateY(-1px);
+}
+
+.unavailable-message {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.unavailable-text {
+  color: var(--text-subtle) !important;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Complete MentorDashboard.css - Part 5C: Preset Buttons & Copy Menu */
+
+/* Preset Buttons for Quick Time Block Setup */
 .preset-buttons {
   display: flex;
   flex-direction: column;
@@ -24,6 +1191,273 @@
   transform: translateY(-1px);
 }
 
+/* Copy Functionality */
+.copy-menu-container {
+  position: relative;
+}
+
+.copy-slots-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-secondary);
+  color: var(--accent-primary);
+  border: 1px solid var(--accent-primary);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.copy-slots-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.copy-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  min-width: 150px;
+}
+
+.copy-option {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.875rem;
+}
+
+.copy-option:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.copy-option:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.copy-option:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Availability Tips */
+.availability-tips {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.tips-title {
+  margin: 0 0 1rem 0 !important;
+  color: var(--accent-primary) !important;
+  font-size: 1rem;
+}
+
+.tips-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.tips-list li {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary) !important;
+  line-height: 1.5;
+}
+
+/* Complete MentorDashboard.css - Part 5D: Responsive Design */
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem 16px;
+  }
+
+  .mentor-welcome h1,
+  .student-welcome h1 {
+    font-size: 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .stats-card {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .stats-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stats-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .filter-tabs {
+    gap: 6px;
+  }
+
+  .filter-tabs button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .booking-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .booking-actions {
+    justify-content: stretch;
+  }
+
+  .accept-btn, .decline-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .student-booking-card .booking-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .status-info {
+    text-align: left;
+    width: 100%;
+  }
+
+  .session-details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .status-description {
+    max-width: 100%;
+  }
+
+  .availability-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .time-inputs {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .time-separator {
+    text-align: center;
+    padding: 0;
+  }
+  
+  .mentor-profile-tabs {
+    gap: 0.5rem;
+  }
+  
+  .mentor-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .calendar-booking-modal,
+  .step-modal {
+    max-width: 95vw;
+    margin: 1rem;
+  }
+  
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.375rem;
+  }
+  
+  .time-slot {
+    min-height: 45px;
+    padding: 0.375rem;
+    font-size: 0.8125rem;
+  }
+  
+  .time-grid {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .time-option {
+    padding: 0.625rem 0.375rem;
+    font-size: 0.875rem;
+  }
+
+  .slot-actions {
+    flex-direction: column;
+  }
+  
+  .slot-actions .add-slot-btn,
+  .copy-slots-btn {
+    width: 100%;
+  }
+  
+  .copy-dropdown {
+    right: auto;
+    left: 0;
+  }
+
+  .preset-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .preset-btn {
+    flex: 1;
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-preferences {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .booking-actions {
+    flex-direction: column;
+  }
+
+  .preset-buttons {
+    flex-direction: column;
+  }
+  
+  .preset-btn {
+    width: 100%;
+  }
+}
+
 @media (min-width: 480px) {
   .preset-buttons {
     flex-direction: row;
@@ -34,4 +1468,30 @@
     flex: 1;
     min-width: 140px;
   }
+}
+
+/* Scrollbar styling */
+.calendar-view::-webkit-scrollbar,
+.date-grid::-webkit-scrollbar,
+.time-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.calendar-view::-webkit-scrollbar-track,
+.date-grid::-webkit-scrollbar-track,
+.time-grid::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+}
+
+.calendar-view::-webkit-scrollbar-thumb,
+.date-grid::-webkit-scrollbar-thumb,
+.time-grid::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.calendar-view::-webkit-scrollbar-thumb:hover,
+.date-grid::-webkit-scrollbar-thumb:hover,
+.time-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
 }
