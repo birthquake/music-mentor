@@ -1676,3 +1676,125 @@
   color: var(--text-muted);
   margin: 0;
 }
+
+/* Timeline visualization */
+.timeline-container {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+}
+
+.timeline-bar {
+  position: relative;
+  height: 8px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-block {
+  position: absolute;
+  height: 100%;
+  background: var(--green);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Slot actions row */
+.slot-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.slot-actions .add-slot-btn {
+  flex: 1;
+}
+
+/* Copy functionality */
+.copy-menu-container {
+  position: relative;
+}
+
+.copy-slots-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-secondary);
+  color: var(--accent-primary);
+  border: 1px solid var(--accent-primary);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.copy-slots-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.copy-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  min-width: 150px;
+}
+
+.copy-option {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.875rem;
+}
+
+.copy-option:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.copy-option:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.copy-option:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .slot-actions {
+    flex-direction: column;
+  }
+  
+  .slot-actions .add-slot-btn,
+  .copy-slots-btn {
+    width: 100%;
+  }
+  
+  .copy-dropdown {
+    right: auto;
+    left: 0;
+  }
+}
