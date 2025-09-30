@@ -156,7 +156,36 @@ const MentorProfile = ({ user, mentorInfo }) => {
 
   const addTimeSlot = (day) => {
     const currentSlots = profile.availability.weeklySchedule[day].slots || [];
-    const newSlot = { start: '09:00', end: '10:00' };
+    // Default to a reasonable 3-hour block
+    const newSlot = { start: '09:00', end: '12:00' };
+    
+    setProfile(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        weeklySchedule: {
+          ...prev.availability.weeklySchedule,
+          [day]: {
+            ...prev.availability.weeklySchedule[day],
+            slots: [...currentSlots, newSlot]
+          }
+        }
+      }
+    }));
+  };
+
+  // Add preset time blocks
+  const addPresetBlock = (day, preset) => {
+    const currentSlots = profile.availability.weeklySchedule[day].slots || [];
+    
+    const presets = {
+      morning: { start: '09:00', end: '12:00' },
+      afternoon: { start: '13:00', end: '17:00' },
+      evening: { start: '18:00', end: '21:00' },
+      fullDay: { start: '09:00', end: '17:00' }
+    };
+    
+    const newSlot = presets[preset];
     
     setProfile(prev => ({
       ...prev,
@@ -407,7 +436,30 @@ const MentorProfile = ({ user, mentorInfo }) => {
                         <div className="time-slots-container">
                           {slots.length === 0 ? (
                             <div className="empty-slots">
-                              <p className="empty-slots-text">No time slots added yet</p>
+                              <p className="empty-slots-text">No time blocks added yet</p>
+                              <div className="preset-buttons">
+                                <button
+                                  type="button"
+                                  onClick={() => addPresetBlock(day, 'morning')}
+                                  className="preset-btn"
+                                >
+                                  Morning (9 AM-12 PM)
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => addPresetBlock(day, 'afternoon')}
+                                  className="preset-btn"
+                                >
+                                  Afternoon (1-5 PM)
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => addPresetBlock(day, 'evening')}
+                                  className="preset-btn"
+                                >
+                                  Evening (6-9 PM)
+                                </button>
+                              </div>
                             </div>
                           ) : (
                             <div className="slots-list">
@@ -521,11 +573,12 @@ const MentorProfile = ({ user, mentorInfo }) => {
             <div className="availability-tips">
               <h4 className="tips-title">Tips for setting availability:</h4>
               <ul className="tips-list">
-                <li>Set realistic time blocks - students book 15-minute sessions</li>
-                <li>Use "Copy to..." to quickly replicate your schedule across multiple days</li>
-                <li>Leave buffer time between sessions for notes and preparation</li>
+                <li>Use preset buttons for quick setup, then adjust times as needed</li>
+                <li>Each time block automatically generates 15-minute bookable slots</li>
+                <li>15-minute buffer is automatically added between sessions</li>
+                <li>Add multiple blocks per day for flexibility (e.g., morning + evening)</li>
+                <li>Use "Copy to..." to quickly replicate schedules across days</li>
                 <li>Consider your time zone when setting hours (6 AM - 11 PM available)</li>
-                <li>You can always adjust your availability later</li>
               </ul>
             </div>
           </div>
