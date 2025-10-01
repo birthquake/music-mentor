@@ -39,9 +39,10 @@ class DailyVideoService {
     const endTime = new Date(scheduledEnd.seconds * 1000);
     const durationMinutes = Math.ceil((endTime - startTime) / (1000 * 60)) + 5;
 
-    // Public room config - removed privacy setting so anyone with link can join
+    // Public room config - explicitly set to public so anyone with link can join
     const roomConfig = {
-      name: `musicmentor-session-${bookingId}`
+      name: `musicmentor-session-${bookingId}`,
+      privacy: 'public'
     };
 
     console.log('🔍 Room config:', roomConfig);
