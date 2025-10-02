@@ -213,7 +213,6 @@ const BookingDetails = ({
     </div>
   );
 };
-
 // Main Step-by-Step Calendar Booking Component
 const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   // All hooks at the top
@@ -226,11 +225,10 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
 
-  // Load mentor availability from Firestore
+  // Load mentor availability from Firestore with FIXED slot generation
   const loadMentorAvailability = async () => {
     setLoading(true);
     try {
-      // Get mentor profile from Firestore using their userId 
       const profileResult = await getMentorProfile(mentor.userId || mentor.id);
       
       if (!profileResult.success) {
@@ -250,42 +248,57 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
         return;
       }
 
-      // Generate available slots for the next 3 weeks
+      // Generate 15-minute slots for the next 3 weeks
       const slots = [];
       const today = new Date();
       const endDate = new Date(today);
       endDate.setDate(endDate.getDate() + 21); // 3 weeks
+      const now = new Date(); // Current time for filtering
 
       // Loop through each day in the next 3 weeks
       for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
         const dayName = d.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
         const daySchedule = weeklySchedule[dayName];
         
-        // If this day is available and has time slots
+        // If this day is available and has time blocks
         if (daySchedule?.available && daySchedule.slots?.length > 0) {
-          daySchedule.slots.forEach((timeSlot, index) => {
-            const slotDate = new Date(d);
-            const [startHour, startMin] = timeSlot.start.split(':').map(Number);
-            const [endHour, endMin] = timeSlot.end.split(':').map(Number);
+          daySchedule.slots.forEach((timeBlock) => {
+            const [startHour, startMin] = timeBlock.start.split(':').map(Number);
+            const [endHour, endMin] = timeBlock.end.split(':').map(Number);
             
-            const startTime = new Date(slotDate);
-            startTime.setHours(startHour, startMin, 0, 0);
+            // Create start and end times for this time block
+            const blockStart = new Date(d);
+            blockStart.setHours(startHour, startMin, 0, 0);
             
-            const endTime = new Date(slotDate);
-            endTime.setHours(endHour, endMin, 0, 0);
+            const blockEnd = new Date(d);
+            blockEnd.setHours(endHour, endMin, 0, 0);
             
-            // Only include future slots (not past times)
-            if (startTime > new Date()) {
-              slots.push({
-                slotId: `${slotDate.toDateString()}-${timeSlot.start}-${index}`,
-                start: startTime,
-                end: endTime,
-                available: true
-              });
+            // Generate 15-minute slots within this time block
+            let currentSlotStart = new Date(blockStart);
+            
+            while (currentSlotStart < blockEnd) {
+              const currentSlotEnd = new Date(currentSlotStart);
+              currentSlotEnd.setMinutes(currentSlotStart.getMinutes() + 15);
+              
+              // Only include if the slot END time is in the future
+              // This allows booking slots that have started but not ended
+              if (currentSlotEnd > now) {
+                slots.push({
+                  slotId: `${d.toDateString()}-${currentSlotStart.getHours()}-${currentSlotStart.getMinutes()}`,
+                  start: new Date(currentSlotStart),
+                  end: new Date(currentSlotEnd),
+                  available: true
+                });
+              }
+              
+              // Move to next 15-minute slot
+              currentSlotStart.setMinutes(currentSlotStart.getMinutes() + 15);
             }
           });
         }
       }
+
+      console.log(`Generated ${slots.length} 15-minute slots`);
 
       // Sort slots by time
       const sortedSlots = slots.sort((a, b) => a.start - b.start);
@@ -296,6 +309,7 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
       
       // Only show available slots
       const availableOnly = checkedSlots.filter(slot => slot.available);
+      console.log(`${availableOnly.length} slots available after checking bookings`);
       setAvailableSlots(availableOnly);
       
     } catch (error) {
@@ -364,14 +378,23 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
         mentorName: mentor?.name,
         userId: user?.uid,
         userEmail: user?.email,
+        studentName: user?.displayName || user?.email,
         message,
         videoPreferred,
-        status: 'pending', // Requires mentor approval
+        status: 'pending',
         createdAt: serverTimestamp(),
         scheduledStart: selectedTime.start,
         scheduledEnd: selectedTime.end,
         rate: mentor?.rate,
-        bookingType: 'scheduled'
+        bookingType: 'scheduled',
+        preferredTime: selectedTime.start.toLocaleString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        })
       });
 
       const timeStr = selectedTime.start.toLocaleTimeString([], { 
@@ -458,7 +481,6 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     </div>
   );
 };
-
 // Toggle and button styling
 const toggleStyles = `
 .toggle-container {
