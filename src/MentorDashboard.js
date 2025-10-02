@@ -9,7 +9,8 @@ import {
   updateDoc,
   orderBy,
   Timestamp,
-  getDoc
+  getDoc,
+  addDoc
 } from 'firebase/firestore';
 import { confirmBookingWithVideo } from './bookingVideoHelpers';
 import { getVideoRoomStatus, canAccessVideoSession, getSessionTimeStatus } from './bookingVideoHelpers';
@@ -335,10 +336,66 @@ setBookings(sortedBookings);
 
   const handleAcceptBooking = async (bookingId) => {
   try {
+    // Get the booking details before confirming
+    const bookingRef = doc(db, 'bookings', bookingId);
+    const bookingSnap = await getDoc(bookingRef);
+    const bookingData = bookingSnap.data();
+
+    // Confirm the booking with video
     const result = await confirmBookingWithVideo(bookingId);
     console.log('Booking confirmed:', result.message);
-    // Optionally show a success message to the user
-    // alert(result.message);
+
+    // Send confirmation email to student
+    const sessionTime = bookingData.scheduledStart 
+      ? new Date(bookingData.scheduledStart.seconds * 1000).toLocaleString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        })
+      : bookingData.preferredTime || 'TBD';
+
+    await addDoc(collection(db, 'mail'), {
+      to: bookingData.userEmail,
+      message: {
+        subject: `Session Confirmed with ${mentorInfo.name}! 🎵`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #10b981;">Your Session is Confirmed!</h2>
+            <p>Great news! <strong>${mentorInfo.name}</strong> has accepted your session request.</p>
+            
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin-top: 0;">Session Details</h3>
+              <p><strong>When:</strong> ${sessionTime}</p>
+              <p><strong>Duration:</strong> 15 minutes</p>
+              <p><strong>Rate:</strong> $${bookingData.rate}</p>
+              ${bookingData.videoPreferred ? '<p><strong>Format:</strong> Video session</p>' : ''}
+            </div>
+
+            <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0;"><strong>Your Question:</strong></p>
+              <p style="margin: 10px 0 0 0;">"${bookingData.message}"</p>
+            </div>
+
+            ${result.hasVideo ? `
+              <p style="color: #059669;">
+                <strong>Video Access:</strong> You'll be able to join the video room 30 minutes before your session starts. 
+                Check your dashboard for the "Join Video" button.
+              </p>
+            ` : ''}
+
+            <p>Log in to your MusicMentor dashboard to view all details and access your session.</p>
+            
+            <p style="margin-top: 30px;">See you soon! 🎸</p>
+          </div>
+        `
+      }
+    });
+
+    console.log('Confirmation email sent to student');
+
   } catch (error) {
     console.error('Error confirming booking:', error);
     alert('Failed to confirm booking. Please try again.');
@@ -346,12 +403,56 @@ setBookings(sortedBookings);
 };
 
   const handleDeclineBooking = async (bookingId) => {
+  try {
+    // Get booking details before declining
     const bookingRef = doc(db, 'bookings', bookingId);
+    const bookingSnap = await getDoc(bookingRef);
+    const bookingData = bookingSnap.data();
+
+    // Update booking status
     await updateDoc(bookingRef, {
       status: 'declined',
       declinedAt: Timestamp.now()
     });
-  };
+
+    // Send decline notification to student
+    await addDoc(collection(db, 'mail'), {
+      to: bookingData.userEmail,
+      message: {
+        subject: `Session Request Update - ${mentorInfo.name}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #6b7280;">Session Request Status</h2>
+            <p>Thank you for your interest in booking with <strong>${mentorInfo.name}</strong>.</p>
+            
+            <p>Unfortunately, they're unable to accommodate your requested session at this time. This could be due to scheduling conflicts or availability changes.</p>
+
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Your request was for:</strong></p>
+              <p>${bookingData.preferredTime || 'Time TBD'}</p>
+              <p>"${bookingData.message}"</p>
+            </div>
+
+            <p><strong>What's next?</strong></p>
+            <ul>
+              <li>Try booking a different time slot with this mentor</li>
+              <li>Browse other mentors who might be available</li>
+              <li>Check back later for updated availability</li>
+            </ul>
+
+            <p>We appreciate your understanding and hope you find the perfect mentor match!</p>
+          </div>
+        `
+      }
+    });
+
+    console.log('Decline notification sent to student');
+
+  } catch (error) {
+    console.error('Error declining booking:', error);
+    alert('Failed to decline booking. Please try again.');
+  }
+};
 
   const filteredBookings = bookings.filter(booking => {
     if (filter === 'all') return true;
