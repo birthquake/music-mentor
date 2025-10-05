@@ -334,9 +334,8 @@ setBookings(sortedBookings);
   return () => unsubscribe();
 }, [user, mentorInfo]);
 
-  const handleAcceptBooking = async (bookingId) => {
+const handleAcceptBooking = async (bookingId) => {
   try {
-    // Get the booking details before confirming
     const bookingRef = doc(db, 'bookings', bookingId);
     const bookingSnap = await getDoc(bookingRef);
     const bookingData = bookingSnap.data();
@@ -345,56 +344,57 @@ setBookings(sortedBookings);
     const result = await confirmBookingWithVideo(bookingId);
     console.log('Booking confirmed:', result.message);
 
-    // Send confirmation email to student
+    // Send email via Mailgun API directly
     const sessionTime = bookingData.scheduledStart 
       ? new Date(bookingData.scheduledStart.seconds * 1000).toLocaleString('en-US', {
-          weekday: 'long',
-          month: 'long',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
+          weekday: 'long', month: 'long', day: 'numeric',
+          hour: 'numeric', minute: '2-digit', hour12: true
         })
       : bookingData.preferredTime || 'TBD';
 
-    await addDoc(collection(db, 'mail'), {
-      to: bookingData.userEmail,
-      message: {
-        subject: `Session Confirmed with ${mentorInfo.name}! 🎵`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #10b981;">Your Session is Confirmed!</h2>
-            <p>Great news! <strong>${mentorInfo.name}</strong> has accepted your session request.</p>
-            
-            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin-top: 0;">Session Details</h3>
-              <p><strong>When:</strong> ${sessionTime}</p>
-              <p><strong>Duration:</strong> 15 minutes</p>
-              <p><strong>Rate:</strong> $${bookingData.rate}</p>
-              ${bookingData.videoPreferred ? '<p><strong>Format:</strong> Video session</p>' : ''}
-            </div>
+    const formData = new FormData();
+    formData.append('from', 'MusicMentor <noreply@sandboxc833f6f8ab804d94b249928c7e473d14.mailgun.org>');
+    formData.append('to', bookingData.userEmail);
+    formData.append('subject', `Session Confirmed with ${mentorInfo.name}!`);
+    formData.append('html', `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #10b981;">Your Session is Confirmed!</h2>
+        <p>Great news! <strong>${mentorInfo.name}</strong> has accepted your session request.</p>
+        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0;">Session Details</h3>
+          <p><strong>When:</strong> ${sessionTime}</p>
+          <p><strong>Duration:</strong> 15 minutes</p>
+          <p><strong>Rate:</strong> $${bookingData.rate}</p>
+          ${bookingData.videoPreferred ? '<p><strong>Format:</strong> Video session</p>' : ''}
+        </div>
+        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Your Question:</strong></p>
+          <p style="margin: 10px 0 0 0;">"${bookingData.message}"</p>
+        </div>
+        ${result.hasVideo ? `
+          <p style="color: #059669;">
+            <strong>Video Access:</strong> You'll be able to join the video room 30 minutes before your session starts. 
+            Check your dashboard for the "Join Video" button.
+          </p>
+        ` : ''}
+        <p>Log in to your MusicMentor dashboard to view all details.</p>
+        <p style="margin-top: 30px;">See you soon!</p>
+      </div>
+    `);
 
-            <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0;"><strong>Your Question:</strong></p>
-              <p style="margin: 10px 0 0 0;">"${bookingData.message}"</p>
-            </div>
-
-            ${result.hasVideo ? `
-              <p style="color: #059669;">
-                <strong>Video Access:</strong> You'll be able to join the video room 30 minutes before your session starts. 
-                Check your dashboard for the "Join Video" button.
-              </p>
-            ` : ''}
-
-            <p>Log in to your MusicMentor dashboard to view all details and access your session.</p>
-            
-            <p style="margin-top: 30px;">See you soon! 🎸</p>
-          </div>
-        `
-      }
+    const response = await fetch('https://api.mailgun.net/v3/sandboxc833f6f8ab804d94b249928c7e473d14.mailgun.org/messages', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + btoa('api:f3e97b9eb39fcee8681565da54080d85-8b22cbee-d4100436')
+      },
+      body: formData
     });
 
-    console.log('Confirmation email sent to student');
+    if (response.ok) {
+      console.log('Email sent via Mailgun API');
+    } else {
+      console.error('Mailgun error:', await response.text());
+    }
 
   } catch (error) {
     console.error('Error confirming booking:', error);
