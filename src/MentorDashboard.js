@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { confirmBookingWithVideo } from './bookingVideoHelpers';
 import { getVideoRoomStatus, canAccessVideoSession, getSessionTimeStatus } from './bookingVideoHelpers';
+
 // Icons
 const ClockIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -50,49 +51,48 @@ const CalendarIcon = () => (
     <line x1="3" y1="10" x2="21" y2="10"></line>
   </svg>
 );
-
 // Booking Card Component
 const BookingCard = ({ booking, onAccept, onDecline }) => {
   const [loading, setLoading] = useState(false);
   const [studentName, setStudentName] = useState(null);
 
   // Get student name from profile
-useEffect(() => {
-  const getStudentName = async () => {
-    console.log('Booking data:', booking);
-    console.log('Available fields:', Object.keys(booking));
-    
-    if (!booking.studentId && !booking.userId) {
-      console.log('No studentId or userId found in booking');
-      return;
-    }
-    
-    try {
-      const userId = booking.studentId || booking.userId;
-      console.log('Looking up user profile for ID:', userId);
+  useEffect(() => {
+    const getStudentName = async () => {
+      console.log('Booking data:', booking);
+      console.log('Available fields:', Object.keys(booking));
       
-      const userProfileRef = doc(db, 'userProfiles', userId);
-      const userProfileSnap = await getDoc(userProfileRef);
-      
-      console.log('Profile exists?', userProfileSnap.exists());
-      if (userProfileSnap.exists()) {
-        console.log('Profile data:', userProfileSnap.data());
+      if (!booking.studentId && !booking.userId) {
+        console.log('No studentId or userId found in booking');
+        return;
       }
       
-      if (userProfileSnap.exists() && (userProfileSnap.data().name || userProfileSnap.data().displayName)) {
-      const profileName = userProfileSnap.data().name || userProfileSnap.data().displayName;
-        console.log('Found profile name:', profileName);
-        setStudentName(profileName);
-      } else {
-        console.log('No profile name found');
+      try {
+        const userId = booking.studentId || booking.userId;
+        console.log('Looking up user profile for ID:', userId);
+        
+        const userProfileRef = doc(db, 'userProfiles', userId);
+        const userProfileSnap = await getDoc(userProfileRef);
+        
+        console.log('Profile exists?', userProfileSnap.exists());
+        if (userProfileSnap.exists()) {
+          console.log('Profile data:', userProfileSnap.data());
+        }
+        
+        if (userProfileSnap.exists() && (userProfileSnap.data().name || userProfileSnap.data().displayName)) {
+          const profileName = userProfileSnap.data().name || userProfileSnap.data().displayName;
+          console.log('Found profile name:', profileName);
+          setStudentName(profileName);
+        } else {
+          console.log('No profile name found');
+        }
+      } catch (error) {
+        console.error('Error getting student name:', error);
       }
-    } catch (error) {
-      console.error('Error getting student name:', error);
-    }
-  };
+    };
 
-  getStudentName();
-}, [booking.studentId, booking.userId]);
+    getStudentName();
+  }, [booking.studentId, booking.userId]);
 
   const displayName = studentName || booking.studentName || booking.userEmail?.split('@')[0] || 'Student';
   const displayInitials = studentName ? 
@@ -173,17 +173,17 @@ useEffect(() => {
 
       <div className="booking-details">
         <div className="booking-preferences">
-         <div className="preference-item">
-  <ClockIcon />
-  <span>
-    {booking.preferredTime 
-      ? `Prefers ${booking.preferredTime}` 
-      : booking.scheduledStart 
-        ? `Scheduled: ${new Date(booking.scheduledStart.seconds * 1000).toLocaleDateString()} at ${new Date(booking.scheduledStart.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
-        : 'Time preference not specified'
-    }
-  </span>
-</div>
+          <div className="preference-item">
+            <ClockIcon />
+            <span>
+              {booking.preferredTime 
+                ? `Prefers ${booking.preferredTime}` 
+                : booking.scheduledStart 
+                  ? `Scheduled: ${new Date(booking.scheduledStart.seconds * 1000).toLocaleDateString()} at ${new Date(booking.scheduledStart.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
+                  : 'Time preference not specified'
+              }
+            </span>
+          </div>
           {booking.videoPreferred && (
             <div className="preference-item">
               <VideoIcon />
@@ -201,46 +201,45 @@ useEffect(() => {
         </div>
       </div>
 
-{/* Video Access Section - for confirmed bookings with video */}
-{booking.status === 'confirmed' && booking.videoPreferred && (
-  <div className="video-access-section">
-    {(() => {
-      const videoStatus = getVideoRoomStatus(booking);
-      const accessCheck = canAccessVideoSession(booking);
-      
-      if (!videoStatus.hasVideo) {
-        return (
-          <div className="video-status video-unavailable">
-            <VideoIcon />
-            <span>Video room setup failed</span>
-          </div>
-        );
-      }
-      
-      if (videoStatus.status === 'ready' && accessCheck.canAccess) {
-        return (
-          <div className="video-ready">
-            <button 
-              onClick={() => window.open(videoStatus.meetingUrl, '_blank')}
-              className="join-video-btn"
-            >
-              <VideoIcon />
-              Join Video Session
-            </button>
-          </div>
-        );
-      }
-      
-      return (
-        <div className="video-status video-locked">
-          <VideoIcon />
-          <span>{accessCheck.reason}</span>
+      {/* Video Access Section - for confirmed bookings with video */}
+      {booking.status === 'confirmed' && booking.videoPreferred && (
+        <div className="video-access-section">
+          {(() => {
+            const videoStatus = getVideoRoomStatus(booking);
+            const accessCheck = canAccessVideoSession(booking);
+            
+            if (!videoStatus.hasVideo) {
+              return (
+                <div className="video-status video-unavailable">
+                  <VideoIcon />
+                  <span>Video room setup failed</span>
+                </div>
+              );
+            }
+            
+            if (videoStatus.status === 'ready' && accessCheck.canAccess) {
+              return (
+                <div className="video-ready">
+                  <button 
+                    onClick={() => window.open(videoStatus.meetingUrl, '_blank')}
+                    className="join-video-btn"
+                  >
+                    <VideoIcon />
+                    Join Video Session
+                  </button>
+                </div>
+              );
+            }
+            
+            return (
+              <div className="video-status video-locked">
+                <VideoIcon />
+                <span>{accessCheck.reason}</span>
+              </div>
+            );
+          })()}
         </div>
-      );
-    })()}
-  </div>
-)}
-
+      )}
 
       {booking.status === 'pending' && (
         <div className="booking-actions">
@@ -265,6 +264,7 @@ useEffect(() => {
     </div>
   );
 };
+
 // Stats Component
 const StatsCard = ({ title, value, subtitle, icon }) => (
   <div className="stats-card">
@@ -278,181 +278,124 @@ const StatsCard = ({ title, value, subtitle, icon }) => (
     </div>
   </div>
 );
-
-// Main Mentor Dashboard Component
+       // Main Mentor Dashboard Component
 const MentorDashboard = ({ user, mentorInfo }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('pending');
 
   useEffect(() => {
-  if (!user || !mentorInfo) {
-    console.log('No user or mentorInfo:', { user: !!user, mentorInfo: !!mentorInfo });
-    return;
-  }
+    if (!user || !mentorInfo) {
+      console.log('No user or mentorInfo:', { user: !!user, mentorInfo: !!mentorInfo });
+      return;
+    }
 
-  console.log('Setting up bookings query for mentor:', mentorInfo.id);
+    console.log('Setting up bookings query for mentor:', mentorInfo.id);
 
-  // Query bookings for this mentor - simplified version
-  const q = collection(db, 'bookings');
+    // Query bookings for this mentor
+    const q = collection(db, 'bookings');
 
-  const unsubscribe = onSnapshot(q, 
-    (querySnapshot) => {
-      console.log('Query snapshot received, size:', querySnapshot.size);
-      const bookingData = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        console.log('Found booking:', doc.id, data);
+    const unsubscribe = onSnapshot(q, 
+      (querySnapshot) => {
+        console.log('Query snapshot received, size:', querySnapshot.size);
+        const bookingData = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          console.log('Found booking:', doc.id, data);
+          
+          // Filter for this mentor's bookings - handle both old numeric IDs and new Firestore IDs
+          if (data.mentorId == mentorInfo.id || data.mentorId === user.uid || data.mentorId == user.uid) {
+            bookingData.push({
+              id: doc.id,
+              ...data
+            });
+          }
+        });
         
-        // Filter for this mentor's bookings
-// Filter for this mentor's bookings - handle both old numeric IDs and new Firestore IDs
-if (data.mentorId == mentorInfo.id || data.mentorId === user.uid || data.mentorId == user.uid) {
-  bookingData.push({
-    id: doc.id,
-    ...data
-  });
-}
-      });
-      
-      // Sort bookings by creation date (newest first)
-const sortedBookings = bookingData.sort((a, b) => {
-  const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
-  const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
-  return dateB - dateA; // Newest first
-});
+        // Sort bookings by creation date (newest first)
+        const sortedBookings = bookingData.sort((a, b) => {
+          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+          return dateB - dateA;
+        });
 
-console.log('Total bookings for this mentor:', sortedBookings.length);
-setBookings(sortedBookings);
-      setLoading(false);
-    },
-    (error) => {
-      console.error('Error getting bookings:', error);
-      setLoading(false);
-    }
-  );
-
-  return () => unsubscribe();
-}, [user, mentorInfo]);
-
-const handleAcceptBooking = async (bookingId) => {
-  try {
-    const bookingRef = doc(db, 'bookings', bookingId);
-    const bookingSnap = await getDoc(bookingRef);
-    const bookingData = bookingSnap.data();
-
-    // Confirm the booking with video
-    const result = await confirmBookingWithVideo(bookingId);
-    console.log('Booking confirmed:', result.message);
-
-    // Send email via Mailgun API directly
-    const sessionTime = bookingData.scheduledStart 
-      ? new Date(bookingData.scheduledStart.seconds * 1000).toLocaleString('en-US', {
-          weekday: 'long', month: 'long', day: 'numeric',
-          hour: 'numeric', minute: '2-digit', hour12: true
-        })
-      : bookingData.preferredTime || 'TBD';
-
-    const formData = new FormData();
-    formData.append('from', 'MusicMentor <noreply@sandboxc833f6f8ab804d94b249928c7e473d14.mailgun.org>');
-    formData.append('to', bookingData.userEmail);
-    formData.append('subject', `Session Confirmed with ${mentorInfo.name}!`);
-    formData.append('html', `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #10b981;">Your Session is Confirmed!</h2>
-        <p>Great news! <strong>${mentorInfo.name}</strong> has accepted your session request.</p>
-        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Session Details</h3>
-          <p><strong>When:</strong> ${sessionTime}</p>
-          <p><strong>Duration:</strong> 15 minutes</p>
-          <p><strong>Rate:</strong> $${bookingData.rate}</p>
-          ${bookingData.videoPreferred ? '<p><strong>Format:</strong> Video session</p>' : ''}
-        </div>
-        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Your Question:</strong></p>
-          <p style="margin: 10px 0 0 0;">"${bookingData.message}"</p>
-        </div>
-        ${result.hasVideo ? `
-          <p style="color: #059669;">
-            <strong>Video Access:</strong> You'll be able to join the video room 30 minutes before your session starts. 
-            Check your dashboard for the "Join Video" button.
-          </p>
-        ` : ''}
-        <p>Log in to your MusicMentor dashboard to view all details.</p>
-        <p style="margin-top: 30px;">See you soon!</p>
-      </div>
-    `);
-
-    const response = await fetch('https://api.mailgun.net/v3/sandboxc833f6f8ab804d94b249928c7e473d14.mailgun.org/messages', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Basic ' + btoa('api:f3e97b9eb39fcee8681565da54080d85-8b22cbee-d4100436')
+        console.log('Total bookings for this mentor:', sortedBookings.length);
+        setBookings(sortedBookings);
+        setLoading(false);
       },
-      body: formData
-    });
+      (error) => {
+        console.error('Error getting bookings:', error);
+        setLoading(false);
+      }
+    );
 
-    if (response.ok) {
-      console.log('Email sent via Mailgun API');
-    } else {
-      console.error('Mailgun error:', await response.text());
+    return () => unsubscribe();
+  }, [user, mentorInfo]);
+
+  const handleAcceptBooking = async (bookingId) => {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      const bookingSnap = await getDoc(bookingRef);
+      
+      if (!bookingSnap.exists()) {
+        throw new Error('Booking not found');
+      }
+      
+      const bookingData = bookingSnap.data();
+
+      // Confirm the booking with video
+      const result = await confirmBookingWithVideo(bookingId);
+      console.log('Booking confirmed:', result.message);
+
+      // TODO: Email notifications
+      // Email functionality requires backend/Cloud Functions to keep API keys secure
+      // Options:
+      // 1. Set up Vercel serverless function as proxy to Mailgun API
+      // 2. Set up Firebase Cloud Functions (requires Firebase CLI)
+      // 3. Use alternative service with better client-side support
+      // See session notes: "Critical Security Warning" and "Option 3: Simple Backend Proxy"
+      
+      console.log('Booking accepted successfully. Student will see confirmation in dashboard.');
+      
+      // Optional: Show success message to mentor
+      alert('Session confirmed! The student will see the update in their dashboard.');
+
+    } catch (error) {
+      console.error('Error confirming booking:', error);
+      throw error; // Re-throw so BookingCard can handle it
     }
-
-  } catch (error) {
-    console.error('Error confirming booking:', error);
-    alert('Failed to confirm booking. Please try again.');
-  }
-};
+  };
 
   const handleDeclineBooking = async (bookingId) => {
-  try {
-    // Get booking details before declining
-    const bookingRef = doc(db, 'bookings', bookingId);
-    const bookingSnap = await getDoc(bookingRef);
-    const bookingData = bookingSnap.data();
-
-    // Update booking status
-    await updateDoc(bookingRef, {
-      status: 'declined',
-      declinedAt: Timestamp.now()
-    });
-
-    // Send decline notification to student
-    await addDoc(collection(db, 'mail'), {
-      to: bookingData.userEmail,
-      message: {
-        subject: `Session Request Update - ${mentorInfo.name}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #6b7280;">Session Request Status</h2>
-            <p>Thank you for your interest in booking with <strong>${mentorInfo.name}</strong>.</p>
-            
-            <p>Unfortunately, they're unable to accommodate your requested session at this time. This could be due to scheduling conflicts or availability changes.</p>
-
-            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p><strong>Your request was for:</strong></p>
-              <p>${bookingData.preferredTime || 'Time TBD'}</p>
-              <p>"${bookingData.message}"</p>
-            </div>
-
-            <p><strong>What's next?</strong></p>
-            <ul>
-              <li>Try booking a different time slot with this mentor</li>
-              <li>Browse other mentors who might be available</li>
-              <li>Check back later for updated availability</li>
-            </ul>
-
-            <p>We appreciate your understanding and hope you find the perfect mentor match!</p>
-          </div>
-        `
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      const bookingSnap = await getDoc(bookingRef);
+      
+      if (!bookingSnap.exists()) {
+        throw new Error('Booking not found');
       }
-    });
+      
+      const bookingData = bookingSnap.data();
 
-    console.log('Decline notification sent to student');
+      // Update booking status
+      await updateDoc(bookingRef, {
+        status: 'declined',
+        declinedAt: Timestamp.now()
+      });
 
-  } catch (error) {
-    console.error('Error declining booking:', error);
-    alert('Failed to decline booking. Please try again.');
-  }
-};
+      console.log('Booking declined successfully');
+      
+      // TODO: Email notifications for declined bookings
+      // Same issue as accept - requires backend to send emails securely
+      
+      // Optional: Show success message to mentor
+      alert('Session declined. The student will be notified in their dashboard.');
+
+    } catch (error) {
+      console.error('Error declining booking:', error);
+      throw error; // Re-throw so BookingCard can handle it
+    }
+  };
 
   const filteredBookings = bookings.filter(booking => {
     if (filter === 'all') return true;
@@ -482,7 +425,6 @@ const handleAcceptBooking = async (bookingId) => {
       </div>
     );
   }
-
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
