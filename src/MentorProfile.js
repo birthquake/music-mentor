@@ -1,4 +1,4 @@
-// MentorProfile.js - Improved Availability Management with 12-hour format
+// MentorProfile.js - Improved Availability Management with error handling
 import React, { useState, useEffect } from 'react';
 import { getMentorProfile, createMentorProfile, DEFAULT_MENTOR_PROFILE } from './profileHelpers';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -11,78 +11,105 @@ const MentorProfile = ({ user, mentorInfo }) => {
   const [hasProfile, setHasProfile] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [copyMenuOpen, setCopyMenuOpen] = useState(null);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   
   // Extended time slots from 6:00 AM to 11:00 PM in 15-minute increments
   const generateTimeSlots = () => {
     const slots = [];
-    for (let hour = 6; hour <= 23; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
-        if (hour === 23 && minute > 0) break; // Stop at 11:00 PM
-        const time24 = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        slots.push(time24);
+    try {
+      for (let hour = 6; hour <= 23; hour++) {
+        for (let minute = 0; minute < 60; minute += 15) {
+          if (hour === 23 && minute > 0) break;
+          const time24 = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          slots.push(time24);
+        }
       }
+    } catch (error) {
+      console.error('Error generating time slots:', error);
     }
     return slots;
   };
 
   const TIME_SLOTS = generateTimeSlots();
 
-  // Convert 24-hour time to 12-hour format
+  // Convert 24-hour time to 12-hour format with error handling
   const formatTime12Hour = (time24) => {
-    const [hours, minutes] = time24.split(':').map(Number);
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-    return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+    try {
+      if (!time24 || typeof time24 !== 'string') return 'Invalid time';
+      
+      const [hours, minutes] = time24.split(':').map(Number);
+      
+      if (isNaN(hours) || isNaN(minutes)) return 'Invalid time';
+      
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+      return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return 'Invalid time';
+    }
   };
 
   // Parse various time input formats and convert to 24-hour format
   const parseTimeInput = (input) => {
-    if (!input) return null;
-    
-    // Remove spaces and convert to lowercase
-    let cleaned = input.toLowerCase().replace(/\s/g, '');
-    
-    // Handle formats like "9am", "9:30pm", "930am", etc.
-    const timeRegex = /^(\d{1,2}):?(\d{2})?(am|pm)?$/;
-    const match = cleaned.match(timeRegex);
-    
-    if (!match) return null;
-    
-    let hours = parseInt(match[1]);
-    const minutes = match[2] ? parseInt(match[2]) : 0;
-    const period = match[3];
-    
-    // Convert to 24-hour format
-    if (period === 'pm' && hours !== 12) {
-      hours += 12;
-    } else if (period === 'am' && hours === 12) {
-      hours = 0;
-    }
-    
-    // Validate
-    if (hours < 6 || hours > 23 || minutes < 0 || minutes > 59) {
+    try {
+      if (!input) return null;
+      
+      let cleaned = input.toLowerCase().replace(/\s/g, '');
+      
+      const timeRegex = /^(\d{1,2}):?(\d{2})?(am|pm)?$/;
+      const match = cleaned.match(timeRegex);
+      
+      if (!match) return null;
+      
+      let hours = parseInt(match[1]);
+      const minutes = match[2] ? parseInt(match[2]) : 0;
+      const period = match[3];
+      
+      if (period === 'pm' && hours !== 12) {
+        hours += 12;
+      } else if (period === 'am' && hours === 12) {
+        hours = 0;
+      }
+      
+      if (hours < 6 || hours > 23 || minutes < 0 || minutes > 59) {
+        return null;
+      }
+      
+      const roundedMinutes = Math.round(minutes / 15) * 15;
+      const finalMinutes = roundedMinutes === 60 ? 0 : roundedMinutes;
+      const finalHours = roundedMinutes === 60 ? hours + 1 : hours;
+      
+      return `${finalHours.toString().padStart(2, '0')}:${finalMinutes.toString().padStart(2, '0')}`;
+    } catch (error) {
+      console.error('Error parsing time input:', error);
       return null;
     }
-    
-    // Round to nearest 15-minute increment
-    const roundedMinutes = Math.round(minutes / 15) * 15;
-    const finalMinutes = roundedMinutes === 60 ? 0 : roundedMinutes;
-    const finalHours = roundedMinutes === 60 ? hours + 1 : hours;
-    
-    return `${finalHours.toString().padStart(2, '0')}:${finalMinutes.toString().padStart(2, '0')}`;
   };
 
   useEffect(() => {
     if (user) {
       loadProfile();
+    } else {
+      setLoading(false);
+      setError('Please log in to manage your mentor profile');
     }
   }, [user]);
 
   const loadProfile = async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
+      if (!user?.uid) {
+        throw new Error('User ID is missing');
+      }
+
       const result = await getMentorProfile(user.uid);
+      
       if (result.success) {
         setProfile(result.profile);
         setHasProfile(true);
@@ -99,193 +126,296 @@ const MentorProfile = ({ user, mentorInfo }) => {
       }
     } catch (error) {
       console.error('Error loading profile:', error);
+      setError('Unable to load profile. Please refresh the page.');
     }
+    
     setLoading(false);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    setError(null);
+    setSuccessMessage(null);
 
     try {
+      // Validation
+      if (!profile.displayName?.trim()) {
+        throw new Error('Display name is required');
+      }
+      
+      if (!profile.bio?.trim()) {
+        throw new Error('Bio is required');
+      }
+      
+      if (!profile.rate || profile.rate < 10 || profile.rate > 500) {
+        throw new Error('Rate must be between $10 and $500');
+      }
+      
+      if (profile.experience < 0 || profile.experience > 50) {
+        throw new Error('Experience must be between 0 and 50 years');
+      }
+
+      if (!user?.uid) {
+        throw new Error('User information is missing. Please log in again.');
+      }
+
       if (hasProfile) {
         await updateDoc(doc(db, 'mentorProfiles', user.uid), {
           ...profile,
           updatedAt: new Date()
         });
-        alert('Mentor profile updated successfully!');
+        setSuccessMessage('Mentor profile updated successfully!');
       } else {
         const result = await createMentorProfile(user.uid, profile);
         if (result.success) {
           setHasProfile(true);
-          alert('Mentor profile created successfully!');
+          setSuccessMessage('Mentor profile created successfully!');
         } else {
-          alert('Error saving profile: ' + result.error);
+          throw new Error(result.error || 'Failed to create profile');
         }
       }
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(null), 5000);
+      
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Error saving profile');
+      setError(error.message || 'Error saving profile. Please try again.');
     }
 
     setSaving(false);
   };
 
   const handleChange = (field, value) => {
-    setProfile(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    try {
+      setProfile(prev => ({
+        ...prev,
+        [field]: value
+      }));
+      setError(null);
+    } catch (error) {
+      console.error('Error updating field:', error);
+      setError('Error updating profile field');
+    }
   };
 
   const handleAvailabilityChange = (day, field, value) => {
-    setProfile(prev => ({
-      ...prev,
-      availability: {
-        ...prev.availability,
-        weeklySchedule: {
-          ...prev.availability.weeklySchedule,
-          [day]: {
-            ...prev.availability.weeklySchedule[day],
-            [field]: value
+    try {
+      setProfile(prev => ({
+        ...prev,
+        availability: {
+          ...prev.availability,
+          weeklySchedule: {
+            ...prev.availability.weeklySchedule,
+            [day]: {
+              ...prev.availability.weeklySchedule[day],
+              [field]: value
+            }
           }
         }
-      }
-    }));
+      }));
+      setError(null);
+    } catch (error) {
+      console.error('Error updating availability:', error);
+      setError('Error updating availability');
+    }
   };
 
   const addTimeSlot = (day) => {
-    const currentSlots = profile.availability.weeklySchedule[day].slots || [];
-    // Default to a reasonable 3-hour block
-    const newSlot = { start: '09:00', end: '12:00' };
-    
-    setProfile(prev => ({
-      ...prev,
-      availability: {
-        ...prev.availability,
-        weeklySchedule: {
-          ...prev.availability.weeklySchedule,
-          [day]: {
-            ...prev.availability.weeklySchedule[day],
-            slots: [...currentSlots, newSlot]
+    try {
+      const currentSlots = profile.availability.weeklySchedule[day].slots || [];
+      const newSlot = { start: '09:00', end: '12:00' };
+      
+      setProfile(prev => ({
+        ...prev,
+        availability: {
+          ...prev.availability,
+          weeklySchedule: {
+            ...prev.availability.weeklySchedule,
+            [day]: {
+              ...prev.availability.weeklySchedule[day],
+              slots: [...currentSlots, newSlot]
+            }
           }
         }
-      }
-    }));
+      }));
+      setError(null);
+    } catch (error) {
+      console.error('Error adding time slot:', error);
+      setError('Error adding time slot');
+    }
   };
 
-  // Add preset time blocks
   const addPresetBlock = (day, preset) => {
-    const currentSlots = profile.availability.weeklySchedule[day].slots || [];
-    
-    const presets = {
-      morning: { start: '09:00', end: '12:00' },
-      afternoon: { start: '13:00', end: '17:00' },
-      evening: { start: '18:00', end: '21:00' },
-      fullDay: { start: '09:00', end: '17:00' }
-    };
-    
-    const newSlot = presets[preset];
-    
-    setProfile(prev => ({
-      ...prev,
-      availability: {
-        ...prev.availability,
-        weeklySchedule: {
-          ...prev.availability.weeklySchedule,
-          [day]: {
-            ...prev.availability.weeklySchedule[day],
-            slots: [...currentSlots, newSlot]
+    try {
+      const currentSlots = profile.availability.weeklySchedule[day].slots || [];
+      
+      const presets = {
+        morning: { start: '09:00', end: '12:00' },
+        afternoon: { start: '13:00', end: '17:00' },
+        evening: { start: '18:00', end: '21:00' },
+        fullDay: { start: '09:00', end: '17:00' }
+      };
+      
+      const newSlot = presets[preset];
+      
+      if (!newSlot) {
+        throw new Error('Invalid preset type');
+      }
+      
+      setProfile(prev => ({
+        ...prev,
+        availability: {
+          ...prev.availability,
+          weeklySchedule: {
+            ...prev.availability.weeklySchedule,
+            [day]: {
+              ...prev.availability.weeklySchedule[day],
+              slots: [...currentSlots, newSlot]
+            }
           }
         }
-      }
-    }));
+      }));
+      setError(null);
+    } catch (error) {
+      console.error('Error adding preset block:', error);
+      setError('Error adding preset time block');
+    }
   };
 
   const removeTimeSlot = (day, index) => {
-    const currentSlots = [...profile.availability.weeklySchedule[day].slots];
-    currentSlots.splice(index, 1);
-    
-    setProfile(prev => ({
-      ...prev,
-      availability: {
-        ...prev.availability,
-        weeklySchedule: {
-          ...prev.availability.weeklySchedule,
-          [day]: {
-            ...prev.availability.weeklySchedule[day],
-            slots: currentSlots
+    try {
+      const currentSlots = [...profile.availability.weeklySchedule[day].slots];
+      
+      if (index < 0 || index >= currentSlots.length) {
+        throw new Error('Invalid slot index');
+      }
+      
+      currentSlots.splice(index, 1);
+      
+      setProfile(prev => ({
+        ...prev,
+        availability: {
+          ...prev.availability,
+          weeklySchedule: {
+            ...prev.availability.weeklySchedule,
+            [day]: {
+              ...prev.availability.weeklySchedule[day],
+              slots: currentSlots
+            }
           }
         }
-      }
-    }));
+      }));
+      setError(null);
+    } catch (error) {
+      console.error('Error removing time slot:', error);
+      setError('Error removing time slot');
+    }
   };
 
   const updateTimeSlot = (day, index, field, value) => {
-    const currentSlots = [...profile.availability.weeklySchedule[day].slots];
-    currentSlots[index] = {
-      ...currentSlots[index],
-      [field]: value
-    };
-    
-    setProfile(prev => ({
-      ...prev,
-      availability: {
-        ...prev.availability,
-        weeklySchedule: {
-          ...prev.availability.weeklySchedule,
-          [day]: {
-            ...prev.availability.weeklySchedule[day],
-            slots: currentSlots
-          }
-        }
-      }
-    }));
-  };
-
-  // Copy slots from one day to selected days
-  const copySlotsToDay = (sourceDay, targetDay) => {
-    const sourceSlots = profile.availability.weeklySchedule[sourceDay].slots || [];
-    
-    setProfile(prev => ({
-      ...prev,
-      availability: {
-        ...prev.availability,
-        weeklySchedule: {
-          ...prev.availability.weeklySchedule,
-          [targetDay]: {
-            available: true,
-            slots: [...sourceSlots]
-          }
-        }
-      }
-    }));
-    
-    setCopyMenuOpen(null);
-  };
-
-  // Calculate visual timeline for a day (simplified)
-  const getTimelineBlocks = (slots) => {
-    if (!slots || slots.length === 0) return [];
-    
-    // Convert slots to percentage positions (6am = 0%, 11pm = 100%)
-    const startHour = 6;
-    const endHour = 23;
-    const totalHours = endHour - startHour;
-    
-    return slots.map(slot => {
-      const [startH, startM] = slot.start.split(':').map(Number);
-      const [endH, endM] = slot.end.split(':').map(Number);
+    try {
+      const currentSlots = [...profile.availability.weeklySchedule[day].slots];
       
-      const startOffset = (startH - startHour) + (startM / 60);
-      const endOffset = (endH - startHour) + (endM / 60);
+      if (index < 0 || index >= currentSlots.length) {
+        throw new Error('Invalid slot index');
+      }
       
-      return {
-        left: (startOffset / totalHours) * 100,
-        width: ((endOffset - startOffset) / totalHours) * 100
+      currentSlots[index] = {
+        ...currentSlots[index],
+        [field]: value
       };
-    });
+      
+      setProfile(prev => ({
+        ...prev,
+        availability: {
+          ...prev.availability,
+          weeklySchedule: {
+            ...prev.availability.weeklySchedule,
+            [day]: {
+              ...prev.availability.weeklySchedule[day],
+              slots: currentSlots
+            }
+          }
+        }
+      }));
+      setError(null);
+    } catch (error) {
+      console.error('Error updating time slot:', error);
+      setError('Error updating time slot');
+    }
   };
+
+  const copySlotsToDay = (sourceDay, targetDay) => {
+    try {
+      const sourceSlots = profile.availability.weeklySchedule[sourceDay].slots || [];
+      
+      if (!Array.isArray(sourceSlots)) {
+        throw new Error('Invalid source slots');
+      }
+      
+      setProfile(prev => ({
+        ...prev,
+        availability: {
+          ...prev.availability,
+          weeklySchedule: {
+            ...prev.availability.weeklySchedule,
+            [targetDay]: {
+              available: true,
+              slots: [...sourceSlots]
+            }
+          }
+        }
+      }));
+      
+      setCopyMenuOpen(null);
+      setError(null);
+    } catch (error) {
+      console.error('Error copying slots:', error);
+      setError('Error copying time slots');
+    }
+  };
+
+  const getTimelineBlocks = (slots) => {
+    try {
+      if (!slots || slots.length === 0) return [];
+      
+      const startHour = 6;
+      const endHour = 23;
+      const totalHours = endHour - startHour;
+      
+      return slots.map(slot => {
+        const [startH, startM] = slot.start.split(':').map(Number);
+        const [endH, endM] = slot.end.split(':').map(Number);
+        
+        if (isNaN(startH) || isNaN(startM) || isNaN(endH) || isNaN(endM)) {
+          return { left: 0, width: 0 };
+        }
+        
+        const startOffset = (startH - startHour) + (startM / 60);
+        const endOffset = (endH - startHour) + (endM / 60);
+        
+        return {
+          left: (startOffset / totalHours) * 100,
+          width: ((endOffset - startOffset) / totalHours) * 100
+        };
+      });
+    } catch (error) {
+      console.error('Error calculating timeline blocks:', error);
+      return [];
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="dashboard-container">
+        <div className="no-bookings">
+          <h3>Please log in</h3>
+          <p>You need to be logged in to manage your mentor profile.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -294,7 +424,6 @@ const MentorProfile = ({ user, mentorInfo }) => {
       </div>
     );
   }
-
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -303,6 +432,32 @@ const MentorProfile = ({ user, mentorInfo }) => {
           <p className="availability-description">Create your mentor profile to start receiving session requests</p>
         </div>
       </div>
+
+      {error && (
+        <div style={{
+          padding: '1rem',
+          margin: '1rem 0',
+          backgroundColor: '#fee2e2',
+          border: '1px solid #ef4444',
+          borderRadius: '8px',
+          color: '#991b1b'
+        }}>
+          {error}
+        </div>
+      )}
+
+      {successMessage && (
+        <div style={{
+          padding: '1rem',
+          margin: '1rem 0',
+          backgroundColor: '#d1fae5',
+          border: '1px solid #10b981',
+          borderRadius: '8px',
+          color: '#065f46'
+        }}>
+          {successMessage}
+        </div>
+      )}
 
       <div className="mentor-profile-tabs">
         <button 
@@ -329,7 +484,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
                 <label>Display Name *</label>
                 <input
                   type="text"
-                  value={profile.displayName}
+                  value={profile.displayName || ''}
                   onChange={(e) => handleChange('displayName', e.target.value)}
                   placeholder="How you appear to students"
                   required
@@ -340,7 +495,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
                 <label>Years of Experience *</label>
                 <input
                   type="number"
-                  value={profile.experience}
+                  value={profile.experience || 0}
                   onChange={(e) => handleChange('experience', parseInt(e.target.value) || 0)}
                   placeholder="Years"
                   min="0"
@@ -353,7 +508,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
             <div className="form-group">
               <label>Bio *</label>
               <textarea
-                value={profile.bio}
+                value={profile.bio || ''}
                 onChange={(e) => handleChange('bio', e.target.value)}
                 placeholder="Tell students about your background and experience..."
                 rows="4"
@@ -367,7 +522,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
                 <span className="currency">$</span>
                 <input
                   type="number"
-                  value={profile.rate}
+                  value={profile.rate || 35}
                   onChange={(e) => handleChange('rate', parseInt(e.target.value) || 35)}
                   placeholder="35"
                   min="10"
@@ -378,8 +533,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
             </div>
           </div>
         )}
-
-        {activeTab === 'availability' && (
+{activeTab === 'availability' && (
           <div className="profile-section">
             <div className="availability-header">
               <h3>Set Your Availability</h3>
@@ -411,7 +565,6 @@ const MentorProfile = ({ user, mentorInfo }) => {
                     
                     {isAvailable && (
                       <>
-                        {/* Visual Timeline */}
                         {slots.length > 0 && (
                           <div className="timeline-container">
                             <div className="timeline-bar">
@@ -469,7 +622,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
                                     <div className="time-input-group">
                                       <label className="time-label">From</label>
                                       <select
-                                        value={slot.start}
+                                        value={slot.start || '09:00'}
                                         onChange={(e) => updateTimeSlot(day, index, 'start', e.target.value)}
                                         className="time-select"
                                       >
@@ -484,7 +637,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
                                     <div className="time-input-group">
                                       <label className="time-label">Until</label>
                                       <select
-                                        value={slot.end}
+                                        value={slot.end || '12:00'}
                                         onChange={(e) => updateTimeSlot(day, index, 'end', e.target.value)}
                                         className="time-select"
                                       >
