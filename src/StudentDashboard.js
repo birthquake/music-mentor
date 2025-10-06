@@ -8,54 +8,75 @@ import {
   orderBy
 } from 'firebase/firestore';
 
-// Video access helper functions
+// Video access helper functions with error handling
 const canAccessVideoSession = (booking) => {
-  if (!booking.videoRoom || booking.status !== 'confirmed') {
-    return { canAccess: false, reason: 'not_available' };
+  try {
+    if (!booking.videoRoom || booking.status !== 'confirmed') {
+      return { canAccess: false, reason: 'not_available' };
+    }
+
+    const now = new Date();
+    const scheduledStart = booking.scheduledStart?.toDate ? booking.scheduledStart.toDate() : new Date(booking.scheduledStart);
+    const scheduledEnd = booking.scheduledEnd?.toDate ? booking.scheduledEnd.toDate() : new Date(booking.scheduledEnd);
+
+    // Validate dates
+    if (isNaN(scheduledStart.getTime()) || isNaN(scheduledEnd.getTime())) {
+      console.error('Invalid date in booking:', booking);
+      return { canAccess: false, reason: 'invalid_date' };
+    }
+
+    // Allow access 30 minutes before and 30 minutes after
+    const accessStart = new Date(scheduledStart.getTime() - 30 * 60 * 1000);
+    const accessEnd = new Date(scheduledEnd.getTime() + 30 * 60 * 1000);
+
+    if (now < accessStart) {
+      const minutesUntil = Math.floor((accessStart - now) / 60000);
+      return { 
+        canAccess: false, 
+        reason: 'too_early',
+        minutesUntil 
+      };
+    }
+
+    if (now > accessEnd) {
+      return { 
+        canAccess: false, 
+        reason: 'expired' 
+      };
+    }
+
+    return { canAccess: true };
+  } catch (error) {
+    console.error('Error checking video access:', error);
+    return { canAccess: false, reason: 'error' };
   }
-
-  const now = new Date();
-  const scheduledStart = booking.scheduledStart?.toDate ? booking.scheduledStart.toDate() : new Date(booking.scheduledStart);
-  const scheduledEnd = booking.scheduledEnd?.toDate ? booking.scheduledEnd.toDate() : new Date(booking.scheduledEnd);
-
-  // Allow access 30 minutes before and 30 minutes after
-  const accessStart = new Date(scheduledStart.getTime() - 30 * 60 * 1000);
-  const accessEnd = new Date(scheduledEnd.getTime() + 30 * 60 * 1000);
-
-  if (now < accessStart) {
-    const minutesUntil = Math.floor((accessStart - now) / 60000);
-    return { 
-      canAccess: false, 
-      reason: 'too_early',
-      minutesUntil 
-    };
-  }
-
-  if (now > accessEnd) {
-    return { 
-      canAccess: false, 
-      reason: 'expired' 
-    };
-  }
-
-  return { canAccess: true };
 };
 
 const getTimeUntilSession = (scheduledStart) => {
-  const start = scheduledStart?.toDate ? scheduledStart.toDate() : new Date(scheduledStart);
-  const now = new Date();
-  const diffMs = start - now;
-  
-  if (diffMs < 0) return 'Session started';
-  
-  const minutes = Math.floor(diffMs / 60000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  
-  if (days > 0) return `in ${days} day${days > 1 ? 's' : ''}`;
-  if (hours > 0) return `in ${hours} hour${hours > 1 ? 's' : ''}`;
-  if (minutes > 0) return `in ${minutes} minute${minutes > 1 ? 's' : ''}`;
-  return 'starting now';
+  try {
+    const start = scheduledStart?.toDate ? scheduledStart.toDate() : new Date(scheduledStart);
+    
+    if (isNaN(start.getTime())) {
+      return 'Time unavailable';
+    }
+    
+    const now = new Date();
+    const diffMs = start - now;
+    
+    if (diffMs < 0) return 'Session started';
+    
+    const minutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return `in ${days} day${days > 1 ? 's' : ''}`;
+    if (hours > 0) return `in ${hours} hour${hours > 1 ? 's' : ''}`;
+    if (minutes > 0) return `in ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    return 'starting now';
+  } catch (error) {
+    console.error('Error calculating time until session:', error);
+    return 'Time unavailable';
+  }
 };
 
 // Icons
@@ -94,32 +115,53 @@ const UserIcon = () => (
     <circle cx="12" cy="7" r="4"></circle>
   </svg>
 );
-
-// Student Booking Card Component (with Video Support)
+// Student Booking Card Component (with Video Support and Error Handling)
 const StudentBookingCard = ({ booking }) => {
   const formatDate = (timestamp) => {
-    if (!timestamp) return 'Just now';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    try {
+      if (!timestamp) return 'Just now';
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      if (isNaN(date.getTime())) return 'Date unavailable';
+      return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Date unavailable';
+    }
   };
 
   const formatSessionTime = (start, end) => {
-    if (!start) return '';
-    const startDate = start.toDate ? start.toDate() : new Date(start);
-    const endDate = end?.toDate ? end.toDate() : new Date(end);
-    
-    return `${startDate.toLocaleDateString()} at ${startDate.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    })} - ${endDate.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    })}`;
+    try {
+      if (!start) return '';
+      const startDate = start.toDate ? start.toDate() : new Date(start);
+      const endDate = end?.toDate ? end.toDate() : new Date(end);
+      
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return 'Time unavailable';
+      }
+      
+      return `${startDate.toLocaleDateString()} at ${startDate.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })} - ${endDate.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })}`;
+    } catch (error) {
+      console.error('Error formatting session time:', error);
+      return 'Time unavailable';
+    }
   };
 
   const handleJoinVideo = () => {
-    if (booking.videoRoom?.meetingUrl) {
+    try {
+      if (!booking.videoRoom?.meetingUrl) {
+        alert('Video link is not available. Please contact your mentor.');
+        return;
+      }
       window.open(booking.videoRoom.meetingUrl, '_blank');
+    } catch (error) {
+      console.error('Error joining video:', error);
+      alert('Unable to open video session. Please try again.');
     }
   };
 
@@ -179,10 +221,10 @@ const StudentBookingCard = ({ booking }) => {
       <div className="booking-header">
         <div className="mentor-info">
           <div className="mentor-avatar">
-            {booking.mentorName.split(' ').map(n => n[0]).join('')}
+            {booking.mentorName ? booking.mentorName.split(' ').map(n => n[0]).join('') : 'M'}
           </div>
           <div className="mentor-details">
-            <h4>{booking.mentorName}</h4>
+            <h4>{booking.mentorName || 'Mentor'}</h4>
             <p className="booking-date">
               <CalendarIcon />
               Booked {formatDate(booking.createdAt)}
@@ -201,7 +243,7 @@ const StudentBookingCard = ({ booking }) => {
             </div>
           )}
           
-          {!booking.scheduledStart && (
+          {!booking.scheduledStart && booking.preferredTime && (
             <div className="detail-item">
               <ClockIcon />
               <span>Preferred time: {booking.preferredTime}</span>
@@ -215,14 +257,16 @@ const StudentBookingCard = ({ booking }) => {
             </div>
           )}
           <div className="detail-item">
-            <span className="price-tag">${booking.rate} for 15 minutes</span>
+            <span className="price-tag">${booking.rate || 0} for 15 minutes</span>
           </div>
         </div>
 
-        <div className="your-question">
-          <h5>Your Question:</h5>
-          <p>"{booking.message}"</p>
-        </div>
+        {booking.message && (
+          <div className="your-question">
+            <h5>Your Question:</h5>
+            <p>"{booking.message}"</p>
+          </div>
+        )}
 
         {/* Video Access Section */}
         {booking.status === 'confirmed' && booking.videoRoom && (
@@ -251,6 +295,16 @@ const StudentBookingCard = ({ booking }) => {
                     Video session has ended
                   </span>
                 )}
+                {videoAccess.reason === 'invalid_date' && (
+                  <span style={{ color: 'var(--text-secondary)' }}>
+                    Session time unavailable
+                  </span>
+                )}
+                {videoAccess.reason === 'error' && (
+                  <span style={{ color: 'var(--text-secondary)' }}>
+                    Unable to check video access
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -259,14 +313,14 @@ const StudentBookingCard = ({ booking }) => {
         {booking.status === 'confirmed' && !booking.videoRoom && booking.videoPreferred && (
           <div className="next-steps">
             <h5>Next Steps:</h5>
-            <p>🎉 Your session is confirmed! Video call details will be available once your mentor finalizes the setup.</p>
+            <p>Your session is confirmed! Video call details will be available once your mentor finalizes the setup.</p>
           </div>
         )}
 
         {booking.status === 'confirmed' && !booking.videoPreferred && (
           <div className="next-steps">
             <h5>Next Steps:</h5>
-            <p>🎉 Your session is confirmed! Your mentor will reach out with details for your session.</p>
+            <p>Your session is confirmed! Your mentor will reach out with details for your session.</p>
           </div>
         )}
       </div>
@@ -287,64 +341,107 @@ const StudentStatsCard = ({ title, value, subtitle, icon }) => (
     </div>
   </div>
 );
-
-// Main Student Dashboard Component
+       // Main Student Dashboard Component with Error Handling
 const StudentDashboard = ({ user }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!user) {
       console.log('No user found for student dashboard');
+      setLoading(false);
+      return;
+    }
+
+    if (!user.uid) {
+      console.error('User missing UID');
+      setError('User information is incomplete. Please log in again.');
+      setLoading(false);
       return;
     }
 
     console.log('Loading bookings for user:', user.uid);
 
-    // Query bookings for this user
-    const q = collection(db, 'bookings');
+    try {
+      // Query bookings for this user
+      const q = collection(db, 'bookings');
 
-    const unsubscribe = onSnapshot(q, 
-      (querySnapshot) => {
-        console.log('Student query snapshot received, size:', querySnapshot.size);
-        const bookingData = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          
-          // Filter for this user's bookings
-          if (data.userId === user.uid) {
-            bookingData.push({
-              id: doc.id,
-              ...data
+      const unsubscribe = onSnapshot(
+        q, 
+        (querySnapshot) => {
+          try {
+            console.log('Student query snapshot received, size:', querySnapshot.size);
+            const bookingData = [];
+            
+            querySnapshot.forEach((doc) => {
+              try {
+                const data = doc.data();
+                
+                // Filter for this user's bookings
+                if (data.userId === user.uid) {
+                  bookingData.push({
+                    id: doc.id,
+                    ...data
+                  });
+                }
+              } catch (docError) {
+                console.error('Error processing booking document:', doc.id, docError);
+              }
             });
+            
+            // Sort by most recent first
+            try {
+              bookingData.sort((a, b) => {
+                const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+                const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+                return dateB - dateA;
+              });
+            } catch (sortError) {
+              console.error('Error sorting bookings:', sortError);
+            }
+            
+            console.log('Total bookings for this user:', bookingData.length);
+            setBookings(bookingData);
+            setError(null);
+            setLoading(false);
+          } catch (snapshotError) {
+            console.error('Error processing snapshot:', snapshotError);
+            setError('Error loading bookings. Please refresh the page.');
+            setLoading(false);
           }
-        });
-        
-        // Sort by most recent first
-        bookingData.sort((a, b) => {
-          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-          return dateB - dateA;
-        });
-        
-        console.log('Total bookings for this user:', bookingData.length);
-        setBookings(bookingData);
-        setLoading(false);
-      },
-      (error) => {
-        console.error('Error getting student bookings:', error);
-        setLoading(false);
-      }
-    );
+        },
+        (error) => {
+          console.error('Error getting student bookings:', error);
+          setError('Unable to load bookings. Please check your connection and try again.');
+          setLoading(false);
+        }
+      );
 
-    return () => unsubscribe();
+      return () => {
+        try {
+          unsubscribe();
+        } catch (unsubError) {
+          console.error('Error unsubscribing:', unsubError);
+        }
+      };
+    } catch (error) {
+      console.error('Error setting up bookings listener:', error);
+      setError('Failed to connect to bookings. Please refresh the page.');
+      setLoading(false);
+    }
   }, [user]);
 
   const filteredBookings = bookings.filter(booking => {
-    if (filter === 'all') return true;
-    if (filter === 'active') return booking.status === 'pending' || booking.status === 'confirmed';
-    return booking.status === filter;
+    try {
+      if (filter === 'all') return true;
+      if (filter === 'active') return booking.status === 'pending' || booking.status === 'confirmed';
+      return booking.status === filter;
+    } catch (error) {
+      console.error('Error filtering booking:', booking, error);
+      return false;
+    }
   });
 
   const stats = {
@@ -354,6 +451,17 @@ const StudentDashboard = ({ user }) => {
     total: bookings.length
   };
 
+  if (!user) {
+    return (
+      <div className="dashboard-container">
+        <div className="no-bookings">
+          <h3>Please log in</h3>
+          <p>You need to be logged in to view your bookings.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -361,7 +469,6 @@ const StudentDashboard = ({ user }) => {
       </div>
     );
   }
-
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -370,6 +477,19 @@ const StudentDashboard = ({ user }) => {
           <p>Track your mentorship sessions and learning progress</p>
         </div>
       </div>
+
+      {error && (
+        <div style={{
+          padding: '1rem',
+          margin: '1rem 0',
+          backgroundColor: '#fee2e2',
+          border: '1px solid #ef4444',
+          borderRadius: '8px',
+          color: '#991b1b'
+        }}>
+          {error}
+        </div>
+      )}
 
       {/* Stats Section */}
       <div className="stats-grid">
