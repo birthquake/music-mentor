@@ -1,4 +1,4 @@
-// CalendarBooking.js - Step-by-step calendar booking
+// CalendarBooking.js - Step-by-step calendar booking with error handling
 
 import React, { useState, useEffect } from 'react';
 import { getMentorBookings, checkSlotAvailability } from './availabilitySystem';
@@ -51,7 +51,6 @@ const Toggle = ({ checked, onChange, label }) => (
     </label>
   </div>
 );
-
 // Step 1: Date Selection Component
 const DateSelection = ({ availableDates, onSelectDate, onBack }) => {
   return (
@@ -217,18 +216,26 @@ const BookingDetails = ({
 const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   // All hooks at the top
   const [availableSlots, setAvailableSlots] = useState([]);
-  const [step, setStep] = useState('dates'); // 'dates', 'times', 'details'
+  const [step, setStep] = useState('dates');
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [message, setMessage] = useState('');
   const [videoPreferred, setVideoPreferred] = useState(false);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Load mentor availability from Firestore with FIXED slot generation
+  // Load mentor availability from Firestore with error handling
   const loadMentorAvailability = async () => {
     setLoading(true);
+    setError(null);
+    
     try {
+      // Validate mentor data
+      if (!mentor?.userId && !mentor?.id) {
+        throw new Error('Mentor information is missing');
+      }
+
       const profileResult = await getMentorProfile(mentor.userId || mentor.id);
       
       if (!profileResult.success) {
@@ -252,47 +259,44 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
       const slots = [];
       const today = new Date();
       const endDate = new Date(today);
-      endDate.setDate(endDate.getDate() + 21); // 3 weeks
-      const now = new Date(); // Current time for filtering
+      endDate.setDate(endDate.getDate() + 21);
+      const now = new Date();
 
-      // Loop through each day in the next 3 weeks
       for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
         const dayName = d.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
         const daySchedule = weeklySchedule[dayName];
         
-        // If this day is available and has time blocks
         if (daySchedule?.available && daySchedule.slots?.length > 0) {
           daySchedule.slots.forEach((timeBlock) => {
-            const [startHour, startMin] = timeBlock.start.split(':').map(Number);
-            const [endHour, endMin] = timeBlock.end.split(':').map(Number);
-            
-            // Create start and end times for this time block
-            const blockStart = new Date(d);
-            blockStart.setHours(startHour, startMin, 0, 0);
-            
-            const blockEnd = new Date(d);
-            blockEnd.setHours(endHour, endMin, 0, 0);
-            
-            // Generate 15-minute slots within this time block
-            let currentSlotStart = new Date(blockStart);
-            
-            while (currentSlotStart < blockEnd) {
-              const currentSlotEnd = new Date(currentSlotStart);
-              currentSlotEnd.setMinutes(currentSlotStart.getMinutes() + 15);
+            try {
+              const [startHour, startMin] = timeBlock.start.split(':').map(Number);
+              const [endHour, endMin] = timeBlock.end.split(':').map(Number);
               
-              // Only include if the slot END time is in the future
-              // This allows booking slots that have started but not ended
-              if (currentSlotEnd > now) {
-                slots.push({
-                  slotId: `${d.toDateString()}-${currentSlotStart.getHours()}-${currentSlotStart.getMinutes()}`,
-                  start: new Date(currentSlotStart),
-                  end: new Date(currentSlotEnd),
-                  available: true
-                });
+              const blockStart = new Date(d);
+              blockStart.setHours(startHour, startMin, 0, 0);
+              
+              const blockEnd = new Date(d);
+              blockEnd.setHours(endHour, endMin, 0, 0);
+              
+              let currentSlotStart = new Date(blockStart);
+              
+              while (currentSlotStart < blockEnd) {
+                const currentSlotEnd = new Date(currentSlotStart);
+                currentSlotEnd.setMinutes(currentSlotStart.getMinutes() + 15);
+                
+                if (currentSlotEnd > now) {
+                  slots.push({
+                    slotId: `${d.toDateString()}-${currentSlotStart.getHours()}-${currentSlotStart.getMinutes()}`,
+                    start: new Date(currentSlotStart),
+                    end: new Date(currentSlotEnd),
+                    available: true
+                  });
+                }
+                
+                currentSlotStart.setMinutes(currentSlotStart.getMinutes() + 15);
               }
-              
-              // Move to next 15-minute slot
-              currentSlotStart.setMinutes(currentSlotStart.getMinutes() + 15);
+            } catch (slotError) {
+              console.error('Error processing time slot:', timeBlock, slotError);
             }
           });
         }
@@ -300,22 +304,27 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
 
       console.log(`Generated ${slots.length} 15-minute slots`);
 
-      // Sort slots by time
       const sortedSlots = slots.sort((a, b) => a.start - b.start);
       
-      // Check against existing bookings
-      const existingBookings = await getMentorBookings(mentor.id.toString());
-      const checkedSlots = checkSlotAvailability(sortedSlots, existingBookings);
-      
-      // Only show available slots
-      const availableOnly = checkedSlots.filter(slot => slot.available);
-      console.log(`${availableOnly.length} slots available after checking bookings`);
-      setAvailableSlots(availableOnly);
+      // Check against existing bookings with error handling
+      try {
+        const existingBookings = await getMentorBookings(mentor.id.toString());
+        const checkedSlots = checkSlotAvailability(sortedSlots, existingBookings);
+        const availableOnly = checkedSlots.filter(slot => slot.available);
+        console.log(`${availableOnly.length} slots available after checking bookings`);
+        setAvailableSlots(availableOnly);
+      } catch (bookingError) {
+        console.error('Error checking existing bookings:', bookingError);
+        // Still show slots even if we can't check bookings
+        setAvailableSlots(sortedSlots);
+      }
       
     } catch (error) {
-      console.error('Error loading mentor availability from Firestore:', error);
+      console.error('Error loading mentor availability:', error);
+      setError('Unable to load availability. Please try again.');
       setAvailableSlots([]);
     }
+    
     setLoading(false);
   };
 
@@ -338,7 +347,7 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
 
     return Object.keys(grouped)
       .sort((a, b) => new Date(a) - new Date(b))
-      .slice(0, 14) // Show max 14 days
+      .slice(0, 14)
       .map(dateKey => ({
         date: new Date(dateKey),
         slots: grouped[dateKey]
@@ -369,23 +378,40 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
 
   const handleBooking = async (e) => {
     e.preventDefault();
-    if (!selectedTime || !message.trim()) return;
+    
+    // Validation
+    if (!selectedTime || !message.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    if (!user?.uid || !user?.email) {
+      alert('User information is missing. Please log in again.');
+      return;
+    }
+
+    if (!mentor?.id || !mentor?.name) {
+      alert('Mentor information is missing. Please try again.');
+      return;
+    }
 
     setBookingLoading(true);
+    setError(null);
+    
     try {
       await addDoc(collection(db, 'bookings'), {
-        mentorId: mentor?.id,
-        mentorName: mentor?.name,
-        userId: user?.uid,
-        userEmail: user?.email,
-        studentName: user?.displayName || user?.email,
-        message,
+        mentorId: mentor.id,
+        mentorName: mentor.name,
+        userId: user.uid,
+        userEmail: user.email,
+        studentName: user.displayName || user.email,
+        message: message.trim(),
         videoPreferred,
         status: 'pending',
         createdAt: serverTimestamp(),
         scheduledStart: selectedTime.start,
         scheduledEnd: selectedTime.end,
-        rate: mentor?.rate,
+        rate: mentor.rate,
         bookingType: 'scheduled',
         preferredTime: selectedTime.start.toLocaleString('en-US', {
           weekday: 'long',
@@ -402,11 +428,15 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
         minute: '2-digit', 
         hour12: true 
       });
+      
       onConfirm(`Requested for ${timeStr}`, message, videoPreferred);
+      
     } catch (error) {
       console.error('Error creating booking:', error);
+      setError('Failed to create booking. Please check your connection and try again.');
       alert('Error creating booking. Please try again.');
     }
+    
     setBookingLoading(false);
   };
 
@@ -432,6 +462,19 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
             </span>
           </div>
         </div>
+
+        {error && (
+          <div style={{
+            padding: '1rem',
+            margin: '1rem',
+            backgroundColor: '#fee2e2',
+            border: '1px solid #ef4444',
+            borderRadius: '8px',
+            color: '#991b1b'
+          }}>
+            {error}
+          </div>
+        )}
 
         {loading ? (
           <div className="loading-slots">Loading available times...</div>
