@@ -7,6 +7,7 @@ import {
   ButtonSpinner, 
   FullPageLoading 
 } from './LoadingComponents';
+import './MentorProfile.css';
 
 const MentorProfile = ({ user, mentorInfo }) => {
   const [profile, setProfile] = useState(DEFAULT_MENTOR_PROFILE);
