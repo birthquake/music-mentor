@@ -402,16 +402,20 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     return titles[activeFilter] || 'Bookings';
   };
 
-  if (!mentorInfo) {
-    return (
-      <div className="dashboard-container">
-        <div className="not-mentor">
-          <h2>Access Restricted</h2>
-          <p>This dashboard is only available to registered mentors.</p>
-        </div>
+  if (loading) {
+  return <FullPageLoading message="Loading dashboard..." />;
+}
+
+if (!mentorInfo) {
+  return (
+    <div className="dashboard-container">
+      <div className="not-mentor">
+        <h2>Access Restricted</h2>
+        <p>This dashboard is only available to registered mentors.</p>
       </div>
-    );
-  }
+    </div>
+  );
+}
   
 return (
   <div className="dashboard-container">
