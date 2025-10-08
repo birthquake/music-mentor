@@ -14,6 +14,11 @@ import {
 } from 'firebase/firestore';
 import { confirmBookingWithVideo } from './bookingVideoHelpers';
 import { getVideoRoomStatus, canAccessVideoSession, getSessionTimeStatus } from './bookingVideoHelpers';
+import { 
+  ButtonSpinner, 
+  SkeletonGrid,
+  SkeletonStatsCard 
+} from './LoadingComponents';
 
 // Icons
 const ClockIcon = () => (
@@ -248,15 +253,15 @@ const BookingCard = ({ booking, onAccept, onDecline }) => {
             className="decline-btn"
             disabled={loading}
           >
-            <XIcon />
-            Decline
+            {loading ? <ButtonSpinner /> : <XIcon />}
+            {loading ? 'Declining...' : 'Decline'}
           </button>
           <button 
             onClick={handleAccept}
             className="accept-btn"
             disabled={loading}
           >
-            <CheckIcon />
+            {loading ? <ButtonSpinner /> : <CheckIcon />}
             {loading ? 'Accepting...' : 'Accept Session'}
           </button>
         </div>
@@ -435,32 +440,41 @@ const MentorDashboard = ({ user, mentorInfo }) => {
       </div>
 
       {/* Stats Section */}
-      <div className="stats-grid">
-        <StatsCard
-          title="Pending Requests"
-          value={stats.pending}
-          subtitle="Need your review"
-          icon={<ClockIcon />}
-        />
-        <StatsCard
-          title="Confirmed Sessions"
-          value={stats.confirmed}
-          subtitle="Ready to go"
-          icon={<CheckIcon />}
-        />
-        <StatsCard
-          title="This Month"
-          value={stats.thisMonth}
-          subtitle="Total requests"
-          icon={<CalendarIcon />}
-        />
-        <StatsCard
-          title="All Time"
-          value={stats.total}
-          subtitle="Total bookings"
-          icon={<VideoIcon />}
-        />
-      </div>
+      {loading ? (
+        <div className="stats-grid">
+          <SkeletonStatsCard />
+          <SkeletonStatsCard />
+          <SkeletonStatsCard />
+          <SkeletonStatsCard />
+        </div>
+      ) : (
+        <div className="stats-grid">
+          <StatsCard
+            title="Pending Requests"
+            value={stats.pending}
+            subtitle="Need your review"
+            icon={<ClockIcon />}
+          />
+          <StatsCard
+            title="Confirmed Sessions"
+            value={stats.confirmed}
+            subtitle="Ready to go"
+            icon={<CheckIcon />}
+          />
+          <StatsCard
+            title="This Month"
+            value={stats.thisMonth}
+            subtitle="Total requests"
+            icon={<CalendarIcon />}
+          />
+          <StatsCard
+            title="All Time"
+            value={stats.total}
+            subtitle="Total bookings"
+            icon={<VideoIcon />}
+          />
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="filter-tabs">
@@ -487,7 +501,7 @@ const MentorDashboard = ({ user, mentorInfo }) => {
       {/* Bookings List */}
       <div className="bookings-section">
         {loading ? (
-          <div className="loading-bookings">Loading your bookings...</div>
+          <SkeletonGrid count={3} />
         ) : filteredBookings.length === 0 ? (
           <div className="no-bookings">
             <h3>No {filter === 'all' ? '' : filter} bookings yet</h3>
