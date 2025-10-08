@@ -12,6 +12,7 @@ import {
   SkeletonGrid,
   SkeletonStatsCard 
 } from './LoadingComponents';
+import './MentorDashboard.css';  // ← ADD THIS LINE
 
 // Video access helper functions with error handling
 const canAccessVideoSession = (booking) => {
