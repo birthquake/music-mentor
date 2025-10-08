@@ -24,13 +24,11 @@ const canAccessVideoSession = (booking) => {
     const scheduledStart = booking.scheduledStart?.toDate ? booking.scheduledStart.toDate() : new Date(booking.scheduledStart);
     const scheduledEnd = booking.scheduledEnd?.toDate ? booking.scheduledEnd.toDate() : new Date(booking.scheduledEnd);
 
-    // Validate dates
     if (isNaN(scheduledStart.getTime()) || isNaN(scheduledEnd.getTime())) {
       console.error('Invalid date in booking:', booking);
       return { canAccess: false, reason: 'invalid_date' };
     }
 
-    // Allow access 30 minutes before and 30 minutes after
     const accessStart = new Date(scheduledStart.getTime() - 30 * 60 * 1000);
     const accessEnd = new Date(scheduledEnd.getTime() + 30 * 60 * 1000);
 
@@ -84,29 +82,29 @@ const getTimeUntilSession = (scheduledStart) => {
   }
 };
 
-// Icons
+// Icons - Bigger for consistency
 const ClockIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <circle cx="12" cy="12" r="10"></circle>
     <polyline points="12,6 12,12 16,14"></polyline>
   </svg>
 );
 
 const VideoIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <polygon points="23 7 16 12 23 17 23 7"></polygon>
     <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
   </svg>
 );
 
 const CheckIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <polyline points="20,6 9,17 4,12"></polyline>
   </svg>
 );
 
 const CalendarIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
     <line x1="16" y1="2" x2="16" y2="6"></line>
     <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -115,12 +113,20 @@ const CalendarIcon = () => (
 );
 
 const UserIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
     <circle cx="12" cy="7" r="4"></circle>
   </svg>
 );
-// Student Booking Card Component (with Video Support and Error Handling)
+
+const TrendingUpIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+    <polyline points="17 6 23 6 23 12"></polyline>
+  </svg>
+);
+
+// Student Booking Card Component
 const StudentBookingCard = ({ booking }) => {
   const [joiningVideo, setJoiningVideo] = useState(false);
 
@@ -167,7 +173,6 @@ const StudentBookingCard = ({ booking }) => {
       }
       setJoiningVideo(true);
       window.open(booking.videoRoom.meetingUrl, '_blank');
-      // Reset after a short delay
       setTimeout(() => setJoiningVideo(false), 2000);
     } catch (error) {
       console.error('Error joining video:', error);
@@ -279,7 +284,6 @@ const StudentBookingCard = ({ booking }) => {
           </div>
         )}
 
-        {/* Video Access Section */}
         {booking.status === 'confirmed' && booking.videoRoom && (
           <div className="video-access-section">
             {videoAccess.canAccess ? (
@@ -345,25 +349,28 @@ const StudentBookingCard = ({ booking }) => {
     </div>
   );
 };
-
-// Stats Component for Students
-const StudentStatsCard = ({ title, value, subtitle, icon }) => (
-  <div className="stats-card">
-    <div className="stats-icon">
+// Clickable Stats Component - Clean design like mentor dashboard
+const StudentStatsCard = ({ title, value, icon, color, onClick, isActive }) => (
+  <button 
+    className={`stats-card ${isActive ? 'active' : ''}`}
+    style={{ '--card-accent': color }}
+    onClick={onClick}
+  >
+    <div className="stats-icon" style={{ background: color }}>
       {icon}
     </div>
     <div className="stats-content">
-      <h3>{value}</h3>
-      <p className="stats-title">{title}</p>
-      {subtitle && <p className="stats-subtitle">{subtitle}</p>}
+      <div className="stats-value">{value}</div>
+      <div className="stats-title">{title}</div>
     </div>
-  </div>
+  </button>
 );
-       // Main Student Dashboard Component with Error Handling
+
+// Main Student Dashboard Component
 const StudentDashboard = ({ user }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState('pending');
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -380,24 +387,19 @@ const StudentDashboard = ({ user }) => {
       return;
     }
 
-    console.log('Loading bookings for user:', user.uid);
-
     try {
-      // Query bookings for this user
       const q = collection(db, 'bookings');
 
       const unsubscribe = onSnapshot(
         q, 
         (querySnapshot) => {
           try {
-            console.log('Student query snapshot received, size:', querySnapshot.size);
             const bookingData = [];
             
             querySnapshot.forEach((doc) => {
               try {
                 const data = doc.data();
                 
-                // Filter for this user's bookings
                 if (data.userId === user.uid) {
                   bookingData.push({
                     id: doc.id,
@@ -409,7 +411,6 @@ const StudentDashboard = ({ user }) => {
               }
             });
             
-            // Sort by most recent first
             try {
               bookingData.sort((a, b) => {
                 const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
@@ -420,7 +421,6 @@ const StudentDashboard = ({ user }) => {
               console.error('Error sorting bookings:', sortError);
             }
             
-            console.log('Total bookings for this user:', bookingData.length);
             setBookings(bookingData);
             setError(null);
             setLoading(false);
@@ -451,22 +451,35 @@ const StudentDashboard = ({ user }) => {
     }
   }, [user]);
 
+  const stats = {
+    pending: bookings.filter(b => b.status === 'pending').length,
+    confirmed: bookings.filter(b => b.status === 'confirmed').length,
+    completed: bookings.filter(b => b.status === 'completed').length,
+    total: bookings.length
+  };
+
+  // Filter bookings based on active stat card
   const filteredBookings = bookings.filter(booking => {
     try {
-      if (filter === 'all') return true;
-      if (filter === 'active') return booking.status === 'pending' || booking.status === 'confirmed';
-      return booking.status === filter;
+      if (activeFilter === 'pending') return booking.status === 'pending';
+      if (activeFilter === 'confirmed') return booking.status === 'confirmed';
+      if (activeFilter === 'completed') return booking.status === 'completed';
+      return true; // 'all' shows everything
     } catch (error) {
       console.error('Error filtering booking:', booking, error);
       return false;
     }
   });
 
-  const stats = {
-    pending: bookings.filter(b => b.status === 'pending').length,
-    confirmed: bookings.filter(b => b.status === 'confirmed').length,
-    completed: bookings.filter(b => b.status === 'completed').length,
-    total: bookings.length
+  // Get section title based on active filter
+  const getSectionTitle = () => {
+    const titles = {
+      pending: 'Awaiting Response',
+      confirmed: 'Confirmed Sessions',
+      completed: 'Completed Sessions',
+      all: 'All Sessions'
+    };
+    return titles[activeFilter] || 'Your Sessions';
   };
 
   if (!user) {
@@ -526,71 +539,53 @@ const StudentDashboard = ({ user }) => {
         </div>
       )}
 
-      {/* Stats Section */}
+      {/* Clickable Stats Grid */}
       <div className="stats-grid">
         <StudentStatsCard
           title="Awaiting Response"
           value={stats.pending}
-          subtitle="Mentors reviewing"
           icon={<ClockIcon />}
+          color="#f59e0b"
+          onClick={() => setActiveFilter('pending')}
+          isActive={activeFilter === 'pending'}
         />
         <StudentStatsCard
           title="Confirmed Sessions"
           value={stats.confirmed}
-          subtitle="Ready to learn"
           icon={<CheckIcon />}
+          color="#10b981"
+          onClick={() => setActiveFilter('confirmed')}
+          isActive={activeFilter === 'confirmed'}
         />
         <StudentStatsCard
           title="Completed"
           value={stats.completed}
-          subtitle="Learning wins"
-          icon={<UserIcon />}
+          icon={<TrendingUpIcon />}
+          color="#8b5cf6"
+          onClick={() => setActiveFilter('completed')}
+          isActive={activeFilter === 'completed'}
         />
         <StudentStatsCard
           title="Total Sessions"
           value={stats.total}
-          subtitle="Your journey"
-          icon={<VideoIcon />}
+          icon={<CalendarIcon />}
+          color="#3b82f6"
+          onClick={() => setActiveFilter('all')}
+          isActive={activeFilter === 'all'}
         />
       </div>
 
-      {/* Filter Tabs */}
-      <div className="filter-tabs">
-        <button 
-          className={filter === 'active' ? 'active' : ''}
-          onClick={() => setFilter('active')}
-        >
-          Active ({stats.pending + stats.confirmed})
-        </button>
-        <button 
-          className={filter === 'pending' ? 'active' : ''}
-          onClick={() => setFilter('pending')}
-        >
-          Pending ({stats.pending})
-        </button>
-        <button 
-          className={filter === 'confirmed' ? 'active' : ''}
-          onClick={() => setFilter('confirmed')}
-        >
-          Confirmed ({stats.confirmed})
-        </button>
-        <button 
-          className={filter === 'all' ? 'active' : ''}
-          onClick={() => setFilter('all')}
-        >
-          All Sessions ({stats.total})
-        </button>
-      </div>
-
-      {/* Bookings List */}
+      {/* Bookings List - Filtered by active card */}
       <div className="bookings-section">
+        <h2 className="section-heading">{getSectionTitle()}</h2>
+        
         {filteredBookings.length === 0 ? (
           <div className="no-bookings">
-            <h3>No {filter === 'all' ? '' : filter} sessions yet</h3>
+            <h3>No {activeFilter === 'all' ? '' : getSectionTitle().toLowerCase()} yet</h3>
             <p>
               {stats.total === 0 
                 ? "Ready to start learning? Browse mentors and book your first session!"
-                : `No ${filter} sessions found. Check other tabs or book another session!`
+                : `No ${activeFilter} sessions found. Try clicking a different stat card!`
               }
             </p>
           </div>
