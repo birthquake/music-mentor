@@ -82,7 +82,7 @@ const getTimeUntilSession = (scheduledStart) => {
   }
 };
 
-// Icons - Bigger for consistency
+// Icons
 const ClockIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <circle cx="12" cy="12" r="10"></circle>
@@ -349,7 +349,8 @@ const StudentBookingCard = ({ booking }) => {
     </div>
   );
 };
-// Clickable Stats Component - Clean design like mentor dashboard
+
+// Clickable Stats Component
 const StudentStatsCard = ({ title, value, icon, color, onClick, isActive }) => (
   <button 
     className={`stats-card ${isActive ? 'active' : ''}`}
@@ -494,13 +495,13 @@ const StudentDashboard = ({ user }) => {
   }
 
   if (loading) {
-return (
-  <div className="dashboard-container">
-    <div className="dashboard-header">
-      <div className="student-welcome">
-        <h1>Hi, {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'there'}!</h1>
-      </div>
-    </div>
+    return (
+      <div className="dashboard-container">
+        <div className="dashboard-header">
+          <div className="student-welcome">
+            <h1>Hi, {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'there'}!</h1>
+          </div>
+        </div>
 
         <div className="stats-grid">
           <SkeletonStatsCard />
@@ -520,8 +521,7 @@ return (
     <div className="dashboard-container">
       <div className="dashboard-header">
         <div className="student-welcome">
-          <h1>Your Music Learning Journey</h1>
-          <p>Track your mentorship sessions and learning progress</p>
+          <h1>Hi, {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'there'}!</h1>
         </div>
       </div>
 
