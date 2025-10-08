@@ -631,12 +631,33 @@ function App() {
       setUser(user);
       
       // Check if user is a mentor
-      if (user) {
-        const mentor = SAMPLE_MENTORS.find(m => m.email === user.email);
-        setMentorInfo(mentor || null);
+      // Check if user is a mentor by fetching from mentorProfiles
+if (user) {
+  const fetchMentorProfile = async () => {
+    try {
+      const mentorProfileRef = doc(db, 'mentorProfiles', user.uid);
+      const mentorProfileSnap = await getDoc(mentorProfileRef);
+      
+      if (mentorProfileSnap.exists()) {
+        const profileData = mentorProfileSnap.data();
+        setMentorInfo({
+          id: user.uid,
+          displayName: profileData.displayName,
+          ...profileData
+        });
       } else {
         setMentorInfo(null);
       }
+    } catch (error) {
+      console.error('Error fetching mentor profile:', error);
+      setMentorInfo(null);
+    }
+  };
+  
+  fetchMentorProfile();
+} else {
+  setMentorInfo(null);
+}
       
       setLoading(false);
     });
