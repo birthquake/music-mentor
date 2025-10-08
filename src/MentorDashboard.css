@@ -1,993 +1,846 @@
-/* ============================================
-   MentorProfile.css - BLOCK 1 of 6
-   Profile Tabs & Header Styling
-   ============================================ */
+/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
+/* Section 1/5: Root Variables & Base Layout */
 
-/* Profile Tabs Container */
-.mentor-profile-tabs {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-2xl);
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 0;
+:root {
+  /* Background Colors */
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-elevated: #374151;
+  --bg-hover: #4b5563;
+  --bg-card: #1f2937;
+  
+  /* Text Colors */
+  --text-primary: #f9fafb;
+  --text-secondary: #e5e7eb;
+  --text-muted: #9ca3af;
+  --text-subtle: #6b7280;
+  
+  /* Accent Colors */
+  --accent-blue: #3b82f6;
+  --accent-blue-hover: #2563eb;
+  --accent-blue-light: #60a5fa;
+  --accent-green: #10b981;
+  --accent-green-hover: #059669;
+  --accent-green-light: #34d399;
+  --accent-purple: #8b5cf6;
+  --accent-purple-hover: #7c3aed;
+  --accent-orange: #f59e0b;
+  --accent-orange-hover: #d97706;
+  
+  /* Status Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+  
+  /* Border & Shadow */
+  --border-color: #374151;
+  --border-hover: #4b5563;
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
 }
 
-/* Individual Tab Button */
-.mentor-tab {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 1rem;
-  font-weight: 600;
-  padding: var(--spacing-md) var(--spacing-lg);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  letter-spacing: 0.3px;
+* {
+  box-sizing: border-box;
 }
 
-.mentor-tab:hover {
+body {
+  background: var(--bg-primary);
   color: var(--text-primary);
-  background: var(--bg-secondary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Active Tab State */
-.mentor-tab.active {
-  color: var(--accent-blue);
-  background: var(--bg-card);
-  font-weight: 700;
+/* Dashboard Container */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  min-height: 80vh;
 }
 
-.mentor-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--accent-blue);
+/* Dashboard Header */
+.dashboard-header {
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* Profile Form Container */
-.profile-form {
+.mentor-welcome h1,
+.student-welcome h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.mentor-welcome p,
+.student-welcome p {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+.availability-description {
+  color: var(--text-secondary) !important;
+  font-size: 1rem !important;
+}
+
+/* Not Mentor Message */
+.not-mentor {
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-xl);
   background: var(--bg-card);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-2xl);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-md);
 }
 
-/* Profile Section (for each tab content) */
-.profile-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
-}
-
-.profile-section h3 {
+.not-mentor h2 {
   color: var(--text-primary);
-  font-size: 1.5rem;
+  margin-bottom: var(--spacing-md);
+  font-size: 1.75rem;
   font-weight: 700;
-  margin: 0 0 var(--spacing-md) 0;
-  letter-spacing: -0.5px;
 }
 
-/* Availability Header */
-.availability-header {
-  margin-bottom: var(--spacing-lg);
-}
-
-.availability-header h3 {
-  color: var(--text-primary);
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 var(--spacing-sm) 0;
-  letter-spacing: -0.5px;
-}
-
-.availability-header .availability-description {
+.not-mentor p {
   color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 1.125rem;
   margin: 0;
 }
 
-/* END OF BLOCK 1 - Copy this entire block to your MentorProfile.css file */
-/* ============================================
-   MentorProfile.css - BLOCK 2 of 6
-   Form Groups & Input Styling
-   ============================================ */
+/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
+/* Section 2/5: Stats Cards & Grid */
 
-/* Form Grid Layout (2 columns for side-by-side inputs) */
-.form-grid {
+/* Stats Grid */
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .form-grid {
-    grid-template-columns: 1fr;
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
   }
 }
 
-/* Individual Form Group */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
 }
 
-.form-group label {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0;
+@media (min-width: 1400px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 900px;
+  }
 }
 
-/* Text Inputs */
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group input[type="email"] {
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 1rem;
-  padding: 0.875rem 1rem;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: var(--accent-blue);
-  background: var(--bg-elevated);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-group input:hover:not(:focus) {
-  border-color: var(--border-hover);
-}
-
-.form-group input::placeholder {
-  color: var(--text-subtle);
-}
-
-/* Textarea */
-.form-group textarea {
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 1rem;
-  padding: 0.875rem 1rem;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  resize: vertical;
-  min-height: 120px;
-  line-height: 1.6;
-}
-
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--accent-blue);
-  background: var(--bg-elevated);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-group textarea:hover:not(:focus) {
-  border-color: var(--border-hover);
-}
-
-.form-group textarea::placeholder {
-  color: var(--text-subtle);
-}
-
-/* Price Input with Dollar Sign */
-.price-input {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.price-input .currency {
-  position: absolute;
-  left: 1rem;
-  color: var(--text-muted);
-  font-size: 1rem;
-  font-weight: 600;
-  pointer-events: none;
-}
-
-.price-input input {
-  padding-left: 2.25rem !important;
-}
-
-/* Number Input Arrows (Style them to match theme) */
-.form-group input[type="number"]::-webkit-inner-spin-button,
-.form-group input[type="number"]::-webkit-outer-spin-button {
-  opacity: 1;
-  height: 40px;
-}
-
-/* END OF BLOCK 2 - Copy this entire block below Block 1 */
-/* ============================================
-   MentorProfile.css - BLOCK 3 of 6
-   Availability Grid & Day Cards
-   ============================================ */
-
-/* Availability Grid - Shows all 7 days */
-.availability-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-}
-
-/* Individual Day Card */
-.day-card {
-  background: var(--bg-elevated);
-  border: 2px solid var(--border-color);
+/* Clickable Stats Card */
+.stats-card {
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  transition: all 0.3s ease;
-}
-
-.day-card.available {
-  border-color: var(--accent-green);
-  background: var(--bg-secondary);
-}
-
-.day-card.unavailable {
-  opacity: 0.6;
-}
-
-.day-card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-/* Day Card Header (Title + Toggle) */
-.day-card-header {
+  padding: var(--spacing-2xl);
+  border: 2px solid var(--border-color);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
-}
-
-.day-title {
-  color: var(--text-primary);
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: -0.3px;
-}
-
-/* Toggle Switch Styling */
-.toggle-switch {
+  gap: var(--spacing-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-lg);
   position: relative;
-  display: inline-block;
-  width: 56px;
-  height: 28px;
-}
-
-.toggle-input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
+  overflow: hidden;
   cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: var(--bg-hover);
-  transition: 0.3s;
-  border-radius: 28px;
-  border: 2px solid var(--border-color);
+  height: 4px;
+  background: var(--card-accent, var(--accent-blue));
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 2px;
-  bottom: 2px;
-  background: white;
-  transition: 0.3s;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+.stats-card:hover {
+  background: var(--bg-elevated);
+  border-color: var(--card-accent, var(--accent-blue));
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
 }
 
-.toggle-input:checked + .toggle-slider {
-  background: var(--accent-green);
-  border-color: var(--accent-green);
+.stats-card:hover::before {
+  opacity: 1;
 }
 
-.toggle-input:checked + .toggle-slider:before {
-  transform: translateX(28px);
+.stats-card.active {
+  background: var(--bg-elevated);
+  border-color: var(--card-accent, var(--accent-blue));
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
 }
 
-.toggle-input:focus + .toggle-slider {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+.stats-card.active::before {
+  opacity: 1;
 }
 
-/* Unavailable Message */
-.unavailable-message {
-  text-align: center;
-  padding: var(--spacing-lg);
-}
-
-.unavailable-text {
-  color: var(--text-muted);
-  font-size: 0.9375rem;
-  margin: 0;
-  font-style: italic;
-}
-
-/* Empty Slots State */
-.empty-slots {
-  text-align: center;
-  padding: var(--spacing-xl) var(--spacing-lg);
-  background: var(--bg-primary);
-  border-radius: var(--radius-md);
-  border: 2px dashed var(--border-color);
-}
-
-.empty-slots-text {
-  color: var(--text-muted);
-  font-size: 0.9375rem;
-  margin: 0 0 var(--spacing-lg) 0;
-}
-
-/* Preset Buttons Container */
-.preset-buttons {
+.stats-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-lg);
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  align-items: center;
   justify-content: center;
-}
-
-.preset-btn {
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.preset-btn:hover {
-  background: var(--accent-blue);
-  border-color: var(--accent-blue);
   color: white;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease;
 }
 
-/* END OF BLOCK 3 - Copy this entire block below Block 2 */
-/* ============================================
-   MentorProfile.css - BLOCK 4 of 6
-   Time Slots & Timeline Visualization
-   ============================================ */
-
-/* Time Slots Container */
-.time-slots-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+.stats-card:hover .stats-icon,
+.stats-card.active .stats-icon {
+  transform: scale(1.1);
 }
 
-/* Individual Time Slot List */
-.slots-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-/* Time Slot Item */
-.time-slot-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  background: var(--bg-primary);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-md);
-  border: 2px solid var(--border-color);
-}
-
-/* Time Inputs Container */
-.time-inputs {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
+.stats-content {
   flex: 1;
-  flex-wrap: wrap;
+  min-width: 0;
 }
 
-.time-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  flex: 1;
-  min-width: 140px;
+.stats-value {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -2px;
 }
 
-.time-label {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
+.stats-title {
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin: var(--spacing-sm) 0 0 0;
+  font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.time-select {
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-md);
+/* Section Heading */
+.section-heading {
   color: var(--text-primary);
-  font-size: 0.9375rem;
-  padding: 0.625rem 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-xl) 0;
+  letter-spacing: -0.5px;
+}
+/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
+/* Section 3/5: Bookings Section & Cards */
+
+/* Bookings Section */
+.bookings-section {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
 }
 
-.time-select:hover {
-  border-color: var(--border-hover);
+.loading-bookings {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-muted);
+  font-size: 1.125rem;
 }
 
-.time-select:focus {
-  outline: none;
+.no-bookings {
+  text-align: center;
+  padding: var(--spacing-2xl);
+}
+
+.no-bookings h3 {
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.no-bookings p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.bookings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Booking Card */
+.booking-card,
+.student-booking-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  background: var(--bg-elevated);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.booking-card::before,
+.student-booking-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent-blue);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.booking-card:hover,
+.student-booking-card:hover {
   border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
-.time-separator {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  font-weight: 500;
-  align-self: flex-end;
-  padding-bottom: 0.625rem;
+.booking-card:hover::before,
+.student-booking-card:hover::before {
+  opacity: 1;
 }
 
-/* Remove Time Slot Button */
-.remove-slot-btn {
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  color: var(--text-muted);
-  width: 36px;
-  height: 36px;
+/* Booking Header */
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+
+.booking-user,
+.mentor-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+  min-width: 0;
+}
+
+.user-avatar,
+.mentor-avatar {
+  width: 52px;
+  height: 52px;
+  background: var(--accent-purple);
+  color: white;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-weight: 700;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+  text-transform: uppercase;
+}
+
+.user-info,
+.mentor-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-info h4,
+.mentor-details h4 {
+  color: var(--text-primary);
+  font-weight: 700;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.booking-date {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Status Info */
+.status-info {
+  text-align: right;
+}
+
+.status-description {
+  margin-top: var(--spacing-sm);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  max-width: 220px;
+  line-height: 1.5;
+}
+
+/* Booking Details */
+.booking-details,
+.booking-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.booking-preferences,
+.session-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.preference-item,
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.preference-item svg,
+.detail-item svg {
+  color: var(--accent-blue);
   flex-shrink: 0;
 }
 
-.remove-slot-btn:hover {
-  background: var(--error);
-  border-color: var(--error);
-  color: white;
-  transform: scale(1.1);
-}
-
-/* Timeline Visualization */
-.timeline-container {
-  margin-bottom: var(--spacing-lg);
-  padding: var(--spacing-md);
-  background: var(--bg-primary);
-  border-radius: var(--radius-md);
-}
-
-.timeline-bar {
-  position: relative;
-  height: 24px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  margin-bottom: var(--spacing-sm);
-}
-
-.timeline-block {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  background: var(--accent-green);
-  border-radius: var(--radius-sm);
-  transition: all 0.3s ease;
-}
-
-.timeline-labels {
-  display: flex;
-  justify-content: space-between;
-  color: var(--text-subtle);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-/* Slot Actions (Add + Copy buttons) */
-.slot-actions {
-  display: flex;
-  gap: var(--spacing-sm);
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.add-slot-btn {
-  background: var(--bg-secondary);
-  border: 2px solid var(--accent-blue);
-  color: var(--accent-blue);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  transition: all 0.2s ease;
-}
-
-.add-slot-btn:hover {
+.preference-item .rate,
+.price-tag {
   background: var(--accent-blue);
   color: white;
-  transform: translateY(-2px);
+  padding: 0.375rem 1rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.8125rem;
   box-shadow: var(--shadow-sm);
 }
 
-/* Copy Menu */
-.copy-menu-container {
-  position: relative;
-}
-
-.copy-slots-btn {
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  transition: all 0.2s ease;
-}
-
-.copy-slots-btn:hover {
+.session-time-highlight {
   background: var(--bg-elevated);
-  border-color: var(--border-hover);
-  color: var(--text-primary);
-}
-
-.copy-dropdown {
-  position: absolute;
-  top: calc(100% + var(--spacing-xs));
-  left: 0;
-  background: var(--bg-elevated);
-  border: 2px solid var(--border-color);
+  padding: var(--spacing-md);
   border-radius: var(--radius-md);
-  padding: var(--spacing-sm);
-  box-shadow: var(--shadow-lg);
-  z-index: 100;
-  min-width: 140px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.copy-option {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
+  border: 2px solid var(--accent-green);
   width: 100%;
-  text-align: left;
-  transition: all 0.2s ease;
 }
 
-.copy-option:hover {
-  background: var(--accent-blue);
-  color: white;
-}
-
-/* END OF BLOCK 4 - Copy this entire block below Block 3 */
-/* ============================================
-   MentorProfile.css - BLOCK 5 of 6
-   Buttons, Form Actions & Tips Section
-   ============================================ */
-
-/* Form Actions Container (Save button area) */
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-2xl);
-  padding-top: var(--spacing-xl);
-  border-top: 2px solid var(--border-color);
-}
-
-/* Save Profile Button */
-.save-profile-btn {
-  background: var(--accent-green);
-  border: none;
-  color: white;
-  padding: 1rem 2.5rem;
+/* Booking Message */
+.booking-message,
+.your-question {
+  background: var(--bg-secondary);
+  padding: var(--spacing-lg);
   border-radius: var(--radius-md);
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.booking-message h5,
+.your-question h5 {
+  color: var(--text-muted);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.booking-message p,
+.your-question p {
+  color: var(--text-primary);
+  font-style: italic;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.9375rem;
+}
+/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
+/* Section 4/5: Buttons, Actions & Video */
+
+/* Booking Actions */
+.booking-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.accept-btn,
+.decline-btn,
+.join-video-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
+  padding: 0.875rem 1.75rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.9375rem;
+  box-shadow: var(--shadow-sm);
   letter-spacing: 0.3px;
-  min-width: 180px;
 }
 
-.save-profile-btn:hover:not(:disabled) {
+.accept-btn {
+  background: var(--accent-green);
+  color: white;
+}
+
+.accept-btn:hover:not(:disabled) {
   background: var(--accent-green-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
-.save-profile-btn:active:not(:disabled) {
-  transform: translateY(0);
+.decline-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
 }
 
-.save-profile-btn:disabled {
-  opacity: 0.6;
+.decline-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--error);
+  transform: translateY(-2px);
+}
+
+.accept-btn:disabled,
+.decline-btn:disabled,
+.join-video-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
-/* Availability Tips Section */
-.availability-tips {
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  margin-top: var(--spacing-xl);
+/* Next Steps Section */
+.next-steps {
+  background: rgba(16, 185, 129, 0.1);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--accent-green);
 }
 
-.tips-title {
-  color: var(--text-primary);
-  font-size: 1.125rem;
+.next-steps h5 {
+  color: var(--accent-green);
   font-weight: 700;
-  margin: 0 0 var(--spacing-md) 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.tips-title::before {
-  content: '💡';
-  font-size: 1.25rem;
-}
-
-.tips-list {
-  list-style: none;
-  padding: 0;
+.next-steps p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 0.9375rem;
   margin: 0;
+}
+
+/* Video Access Section */
+.video-access-section {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+.video-ready {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
 }
 
-.tips-list li {
-  color: var(--text-secondary);
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  padding-left: var(--spacing-lg);
-  position: relative;
+.join-video-btn {
+  background: var(--accent-blue);
+  color: white;
 }
 
-.tips-list li::before {
-  content: '→';
-  position: absolute;
-  left: 0;
-  color: var(--accent-blue);
-  font-weight: 700;
+.join-video-btn:hover:not(:disabled) {
+  background: var(--accent-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
-/* Success/Error Messages (already inline styled, but adding classes for consistency) */
-.success-message {
-  padding: 1rem;
-  margin: 1rem 0;
-  background-color: #d1fae5;
-  border: 2px solid var(--accent-green);
-  border-radius: var(--radius-md);
-  color: #065f46;
-  font-weight: 600;
+.video-status {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-}
-
-.error-message {
-  padding: 1rem;
-  margin: 1rem 0;
-  background-color: #fee2e2;
-  border: 2px solid var(--error);
+  padding: var(--spacing-md);
   border-radius: var(--radius-md);
-  color: #991b1b;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  font-size: 0.875rem;
 }
 
-/* Loading State for Save Button */
-.save-profile-btn .button-spinner {
-  width: 20px;
-  height: 20px;
+.video-unavailable {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid var(--error);
 }
 
-/* Focus States for Accessibility */
-.save-profile-btn:focus-visible,
-.add-slot-btn:focus-visible,
-.copy-slots-btn:focus-visible,
-.preset-btn:focus-visible {
+.video-locked,
+.video-waiting {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.session-time {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: var(--spacing-xs) 0 0 0;
+}
+
+/* Scrollbar Styling */
+.date-grid::-webkit-scrollbar,
+.time-grid::-webkit-scrollbar,
+.calendar-view::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.date-grid::-webkit-scrollbar-track,
+.time-grid::-webkit-scrollbar-track,
+.calendar-view::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 3px;
+}
+
+.date-grid::-webkit-scrollbar-thumb,
+.time-grid::-webkit-scrollbar-thumb,
+.calendar-view::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.date-grid::-webkit-scrollbar-thumb:hover,
+.time-grid::-webkit-scrollbar-thumb:hover,
+.calendar-view::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
+/* Section 5/5: Responsive Design (FINAL) */
+
+/* Tablet Responsive */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .mentor-welcome h1,
+  .student-welcome h1 {
+    font-size: 2rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .stats-card {
+    padding: var(--spacing-xl);
+    gap: var(--spacing-lg);
+  }
+
+  .stats-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .stats-value {
+    font-size: 2.75rem;
+  }
+
+  .stats-title {
+    font-size: 0.8125rem;
+  }
+
+  .booking-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+  }
+
+  .status-info {
+    text-align: left;
+    width: 100%;
+  }
+
+  .status-description {
+    max-width: 100%;
+  }
+
+  .booking-actions {
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .accept-btn,
+  .decline-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .session-details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+
+  .mentor-welcome h1,
+  .student-welcome h1 {
+    font-size: 1.75rem;
+  }
+
+  .mentor-welcome p,
+  .student-welcome p {
+    font-size: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .stats-card {
+    padding: var(--spacing-lg);
+  }
+
+  .stats-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .stats-value {
+    font-size: 2.25rem;
+  }
+
+  .section-heading {
+    font-size: 1.5rem;
+  }
+
+  .booking-card,
+  .student-booking-card {
+    padding: var(--spacing-lg);
+  }
+
+  .user-avatar,
+  .mentor-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+
+  .booking-preferences {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .booking-actions {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .accept-btn,
+  .decline-btn,
+  .join-video-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 360px) {
+  .dashboard-container {
+    padding: var(--spacing-md) var(--spacing-xs);
+  }
+
+  .mentor-welcome h1,
+  .student-welcome h1 {
+    font-size: 1.5rem;
+  }
+
+  .stats-value {
+    font-size: 2rem;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1400px) {
+  .dashboard-container {
+    max-width: 1400px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Focus & Accessibility */
+*:focus-visible {
   outline: 2px solid var(--accent-blue);
   outline-offset: 2px;
 }
 
-/* END OF BLOCK 5 - Copy this entire block below Block 4 */
-/* ============================================
-   MentorProfile.css - BLOCK 6 of 6 (FINAL)
-   Responsive Design for Tablets & Mobile
-   ============================================ */
-
-/* Tablet Responsive (768px and below) */
-@media (max-width: 768px) {
-  /* Profile Form */
-  .profile-form {
-    padding: var(--spacing-xl);
-  }
-
-  /* Tabs */
-  .mentor-profile-tabs {
-    gap: var(--spacing-sm);
-  }
-
-  .mentor-tab {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: 0.9375rem;
-  }
-
-  /* Form Grid - Stack to single column */
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* Section Headings */
-  .profile-section h3,
-  .availability-header h3 {
-    font-size: 1.25rem;
-  }
-
-  /* Time Slot Item */
-  .time-slot-item {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .time-inputs {
-    flex-direction: column;
-  }
-
-  .time-input-group {
-    min-width: 100%;
-  }
-
-  .time-separator {
-    align-self: center;
-    padding: 0;
-    font-size: 0.8125rem;
-  }
-
-  .remove-slot-btn {
-    align-self: flex-end;
-  }
-
-  /* Slot Actions */
-  .slot-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .add-slot-btn,
-  .copy-slots-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Copy Dropdown */
-  .copy-dropdown {
-    left: 0;
-    right: 0;
-    width: 100%;
-  }
-
-  /* Form Actions */
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .save-profile-btn {
-    width: 100%;
-  }
-}
-
-/* Mobile Responsive (480px and below) */
-@media (max-width: 480px) {
-  /* Profile Form */
-  .profile-form {
-    padding: var(--spacing-lg);
-  }
-
-  /* Tabs - Stack if needed */
-  .mentor-profile-tabs {
-    flex-wrap: wrap;
-  }
-
-  .mentor-tab {
-    flex: 1;
-    min-width: 120px;
-    padding: var(--spacing-sm);
-    font-size: 0.875rem;
-  }
-
-  /* Section Headings */
-  .profile-section h3,
-  .availability-header h3 {
-    font-size: 1.125rem;
-  }
-
-  .availability-header .availability-description {
-    font-size: 0.9375rem;
-  }
-
-  /* Day Card */
-  .day-card {
-    padding: var(--spacing-lg);
-  }
-
-  .day-title {
-    font-size: 1.125rem;
-  }
-
-  /* Preset Buttons - Full width on mobile */
-  .preset-buttons {
-    flex-direction: column;
-  }
-
-  .preset-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Timeline */
-  .timeline-container {
-    padding: var(--spacing-sm);
-  }
-
-  .timeline-bar {
-    height: 20px;
-  }
-
-  /* Time Slot Item */
-  .time-slot-item {
-    padding: var(--spacing-sm);
-  }
-
-  .time-select {
-    font-size: 0.875rem;
-    padding: 0.5rem 0.75rem;
-  }
-
-  /* Remove Button */
-  .remove-slot-btn {
-    width: 32px;
-    height: 32px;
-  }
-
-  /* Availability Tips */
-  .availability-tips {
-    padding: var(--spacing-lg);
-  }
-
-  .tips-title {
-    font-size: 1rem;
-  }
-
-  .tips-list li {
-    font-size: 0.875rem;
-    padding-left: var(--spacing-md);
-  }
-
-  /* Save Button */
-  .save-profile-btn {
-    padding: 0.875rem 1.5rem;
-    font-size: 0.9375rem;
-  }
-}
-
-/* Extra Small Devices (360px and below) */
-@media (max-width: 360px) {
-  .profile-form {
-    padding: var(--spacing-md);
-  }
-
-  .day-card {
-    padding: var(--spacing-md);
-  }
-
-  .mentor-tab {
-    font-size: 0.8125rem;
-    padding: var(--spacing-xs) var(--spacing-sm);
-  }
-
-  .day-title {
-    font-size: 1rem;
-  }
-
-  .toggle-switch {
-    width: 48px;
-    height: 24px;
-  }
-
-  .toggle-slider:before {
-    height: 16px;
-    width: 16px;
-  }
-
-  .toggle-input:checked + .toggle-slider:before {
-    transform: translateX(24px);
-  }
-}
-
-/* Print Styles */
-@media print {
-  .mentor-profile-tabs {
-    display: none;
-  }
-
-  .form-actions {
-    display: none;
-  }
-
-  .profile-form {
-    box-shadow: none;
-    border: 1px solid #ccc;
-  }
-
-  .day-card {
-    break-inside: avoid;
-  }
-}
-
-/* Reduced Motion Preferences */
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -998,5 +851,21 @@
   }
 }
 
-/* END OF BLOCK 6 - COMPLETE! 🎉 
-   All 6 blocks are now done. Your MentorProfile.css is complete! */
+/* Print Styles */
+@media print {
+  .booking-actions {
+    display: none;
+  }
+
+  .dashboard-container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .booking-card,
+  .student-booking-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #333;
+  }
+}
