@@ -1,3 +1,8 @@
+/* ============================================
+   App.js - SECTION 1 of 7
+   Imports & Icon Components
+   ============================================ */
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { auth, db } from './firebase';
@@ -56,6 +61,12 @@ const UserIcon = () => (
   </svg>
 );
 
+/* END OF SECTION 1 - Copy this section to your App.js */
+/* ============================================
+   App.js - SECTION 2 of 7
+   Sample Mentors Data & Auth Modal Component
+   ============================================ */
+
 // Sample mentors data
 const SAMPLE_MENTORS = [
   {
@@ -111,6 +122,7 @@ const SAMPLE_MENTORS = [
     tags: ["Booking", "Contracts", "Marketing", "Revenue"]
   }
 ];
+
 // Auth Modal Component
 const AuthModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -199,7 +211,14 @@ const AuthModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
-// Updated Header Component for App.js
+
+/* END OF SECTION 2 - Copy this below Section 1 */
+/* ============================================
+   App.js - SECTION 3 of 7
+   Header Component & Dashboard Link Styles
+   ============================================ */
+
+// Header Component
 const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -287,7 +306,8 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
     </header>
   );
 };
-// Add CSS for dashboard link
+
+// Dashboard Link Styles
 const dashboardLinkStyles = `
 .dashboard-link {
   color: white;
@@ -340,6 +360,13 @@ if (typeof document !== 'undefined') {
   styleSheet.textContent = dashboardLinkStyles;
   document.head.appendChild(styleSheet);
 }
+
+/* END OF SECTION 3 - Copy this below Section 2 */
+/* ============================================
+   App.js - SECTION 4 of 7
+   Mentor Card & Booking Modal Components
+   ============================================ */
+
 // Mentor Card Component
 const MentorCard = ({ mentor, onBook, user }) => {
   const renderStars = (rating) => {
@@ -400,6 +427,7 @@ const MentorCard = ({ mentor, onBook, user }) => {
     </div>
   );
 };
+
 // Booking Modal Component  
 const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
   const [selectedTime, setSelectedTime] = useState('');
@@ -413,21 +441,21 @@ const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
     
     try {
       // Save booking to Firestore with profile integration
-const result = await createBookingWithProfiles({
-  mentorId: mentor.id,
-  mentorName: mentor.name,
-  userId: user.uid,
-  userEmail: user.email,
-  preferredTime: selectedTime,
-  message,
-  videoPreferred,
-  status: 'pending',
-  rate: mentor.rate
-});
+      const result = await createBookingWithProfiles({
+        mentorId: mentor.id,
+        mentorName: mentor.name,
+        userId: user.uid,
+        userEmail: user.email,
+        preferredTime: selectedTime,
+        message,
+        videoPreferred,
+        status: 'pending',
+        rate: mentor.rate
+      });
 
-if (!result.success) {
-  throw new Error(result.error);
-}
+      if (!result.success) {
+        throw new Error(result.error);
+      }
       
       onConfirm(selectedTime, message, videoPreferred);
       
@@ -513,8 +541,15 @@ if (!result.success) {
     </div>
   );
 };
+
+/* END OF SECTION 4 - Copy this below Section 3 */
+/* ============================================
+   App.js - SECTION 5 of 7
+   Homepage Component
+   ============================================ */
+
 // Homepage Component
-  const Homepage = ({ user, onAuthClick }) => {
+const Homepage = ({ user, onAuthClick }) => {
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);  
   const [selectedMentor, setSelectedMentor] = useState(null);
@@ -522,13 +557,13 @@ if (!result.success) {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-  const loadMentors = async () => {
-    const enhancedMentors = await getEnhancedMentors();
-    setMentors(enhancedMentors);
-    setLoading(false);
-  };
-  loadMentors();
-}, []);
+    const loadMentors = async () => {
+      const enhancedMentors = await getEnhancedMentors();
+      setMentors(enhancedMentors);
+      setLoading(false);
+    };
+    loadMentors();
+  }, []);
 
   const handleBookMentor = (mentor) => {
     if (!user) {
@@ -593,31 +628,38 @@ if (!result.success) {
         </section>
 
         <section className="mentors-grid">
-  {loading ? (
-    <div>Loading mentors...</div>
-  ) : (
-    filteredMentors.map(mentor => (
-      <MentorCard 
-        key={mentor.id}
-        mentor={mentor}
-        onBook={handleBookMentor}
-        user={user}
-      />
-    ))
-  )}
-</section>
+          {loading ? (
+            <div>Loading mentors...</div>
+          ) : (
+            filteredMentors.map(mentor => (
+              <MentorCard 
+                key={mentor.id}
+                mentor={mentor}
+                onBook={handleBookMentor}
+                user={user}
+              />
+            ))
+          )}
+        </section>
       </div>
 
       <CalendarBooking
-  mentor={selectedMentor}
-  isOpen={showBookingModal}
-  onClose={() => setShowBookingModal(false)}
-  onConfirm={handleConfirmBooking}
-  user={user}
-/>
+        mentor={selectedMentor}
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        onConfirm={handleConfirmBooking}
+        user={user}
+      />
     </main>
   );
 };
+
+/* END OF SECTION 5 - Copy this below Section 4 */
+/* ============================================
+   App.js - SECTION 6 of 7
+   Main App Component with FIXED User Profile Loading
+   ============================================ */
+
 // Main App Component
 function App() {
   const [user, setUser] = useState(null);
@@ -625,39 +667,63 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [mentorInfo, setMentorInfo] = useState(null);
 
-  // Auth state listener
+  // Auth state listener with FIXED student profile loading
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-      
-      // Check if user is a mentor
-      // Check if user is a mentor by fetching from mentorProfiles
-if (user) {
-  const fetchMentorProfile = async () => {
-    try {
-      const mentorProfileRef = doc(db, 'mentorProfiles', user.uid);
-      const mentorProfileSnap = await getDoc(mentorProfileRef);
-      
-      if (mentorProfileSnap.exists()) {
-        const profileData = mentorProfileSnap.data();
-        setMentorInfo({
-          id: user.uid,
-          displayName: profileData.displayName,
-          ...profileData
-        });
+    const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
+      if (authUser) {
+        // First, try to load mentor profile
+        try {
+          const mentorProfileRef = doc(db, 'mentorProfiles', authUser.uid);
+          const mentorProfileSnap = await getDoc(mentorProfileRef);
+          
+          if (mentorProfileSnap.exists()) {
+            // User is a mentor
+            const profileData = mentorProfileSnap.data();
+            setMentorInfo({
+              id: authUser.uid,
+              displayName: profileData.displayName,
+              ...profileData
+            });
+            
+            // Set user with mentor data
+            setUser({
+              ...authUser,
+              displayName: profileData.displayName
+            });
+          } else {
+            // Not a mentor, try to load student profile
+            setMentorInfo(null);
+            
+            try {
+              const userProfileRef = doc(db, 'userProfiles', authUser.uid);
+              const userProfileSnap = await getDoc(userProfileRef);
+              
+              if (userProfileSnap.exists()) {
+                // User has a student profile
+                const profileData = userProfileSnap.data();
+                setUser({
+                  ...authUser,
+                  displayName: profileData.displayName || profileData.name || authUser.email
+                });
+              } else {
+                // No profile exists yet
+                setUser(authUser);
+              }
+            } catch (error) {
+              console.error('Error fetching user profile:', error);
+              setUser(authUser);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching mentor profile:', error);
+          setMentorInfo(null);
+          setUser(authUser);
+        }
       } else {
+        // User signed out
+        setUser(null);
         setMentorInfo(null);
       }
-    } catch (error) {
-      console.error('Error fetching mentor profile:', error);
-      setMentorInfo(null);
-    }
-  };
-  
-  fetchMentorProfile();
-} else {
-  setMentorInfo(null);
-}
       
       setLoading(false);
     });
@@ -710,14 +776,14 @@ if (user) {
               />
             } 
           />
-  <Route 
-  path="/profile" 
-  element={<UserProfile user={user} />} 
-/>
-<Route 
-  path="/mentor-profile" 
-  element={<MentorProfile user={user} mentorInfo={mentorInfo} />} 
-/>
+          <Route 
+            path="/profile" 
+            element={<UserProfile user={user} />} 
+          />
+          <Route 
+            path="/mentor-profile" 
+            element={<MentorProfile user={user} mentorInfo={mentorInfo} />} 
+          />
           <Route 
             path="/my-bookings" 
             element={
@@ -737,4 +803,35 @@ if (user) {
   );
 }
 
+/* END OF SECTION 6 - Copy this below Section 5 */
+/* ============================================
+   App.js - SECTION 7 of 7 (FINAL)
+   Export Statement
+   ============================================ */
+
 export default App;
+
+/* ============================================
+   🎉 COMPLETE! All 7 sections done!
+   
+   Your App.js should now have:
+   ✅ Section 1: Imports & Icons
+   ✅ Section 2: Sample Mentors & Auth Modal
+   ✅ Section 3: Header Component & Styles
+   ✅ Section 4: Mentor Card & Booking Modal
+   ✅ Section 5: Homepage Component
+   ✅ Section 6: Main App Component (FIXED)
+   ✅ Section 7: Export
+   
+   KEY FIXES IN THIS VERSION:
+   - Student profile loading from userProfiles collection
+   - Uses displayName field for students
+   - Proper fallback handling
+   - Should fix "Hi, corktapp" issue
+   
+   DEPLOY & TEST:
+   1. Deploy to Vercel/your hosting
+   2. Hard refresh (Ctrl+Shift+R)
+   3. Check student dashboard name
+   4. Check if stats grid appears
+   ============================================ */
