@@ -17,7 +17,8 @@ import { getVideoRoomStatus, canAccessVideoSession, getSessionTimeStatus } from 
 import { 
   ButtonSpinner, 
   SkeletonGrid,
-  SkeletonStatsCard 
+  SkeletonStatsCard,
+  FullPageLoading
 } from './LoadingComponents';
 
 // Icons
@@ -259,7 +260,8 @@ const BookingCard = ({ booking, onAccept, onDecline }) => {
     </div>
   );
 };
-// Clickable Stats Component - No subtitle, just clean number and title
+
+// Clickable Stats Component
 const StatsCard = ({ title, value, icon, color, onClick, isActive }) => (
   <button 
     className={`stats-card ${isActive ? 'active' : ''}`}
@@ -278,13 +280,16 @@ const StatsCard = ({ title, value, icon, color, onClick, isActive }) => (
 
 // Main Mentor Dashboard Component
 const MentorDashboard = ({ user, mentorInfo }) => {
+  // ✅ 1. ALL HOOKS FIRST
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('pending');
 
+  // ✅ 2. useEffect HOOKS
   useEffect(() => {
     if (!user || !mentorInfo) {
       console.log('No user or mentorInfo:', { user: !!user, mentorInfo: !!mentorInfo });
+      setLoading(false);
       return;
     }
 
@@ -322,6 +327,7 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     return () => unsubscribe();
   }, [user, mentorInfo]);
 
+  // ✅ 3. EVENT HANDLER FUNCTIONS
   const handleAcceptBooking = async (bookingId) => {
     try {
       const bookingRef = doc(db, 'bookings', bookingId);
@@ -364,6 +370,7 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     }
   };
 
+  // ✅ 4. ALL CALCULATIONS
   const stats = {
     pending: bookings.filter(b => b.status === 'pending').length,
     confirmed: bookings.filter(b => b.status === 'confirmed').length,
@@ -377,7 +384,6 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     }).length
   };
 
-  // Filter bookings based on active stat card
   const filteredBookings = bookings.filter(booking => {
     if (activeFilter === 'pending') return booking.status === 'pending';
     if (activeFilter === 'confirmed') return booking.status === 'confirmed';
@@ -388,10 +394,9 @@ const MentorDashboard = ({ user, mentorInfo }) => {
       return bookingDate.getMonth() === thisMonth.getMonth() && 
              bookingDate.getFullYear() === thisMonth.getFullYear();
     }
-    return true; // 'all' shows everything
+    return true;
   });
 
-  // Get section title based on active filter
   const getSectionTitle = () => {
     const titles = {
       pending: 'Pending Requests',
@@ -402,82 +407,72 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     return titles[activeFilter] || 'Bookings';
   };
 
+  // ✅ 5. EARLY RETURNS (after all hooks & calculations)
   if (loading) {
-  return <FullPageLoading message="Loading dashboard..." />;
-}
+    return <FullPageLoading message="Loading dashboard..." />;
+  }
 
-if (!mentorInfo) {
+  if (!mentorInfo) {
+    return (
+      <div className="dashboard-container">
+        <div className="not-mentor">
+          <h2>Access Restricted</h2>
+          <p>This dashboard is only available to registered mentors.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ 6. MAIN JSX RETURN
   return (
     <div className="dashboard-container">
-      <div className="not-mentor">
-        <h2>Access Restricted</h2>
-        <p>This dashboard is only available to registered mentors.</p>
+      <div className="dashboard-header">
+        <div className="mentor-welcome">
+          <h1>Hi, {mentorInfo.displayName?.split(' ')[0] || mentorInfo.displayName || 'there'}!</h1>
+        </div>
       </div>
-    </div>
-  );
-}
-  
-return (
-  <div className="dashboard-container">
-    <div className="dashboard-header">
-      <div className="mentor-welcome">
-<h1>Hi, {mentorInfo.displayName?.split(' ')[0] || mentorInfo.displayName || 'there'}!</h1>
-  </div>
-    </div>
-
 
       {/* Clickable Stats Grid */}
-      {loading ? (
-        <div className="stats-grid">
-          <SkeletonStatsCard />
-          <SkeletonStatsCard />
-          <SkeletonStatsCard />
-          <SkeletonStatsCard />
-        </div>
-      ) : (
-        <div className="stats-grid">
-          <StatsCard
-            title="Pending Requests"
-            value={stats.pending}
-            icon={<ClockIcon />}
-            color="#f59e0b"
-            onClick={() => setActiveFilter('pending')}
-            isActive={activeFilter === 'pending'}
-          />
-          <StatsCard
-            title="Confirmed Sessions"
-            value={stats.confirmed}
-            icon={<CheckIcon />}
-            color="#10b981"
-            onClick={() => setActiveFilter('confirmed')}
-            isActive={activeFilter === 'confirmed'}
-          />
-          <StatsCard
-            title="This Month"
-            value={stats.thisMonth}
-            icon={<TrendingUpIcon />}
-            color="#8b5cf6"
-            onClick={() => setActiveFilter('thisMonth')}
-            isActive={activeFilter === 'thisMonth'}
-          />
-          <StatsCard
-            title="All Time"
-            value={stats.total}
-            icon={<CalendarIcon />}
-            color="#3b82f6"
-            onClick={() => setActiveFilter('all')}
-            isActive={activeFilter === 'all'}
-          />
-        </div>
-      )}
+      <div className="stats-grid">
+        <StatsCard
+          title="Pending Requests"
+          value={stats.pending}
+          icon={<ClockIcon />}
+          color="#f59e0b"
+          onClick={() => setActiveFilter('pending')}
+          isActive={activeFilter === 'pending'}
+        />
+        <StatsCard
+          title="Confirmed Sessions"
+          value={stats.confirmed}
+          icon={<CheckIcon />}
+          color="#10b981"
+          onClick={() => setActiveFilter('confirmed')}
+          isActive={activeFilter === 'confirmed'}
+        />
+        <StatsCard
+          title="This Month"
+          value={stats.thisMonth}
+          icon={<TrendingUpIcon />}
+          color="#8b5cf6"
+          onClick={() => setActiveFilter('thisMonth')}
+          isActive={activeFilter === 'thisMonth'}
+        />
+        <StatsCard
+          title="All Time"
+          value={stats.total}
+          icon={<CalendarIcon />}
+          color="#3b82f6"
+          onClick={() => setActiveFilter('all')}
+          isActive={activeFilter === 'all'}
+        />
+      </div>
 
       {/* Bookings List - Filtered by active card */}
       <div className="bookings-section">
         <h2 className="section-heading">{getSectionTitle()}</h2>
         
-        {loading ? (
-          <SkeletonGrid count={3} />
-        ) : filteredBookings.length === 0 ? (
+        {filteredBookings.length === 0 ? (
           <div className="no-bookings">
             <h3>No {activeFilter === 'all' ? '' : getSectionTitle().toLowerCase()} yet</h3>
             <p>When students book sessions with you, they'll appear here.</p>
