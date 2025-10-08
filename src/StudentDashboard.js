@@ -494,14 +494,13 @@ const StudentDashboard = ({ user }) => {
   }
 
   if (loading) {
-    return (
-      <div className="dashboard-container">
-        <div className="dashboard-header">
-          <div className="student-welcome">
-            <h1>Your Music Learning Journey</h1>
-            <p>Track your mentorship sessions and learning progress</p>
-          </div>
-        </div>
+return (
+  <div className="dashboard-container">
+    <div className="dashboard-header">
+      <div className="student-welcome">
+        <h1>Hi, {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'there'}!</h1>
+      </div>
+    </div>
 
         <div className="stats-grid">
           <SkeletonStatsCard />
