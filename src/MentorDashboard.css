@@ -1,927 +1,1015 @@
-/* Complete MentorDashboard.css - Part 1: Root Variables & Basic Layout */
+/* Modern MentorDashboard.css - Fiverr-Inspired Dark Theme */
+/* Section 1/4: Root Variables & Core Layout */
 
-/* Dark Theme Variables */
 :root {
-  --bg-primary: #0f0f0f;
-  --bg-secondary: #1c1c1c;
-  --bg-elevated: #272727;
-  --bg-hover: #3f3f3f;
-  --text-primary: #ffffff;
-  --text-secondary: #f1f1f1;
-  --text-muted: #cccccc;
-  --text-instruction: #e8e8e8;
-  --text-subtle: #b8b8b8;
-  --accent-primary: #3ea6ff;
-  --accent-hover: #65b8ff;
-  --green: #00d563;
-  --green-hover: #00c756;
-  --red: #ff4444;
-  --border-color: #3f3f3f;
-  --border-hover: #666666;
+  /* Background Colors - Deep blacks with subtle elevation */
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-elevated: #374151;
+  --bg-hover: #4b5563;
+  --bg-card: #1f2937;
+  
+  /* Text Colors - High contrast for readability */
+  --text-primary: #f9fafb;
+  --text-secondary: #e5e7eb;
+  --text-muted: #9ca3af;
+  --text-subtle: #6b7280;
+  
+  /* Accent Colors - Vibrant but professional */
+  --accent-blue: #3b82f6;
+  --accent-blue-hover: #2563eb;
+  --accent-blue-light: #60a5fa;
+  
+  --accent-green: #10b981;
+  --accent-green-hover: #059669;
+  --accent-green-light: #34d399;
+  
+  --accent-purple: #8b5cf6;
+  --accent-purple-hover: #7c3aed;
+  
+  --accent-orange: #f59e0b;
+  --accent-orange-hover: #d97706;
+  
+  /* Status Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+  
+  /* Border & Shadow */
+  --border-color: #374151;
+  --border-hover: #4b5563;
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
 }
 
-/* Dashboard Container */
+/* Global Resets & Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dashboard Container - Main wrapper */
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 24px;
+  padding: var(--spacing-2xl) var(--spacing-lg);
   min-height: 80vh;
-  background: var(--bg-primary);
 }
 
+/* Dashboard Header - Bold welcome section */
 .dashboard-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .mentor-welcome h1,
 .student-welcome h1 {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-sm);
   letter-spacing: -0.5px;
+  line-height: 1.2;
 }
 
 .mentor-welcome p,
 .student-welcome p {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.125rem;
+  font-weight: 400;
+  margin: 0;
 }
 
 .availability-description {
-  color: var(--text-instruction) !important;
+  color: var(--text-secondary) !important;
+  font-size: 1rem !important;
 }
 
-/* Stats Grid */
+/* Stats Grid - Dashboard metrics cards */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
 }
 
 .stats-card {
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
   border: 1px solid var(--border-color);
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  transition: all 0.2s ease;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-blue);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
 }
 
 .stats-card:hover {
   background: var(--bg-elevated);
   border-color: var(--border-hover);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.stats-card:hover::before {
+  transform: scaleX(1);
 }
 
 .stats-icon {
-  width: 48px;
-  height: 48px;
-  background: var(--accent-primary);
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  background: var(--accent-blue);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+.stats-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .stats-content h3 {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1;
 }
 
 .stats-title {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 0.25rem;
-  font-size: 14px;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .stats-subtitle {
   font-size: 0.875rem;
   color: var(--text-muted);
+  margin: 0;
 }
 
-/* Filter Tabs */
+/* Filter Tabs - Modern pill-style navigation */
 .filter-tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 2rem;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-2xl);
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: var(--spacing-xs);
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.filter-tabs::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.filter-tabs::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
 }
 
 .filter-tabs button {
-  padding: 8px 16px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-elevated);
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
   color: var(--text-secondary);
   cursor: pointer;
-  font-weight: 500;
-  border-radius: 18px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
   transition: all 0.2s ease;
   white-space: nowrap;
   flex-shrink: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .filter-tabs button:hover {
-  background: var(--bg-hover);
+  background: var(--bg-elevated);
   color: var(--text-primary);
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
 }
 
 .filter-tabs button.active {
-  background: var(--text-primary);
-  color: var(--bg-primary);
-  border-color: var(--text-primary);
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-md);
 }
 
 /* Not Mentor Message */
 .not-mentor {
   text-align: center;
-  padding: 4rem 2rem;
-  color: var(--text-secondary);
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
 }
 
 .not-mentor h2 {
   color: var(--text-primary);
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
   font-size: 1.75rem;
+  font-weight: 700;
 }
 
 .not-mentor p {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.125rem;
+  margin: 0;
 }
+/* Modern MentorDashboard.css - Fiverr-Inspired Dark Theme */
+/* Section 2/4: Bookings, Cards & User Interfaces */
 
-/* Complete MentorDashboard.css - Part 2: Bookings Section */
-
-/* Bookings Section */
+/* Bookings Section - Main container for booking cards */
 .bookings-section {
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
   border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
 }
 
 .loading-bookings {
   text-align: center;
-  padding: 3rem;
+  padding: var(--spacing-2xl);
   color: var(--text-muted);
-  font-size: 1.1rem;
+  font-size: 1.125rem;
 }
 
 .no-bookings {
   text-align: center;
-  padding: 3rem;
+  padding: var(--spacing-2xl);
 }
 
 .no-bookings h3 {
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
-  font-size: 1.25rem;
+  margin-bottom: var(--spacing-md);
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .no-bookings p {
   color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
 }
 
 .bookings-grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--spacing-lg);
 }
 
-/* Booking Card */
-.booking-card {
+/* Booking Card - Elevated card design */
+.booking-card,
+.student-booking-card {
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
   background: var(--bg-elevated);
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
 }
 
-.booking-card:hover {
-  border-color: var(--border-hover);
-  background: var(--bg-hover);
+.booking-card::before,
+.student-booking-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent-blue);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
+.booking-card:hover,
+.student-booking-card:hover {
+  border-color: var(--accent-blue);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.booking-card:hover::before,
+.student-booking-card:hover::before {
+  opacity: 1;
+}
+
+/* Booking Header */
 .booking-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
-.booking-user {
+.booking-user,
+.mentor-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--spacing-md);
+  flex: 1;
+  min-width: 0;
 }
 
 .user-avatar,
 .mentor-avatar {
-  width: 40px;
-  height: 40px;
-  background: var(--accent-primary);
+  width: 52px;
+  height: 52px;
+  background: var(--accent-purple);
   color: white;
-  border-radius: 50%;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 1.125rem;
   flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+  text-transform: uppercase;
+}
+
+.user-info,
+.mentor-details {
+  flex: 1;
+  min-width: 0;
 }
 
 .user-info h4,
 .mentor-details h4 {
   color: var(--text-primary);
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .booking-date {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
   color: var(--text-muted);
   font-size: 0.875rem;
+  margin: 0;
 }
 
-.booking-details {
-  margin-bottom: 1.5rem;
+/* Status Info & Badges */
+.status-info {
+  text-align: right;
 }
 
-.booking-preferences {
+.status-description {
+  margin-top: var(--spacing-sm);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  max-width: 220px;
+  line-height: 1.5;
+}
+
+/* Status badges matching Fiverr style */
+span[style*="border-radius: 9999px"] {
+  padding: 0.375rem 1rem !important;
+  border-radius: var(--radius-full) !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Booking Details & Preferences */
+.booking-details,
+.booking-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.booking-preferences,
+.session-details {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
 }
 
-.preference-item {
+.preference-item,
+.detail-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
   color: var(--text-secondary);
   font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.preference-item svg,
+.detail-item svg {
+  color: var(--accent-blue);
+  flex-shrink: 0;
 }
 
 .preference-item .rate,
 .price-tag {
-  background: var(--accent-primary);
+  background: var(--accent-blue);
   color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.875rem;
+  padding: 0.375rem 1rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  box-shadow: var(--shadow-sm);
 }
 
+.session-time-highlight {
+  background: var(--bg-elevated);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--accent-green);
+  width: 100%;
+}
+
+/* Booking Message & Question */
 .booking-message,
 .your-question {
   background: var(--bg-secondary);
-  padding: 1rem;
-  border-radius: 8px;
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
 }
 
 .booking-message h5,
 .your-question h5 {
-  color: var(--text-secondary);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .booking-message p,
 .your-question p {
   color: var(--text-primary);
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.9375rem;
 }
 
+/* Booking Actions - Button group */
 .booking-actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-md);
   justify-content: flex-end;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
 }
 
-.accept-btn, .decline-btn {
+.accept-btn,
+.decline-btn,
+.join-video-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: 0.875rem 1.75rem;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.9375rem;
+  box-shadow: var(--shadow-sm);
+  letter-spacing: 0.3px;
 }
 
 .accept-btn {
-  background: var(--green);
+  background: var(--accent-green);
   color: white;
 }
 
 .accept-btn:hover:not(:disabled) {
-  background: var(--green-hover);
-  transform: translateY(-1px);
+  background: var(--accent-green-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .decline-btn {
-  background: var(--bg-elevated);
+  background: var(--bg-secondary);
   color: var(--text-secondary);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
 }
 
 .decline-btn:hover:not(:disabled) {
   background: var(--bg-hover);
   color: var(--text-primary);
-  border-color: var(--border-hover);
+  border-color: var(--error);
+  transform: translateY(-2px);
 }
 
-.accept-btn:disabled, .decline-btn:disabled {
-  opacity: 0.6;
+.accept-btn:disabled,
+.decline-btn:disabled,
+.join-video-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
-/* Complete MentorDashboard.css - Part 3: Student Dashboard & Video Access */
-
-/* Student Dashboard Specific Styles */
-.student-booking-card {
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
-  transition: all 0.2s ease;
-}
-
-.student-booking-card:hover {
-  border-color: var(--border-hover);
-  background: var(--bg-elevated);
-  transform: translateY(-1px);
-}
-
-.student-booking-card .booking-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1.5rem;
-}
-
-.mentor-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.status-info {
-  text-align: right;
-}
-
-.status-description {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  max-width: 200px;
-  line-height: 1.4;
-}
-
-.booking-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.session-details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--bg-elevated);
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-}
-
-.detail-item svg {
-  color: var(--text-muted);
-}
-
+/* Next Steps Section */
 .next-steps {
-  background: var(--bg-elevated);
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--green);
+  background: rgba(16, 185, 129, 0.1);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--accent-green);
 }
 
 .next-steps h5 {
-  color: var(--green);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  color: var(--accent-green);
+  font-weight: 700;
+  margin: 0 0 var(--spacing-sm) 0;
   font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .next-steps p {
   color: var(--text-secondary);
-  line-height: 1.5;
-  font-size: 0.875rem;
+  line-height: 1.6;
+  font-size: 0.9375rem;
+  margin: 0;
 }
 
 /* Video Access Section */
 .video-access-section {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--bg-elevated);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
 }
 
 .video-ready {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .join-video-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: var(--accent-primary);
+  background: var(--accent-blue);
   color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.join-video-btn:hover {
-  background: #2c8ae6;
+.join-video-btn:hover:not(:disabled) {
+  background: var(--accent-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .video-status {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
 }
 
 .video-unavailable {
-  background: var(--bg-elevated);
-  color: var(--text-muted);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid var(--error);
 }
 
-.video-locked {
-  background: var(--bg-elevated);
-  color: var(--text-secondary);
+.video-locked,
+.video-waiting {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border: 1px solid var(--warning);
   flex-direction: column;
   align-items: flex-start;
 }
 
 .session-time {
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   color: var(--text-muted);
-  margin: 0;
+  margin: var(--spacing-xs) 0 0 0;
 }
-
-/* Complete MentorDashboard.css - Part 4: Calendar & Profile Forms */
+/* Modern MentorDashboard.css - Fiverr-Inspired Dark Theme */
+/* Section 3A/4: Calendar Modals & Step Navigation */
 
 /* Calendar Booking Modal */
-.calendar-booking-modal {
-  max-width: 800px;
+.calendar-booking-modal,
+.step-modal {
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
 }
 
-.calendar-booking-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.availability-section h3 {
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.calendar-view {
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1rem;
-  background: var(--bg-elevated);
-}
-
-.loading-slots {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--text-muted);
-}
-
-.day-availability {
-  margin-bottom: 1.5rem;
-}
-
-.day-header {
-  color: var(--accent-primary);
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-bottom: 0.5rem;
+.booking-header {
+  padding: var(--spacing-xl);
   border-bottom: 1px solid var(--border-color);
 }
 
-.time-slots-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0.5rem;
-}
-
-.time-slot {
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.5rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
-  min-height: 50px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  color: var(--text-secondary);
-}
-
-.time-slot:hover:not(:disabled) {
-  border-color: var(--accent-primary);
-  background: var(--bg-elevated);
+.booking-header h2 {
   color: var(--text-primary);
-  transform: translateY(-1px);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-md) 0;
 }
 
-.time-slot.selected {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: white;
-}
-
-.slot-time {
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.slot-status {
-  font-size: 0.75rem;
-  opacity: 0.8;
-  margin-top: 0.25rem;
-}
-
-.time-slot:disabled.booked {
-  background: var(--bg-elevated);
-  border-color: var(--red);
-  color: var(--red);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.time-slot:disabled.unavailable {
-  background: var(--bg-elevated);
-  border-color: var(--border-color);
-  color: var(--text-muted);
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.no-availability {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--text-muted);
-}
-
-.no-availability h3 {
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-}
-
-.selected-time-display {
-  background: var(--bg-elevated);
-  border: 1px solid var(--green);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.selected-time-display h4 {
-  color: var(--green);
-  margin: 0 0 0.5rem 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.selected-time {
-  color: var(--text-primary);
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Step-by-Step Calendar Booking Styles */
-.step-modal {
-  max-width: 500px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-}
-
+/* Step Indicator */
 .step-indicator {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
   border-top: 1px solid var(--border-color);
 }
 
 .step-indicator span {
   font-size: 0.875rem;
   color: var(--text-muted);
-  transition: color 0.2s ease;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .step-indicator span.active {
-  color: var(--accent-primary);
-  font-weight: 600;
+  color: var(--accent-blue);
+  font-weight: 700;
+  font-size: 0.9375rem;
 }
 
 .step-indicator span.completed {
-  color: var(--green);
-  font-weight: 500;
+  color: var(--accent-green);
+  font-weight: 600;
 }
 
+/* Step Content */
 .step-content {
-  padding: 1.5rem 0;
+  padding: var(--spacing-xl);
 }
 
 .step-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-xl);
 }
 
 .step-header h3 {
   color: var(--text-primary);
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-sm) 0;
 }
 
 .step-header p {
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
+  margin: 0;
 }
 
 .back-button {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--spacing-xs);
   background: none;
   border: none;
-  color: var(--accent-primary);
+  color: var(--accent-blue);
   cursor: pointer;
   font-size: 0.875rem;
-  margin-bottom: 1rem;
-  padding: 0.25rem 0;
-  transition: color 0.2s ease;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-sm) 0;
+  transition: all 0.2s ease;
 }
 
 .back-button:hover {
-  color: var(--accent-hover);
+  color: var(--accent-blue-light);
+  transform: translateX(-2px);
 }
 
+/* Date Selection Grid */
 .date-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  max-height: 300px;
+  gap: var(--spacing-md);
+  max-height: 400px;
   overflow-y: auto;
+  padding-right: var(--spacing-sm);
 }
 
 .date-option {
   background: var(--bg-elevated);
   border: 2px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1rem;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
 }
 
 .date-option:hover {
-  border-color: var(--accent-primary);
+  border-color: var(--accent-blue);
   background: var(--bg-hover);
+  transform: translateX(4px);
 }
 
 .date-day {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--spacing-xs);
+  font-size: 1rem;
 }
 
 .date-slots {
   font-size: 0.875rem;
   color: var(--text-muted);
+  font-weight: 500;
 }
 
 .no-dates {
   text-align: center;
-  padding: 2rem 1rem;
+  padding: var(--spacing-2xl);
   color: var(--text-muted);
 }
 
+/* Time Selection Grid */
 .time-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 0.75rem;
-  max-height: 300px;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: var(--spacing-md);
+  max-height: 400px;
   overflow-y: auto;
+  padding-right: var(--spacing-sm);
 }
 
 .time-option {
   background: var(--bg-elevated);
   border: 2px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.75rem 0.5rem;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg) var(--spacing-md);
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 700;
   text-align: center;
   color: var(--text-secondary);
+  font-size: 0.9375rem;
 }
 
 .time-option:hover {
-  border-color: var(--accent-primary);
+  border-color: var(--accent-blue);
   background: var(--bg-hover);
   color: var(--text-primary);
+  transform: scale(1.05);
 }
 
 .time-option.selected {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
   color: white;
+  box-shadow: var(--shadow-md);
 }
 
+/* Loading States */
+.loading-slots {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+/* Modern MentorDashboard.css - Fiverr-Inspired Dark Theme */
+/* Section 3B/4: Forms, Profile & Availability */
+
+/* Booking Details Form */
 .booking-details-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.checkbox-text {
-  color: var(--text-secondary);
-  line-height: 1.5;
+  gap: var(--spacing-xl);
 }
 
 .session-summary {
   background: var(--bg-elevated);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1rem;
+  border: 2px solid var(--accent-blue);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
 }
 
 .session-summary h4 {
-  color: var(--text-secondary);
-  margin-bottom: 0.75rem;
+  color: var(--accent-blue);
+  margin: 0 0 var(--spacing-md) 0;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.5px;
 }
 
 .summary-details {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .summary-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  font-weight: 500;
 }
 
+.summary-item svg {
+  color: var(--accent-blue);
+}
+
+/* Modal Actions */
 .modal-actions {
-  padding-top: 1rem;
+  padding: var(--spacing-lg) var(--spacing-xl);
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: center;
+  gap: var(--spacing-md);
 }
 
-/* Profile Form Styles */
+.cancel-btn,
+.confirm-btn {
+  padding: 0.875rem 2rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.9375rem;
+  box-shadow: var(--shadow-sm);
+  border: none;
+}
+
+.cancel-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
+}
+
+.cancel-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.confirm-btn {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background: var(--accent-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Profile Form */
 .profile-form {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
 .profile-section {
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-xl);
   border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
 }
 
 .profile-section h3 {
   color: var(--text-primary);
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-xl) 0;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
+/* Form Grid & Groups */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 400px));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .form-group label {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 12px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
   transition: all 0.2s ease;
   font-family: inherit;
   background: var(--bg-elevated);
   color: var(--text-primary);
+  font-weight: 500;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(62, 166, 255, 0.1);
+  border-color: var(--accent-blue);
+  background: var(--bg-hover);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-group input::placeholder,
@@ -932,41 +1020,63 @@
 .price-input {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0 var(--spacing-md);
+  transition: all 0.2s ease;
+}
+
+.price-input:focus-within {
+  border-color: var(--accent-blue);
+  background: var(--bg-hover);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .price-input .currency {
-  color: var(--text-secondary);
-  font-weight: 600;
+  color: var(--accent-blue);
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
 .price-input input {
-  flex: 1;
+  border: none;
+  padding: 0.875rem 0;
+  background: transparent;
 }
 
+.price-input input:focus {
+  box-shadow: none;
+}
+
+/* Form Actions */
 .form-actions {
   display: flex;
   justify-content: center;
-  padding-top: 2rem;
+  padding-top: var(--spacing-2xl);
+  border-top: 1px solid var(--border-color);
 }
 
 .save-profile-btn {
-  background: var(--green);
+  background: var(--accent-green);
   color: white;
   border: none;
-  padding: 16px 32px;
-  border-radius: 12px;
+  padding: 1rem 3rem;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 600;
-  font-size: 16px;
-  transition: all 0.2s ease;
-  min-width: 200px;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 240px;
+  box-shadow: var(--shadow-md);
+  letter-spacing: 0.3px;
 }
 
 .save-profile-btn:hover:not(:disabled) {
-  background: var(--green-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 213, 99, 0.3);
+  background: var(--accent-green-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-xl);
 }
 
 .save-profile-btn:disabled {
@@ -977,95 +1087,118 @@
   box-shadow: none;
 }
 
-/* Complete MentorDashboard.css - Part 5A: Profile Tabs & Availability */
-
 /* Mentor Profile Tabs */
 .mentor-profile-tabs {
   display: flex;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-2xl);
   border-bottom: 2px solid var(--border-color);
+  gap: var(--spacing-md);
 }
 
 .mentor-tab {
-  padding: 0.75rem 1.5rem;
+  padding: var(--spacing-lg) var(--spacing-xl);
   background: none;
   border: none;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   color: var(--text-secondary);
   border-bottom: 3px solid transparent;
   transition: all 0.2s ease;
+  font-size: 0.9375rem;
+  position: relative;
 }
 
 .mentor-tab.active {
-  color: var(--accent-primary);
-  border-bottom-color: var(--accent-primary);
+  color: var(--accent-blue);
+  border-bottom-color: var(--accent-blue);
 }
 
 .mentor-tab:hover:not(.active) {
   color: var(--text-primary);
-  background: var(--bg-elevated);
+  background: var(--bg-secondary);
 }
 
 /* Availability Header */
 .availability-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-2xl);
 }
 
 .availability-header h3 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 var(--spacing-sm) 0;
   color: var(--text-primary);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
 }
 
 .availability-header p {
   margin: 0;
-  color: var(--text-instruction);
+  color: var(--text-secondary);
+  font-size: 1rem;
 }
+/* Modern MentorDashboard.css - Fiverr-Inspired Dark Theme */
+/* Section 4A/4: Availability System & Day Cards */
 
 /* Availability Grid */
 .availability-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
 }
 
-/* Day Card */
+/* Day Card - Elevated, modern card design */
 .day-card {
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 2px solid var(--border-color);
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.day-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--border-color);
+  transition: background 0.3s ease;
 }
 
 .day-card.available {
-  border-color: var(--green);
+  border-color: var(--accent-green);
   background: var(--bg-elevated);
 }
 
-.day-card.unavailable {
-  border-color: var(--border-color);
-  background: var(--bg-secondary);
+.day-card.available::before {
+  background: var(--accent-green);
+}
+
+.day-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .day-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-lg);
 }
 
 .day-title {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.3px;
 }
 
-/* Toggle Switch */
+/* Toggle Switch - Modern iOS-style */
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -1081,168 +1214,192 @@
 .toggle-slider {
   position: relative;
   display: inline-block;
-  width: 48px;
-  height: 24px;
+  width: 52px;
+  height: 28px;
   background-color: var(--bg-hover);
-  border-radius: 24px;
-  transition: background-color 0.2s ease;
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  transition: all 0.3s ease;
+  border: 2px solid var(--border-color);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .toggle-slider::before {
   content: '';
   position: absolute;
-  top: 1px;
-  left: 1px;
+  top: 2px;
+  left: 2px;
   width: 20px;
   height: 20px;
   background-color: var(--text-primary);
   border-radius: 50%;
-  transition: transform 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .toggle-input:checked + .toggle-slider {
-  background-color: var(--green);
-  border-color: var(--green);
+  background-color: var(--accent-green);
+  border-color: var(--accent-green);
 }
 
 .toggle-input:checked + .toggle-slider::before {
   transform: translateX(24px);
 }
 
-/* Complete MentorDashboard.css - Part 5B: Time Slots & Timeline */
-
 /* Timeline Visualization */
 .timeline-container {
-  margin: 1rem 0;
-  padding: 0.75rem;
+  margin: var(--spacing-lg) 0;
+  padding: var(--spacing-md);
   background: var(--bg-secondary);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 
 .timeline-bar {
   position: relative;
-  height: 8px;
+  height: 10px;
   background: var(--bg-elevated);
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-sm);
+  overflow: hidden;
 }
 
 .timeline-block {
   position: absolute;
   height: 100%;
-  background: var(--green);
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  background: var(--accent-green);
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
 }
 
 .timeline-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
+  font-weight: 600;
 }
 
 /* Time Slots Container */
 .time-slots-container {
-  min-height: 60px;
+  min-height: 80px;
 }
 
 .empty-slots {
   text-align: center;
-  padding: 2rem 0;
+  padding: var(--spacing-2xl) 0;
 }
 
 .empty-slots-text {
-  color: var(--text-subtle) !important;
+  color: var(--text-muted) !important;
   font-style: italic;
-  margin: 0 0 1rem 0;
+  margin: 0 0 var(--spacing-lg) 0;
+  font-size: 0.9375rem;
 }
 
 .slots-list {
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 .time-slot-item {
   display: flex;
   align-items: flex-end;
-  gap: 1rem;
-  padding: 1rem;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
   background: var(--bg-elevated);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.time-slot-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 
 .time-inputs {
   display: flex;
   align-items: flex-end;
-  gap: 1rem;
+  gap: var(--spacing-md);
   flex: 1;
 }
 
 .time-input-group {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--spacing-xs);
 }
 
 .time-label {
   font-size: 0.75rem !important;
-  font-weight: 500 !important;
-  color: var(--text-secondary) !important;
+  font-weight: 700 !important;
+  color: var(--text-muted) !important;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .time-select {
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  padding: 0.625rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-sm);
   background: var(--bg-secondary);
   color: var(--text-primary);
   font-size: 0.875rem;
-  min-width: 80px;
+  font-weight: 600;
+  min-width: 100px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-select:hover {
+  border-color: var(--border-hover);
 }
 
 .time-select:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(62, 166, 255, 0.1);
+  border-color: var(--accent-blue);
+  background: var(--bg-hover);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .time-separator {
-  padding: 0 0.5rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  margin-bottom: 0.25rem;
+  padding: 0 var(--spacing-sm);
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.875rem;
 }
 
 .remove-slot-btn {
-  background: var(--red);
+  background: var(--error);
   color: white;
   border: none;
-  padding: 0.5rem;
-  border-radius: 6px;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  box-shadow: var(--shadow-sm);
 }
 
 .remove-slot-btn:hover {
   background: #dc2626;
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
 }
 
 /* Slot Actions */
 .slot-actions {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  gap: var(--spacing-sm);
+  align-items: stretch;
 }
 
 .slot-actions .add-slot-btn {
@@ -1250,62 +1407,69 @@
 }
 
 .add-slot-btn {
-  background: var(--green);
+  background: var(--accent-green);
   color: white;
   border: none;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
   transition: all 0.2s ease;
   justify-content: center;
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .add-slot-btn:hover {
-  background: var(--green-hover);
-  transform: translateY(-1px);
+  background: var(--accent-green-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .unavailable-message {
   text-align: center;
-  padding: 2rem 0;
+  padding: var(--spacing-2xl) 0;
 }
 
 .unavailable-text {
-  color: var(--text-subtle) !important;
+  color: var(--text-muted) !important;
   font-style: italic;
   margin: 0;
+  font-size: 0.9375rem;
 }
+/* Modern MentorDashboard.css - Fiverr-Inspired Dark Theme */
+/* Section 4B1/4: Preset Buttons & Copy Menu */
 
-/* Complete MentorDashboard.css - Part 5C: Preset Buttons & Copy Menu */
-
-/* Preset Buttons for Quick Time Block Setup */
+/* Preset Buttons */
 .preset-buttons {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
 }
 
 .preset-btn {
   background: var(--bg-elevated);
-  color: var(--accent-primary);
-  border: 1px solid var(--accent-primary);
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  color: var(--accent-blue);
+  border: 2px solid var(--accent-blue);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 700;
   transition: all 0.2s ease;
   font-size: 0.875rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
 }
 
 .preset-btn:hover {
-  background: var(--accent-primary);
+  background: var(--accent-blue);
   color: white;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 /* Copy Functionality */
@@ -1316,55 +1480,56 @@
 .copy-slots-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
   background: var(--bg-secondary);
-  color: var(--accent-primary);
-  border: 1px solid var(--accent-primary);
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  color: var(--accent-blue);
+  border: 2px solid var(--accent-blue);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 700;
   transition: all 0.2s ease;
   white-space: nowrap;
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .copy-slots-btn:hover {
-  background: var(--accent-primary);
+  background: var(--accent-blue);
   color: white;
+  transform: translateY(-2px);
 }
 
 .copy-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + var(--spacing-sm));
   right: 0;
-  margin-top: 0.5rem;
   background: var(--bg-elevated);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  z-index: 10;
-  min-width: 150px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+  z-index: 100;
+  min-width: 180px;
+  overflow: hidden;
 }
 
 .copy-option {
   display: block;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: var(--spacing-md) var(--spacing-lg);
   background: none;
   border: none;
   text-align: left;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
   font-size: 0.875rem;
-}
-
-.copy-option:first-child {
-  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .copy-option:last-child {
-  border-radius: 0 0 8px 8px;
+  border-bottom: none;
 }
 
 .copy-option:hover {
@@ -1375,90 +1540,103 @@
 /* Availability Tips */
 .availability-tips {
   background: var(--bg-elevated);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-top: 2rem;
+  border: 2px solid var(--accent-blue);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-top: var(--spacing-2xl);
 }
 
 .tips-title {
-  margin: 0 0 1rem 0 !important;
-  color: var(--accent-primary) !important;
-  font-size: 1rem;
+  margin: 0 0 var(--spacing-lg) 0 !important;
+  color: var(--accent-blue) !important;
+  font-size: 1.125rem;
+  font-weight: 700;
 }
 
 .tips-list {
   margin: 0;
-  padding-left: 1.25rem;
+  padding-left: var(--spacing-xl);
 }
 
 .tips-list li {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-md);
   color: var(--text-secondary) !important;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 0.9375rem;
 }
 
-/* Complete MentorDashboard.css - Part 5D: Responsive Design */
+.tips-list li:last-child {
+  margin-bottom: 0;
+}
+/* Modern MentorDashboard.css - Fiverr-Inspired Dark Theme */
+/* Section 4B2/4: Scrollbars & Responsive Design Start */
 
-/* Responsive Design */
+/* Custom Scrollbar Styling */
+.date-grid::-webkit-scrollbar,
+.time-grid::-webkit-scrollbar,
+.calendar-view::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.date-grid::-webkit-scrollbar-track,
+.time-grid::-webkit-scrollbar-track,
+.calendar-view::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 3px;
+}
+
+.date-grid::-webkit-scrollbar-thumb,
+.time-grid::-webkit-scrollbar-thumb,
+.calendar-view::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.date-grid::-webkit-scrollbar-thumb:hover,
+.time-grid::-webkit-scrollbar-thumb:hover,
+.calendar-view::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Responsive Design - Tablet */
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 1rem 16px;
+    padding: var(--spacing-xl) var(--spacing-md);
   }
 
   .mentor-welcome h1,
   .student-welcome h1 {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+    gap: var(--spacing-md);
   }
 
   .stats-card {
-    padding: 1rem;
-    flex-direction: column;
-    text-align: center;
-    gap: 0.75rem;
+    padding: var(--spacing-lg);
   }
 
   .stats-icon {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
   }
 
   .stats-content h3 {
-    font-size: 1.5rem;
-  }
-
-  .filter-tabs {
-    gap: 6px;
+    font-size: 1.75rem;
   }
 
   .filter-tabs button {
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8125rem;
   }
 
   .booking-header {
     flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .booking-actions {
-    justify-content: stretch;
-  }
-
-  .accept-btn, .decline-btn {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .student-booking-card .booking-header {
-    flex-direction: column;
-    gap: 1rem;
+    gap: var(--spacing-md);
     align-items: flex-start;
   }
 
@@ -1467,94 +1645,106 @@
     width: 100%;
   }
 
+  .status-description {
+    max-width: 100%;
+  }
+
+  .booking-actions {
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .accept-btn,
+  .decline-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
   .session-details {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .status-description {
-    max-width: 100%;
-  }
-
   .availability-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .time-inputs {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
+    gap: var(--spacing-md);
   }
-  
+
   .time-separator {
     text-align: center;
     padding: 0;
   }
-  
+
   .mentor-profile-tabs {
-    gap: 0.5rem;
-  }
-  
-  .mentor-tab {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
+    gap: var(--spacing-xs);
   }
 
-  .calendar-booking-modal,
-  .step-modal {
-    max-width: 95vw;
-    margin: 1rem;
-  }
-  
-  .time-slots-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 0.375rem;
-  }
-  
-  .time-slot {
-    min-height: 45px;
-    padding: 0.375rem;
-    font-size: 0.8125rem;
-  }
-  
-  .time-grid {
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-    gap: 0.5rem;
-  }
-  
-  .time-option {
-    padding: 0.625rem 0.375rem;
+  .mentor-tab {
+    padding: var(--spacing-md) var(--spacing-lg);
     font-size: 0.875rem;
   }
 
   .slot-actions {
     flex-direction: column;
   }
-  
-  .slot-actions .add-slot-btn,
-  .copy-slots-btn {
-    width: 100%;
-  }
-  
+
   .copy-dropdown {
     right: auto;
     left: 0;
   }
-
-  .preset-buttons {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  
-  .preset-btn {
-    flex: 1;
-    min-width: 140px;
-  }
 }
+/* Modern MentorDashboard.css - Fiverr-Inspired Dark Theme */
+/* Section 4B3/4: Mobile Responsive (FINAL SECTION) */
 
+/* Responsive Design - Mobile */
 @media (max-width: 480px) {
+  .dashboard-container {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+
+  .mentor-welcome h1,
+  .student-welcome h1 {
+    font-size: 1.75rem;
+  }
+
+  .mentor-welcome p,
+  .student-welcome p {
+    font-size: 1rem;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .stats-card {
+    padding: var(--spacing-md);
+  }
+
+  .filter-tabs {
+    gap: var(--spacing-xs);
+  }
+
+  .filter-tabs button {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  .booking-card,
+  .student-booking-card {
+    padding: var(--spacing-lg);
+  }
+
+  .user-avatar,
+  .mentor-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
   }
 
   .booking-preferences {
@@ -1564,51 +1754,155 @@
 
   .booking-actions {
     flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .accept-btn,
+  .decline-btn,
+  .join-video-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
   }
 
   .preset-buttons {
     flex-direction: column;
   }
-  
+
   .preset-btn {
+    width: 100%;
+  }
+
+  .time-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .time-option {
+    padding: var(--spacing-md) var(--spacing-xs);
+    font-size: 0.8125rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-section {
+    padding: var(--spacing-lg);
+  }
+
+  .save-profile-btn {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .cancel-btn,
+  .confirm-btn {
     width: 100%;
   }
 }
 
-@media (min-width: 480px) {
-  .preset-buttons {
-    flex-direction: row;
-    flex-wrap: wrap;
+/* Extra Small Devices */
+@media (max-width: 360px) {
+  .dashboard-container {
+    padding: var(--spacing-md) var(--spacing-xs);
   }
-  
-  .preset-btn {
-    flex: 1;
-    min-width: 140px;
+
+  .mentor-welcome h1,
+  .student-welcome h1 {
+    font-size: 1.5rem;
+  }
+
+  .stats-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .time-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Scrollbar styling */
-.calendar-view::-webkit-scrollbar,
-.date-grid::-webkit-scrollbar,
-.time-grid::-webkit-scrollbar {
-  width: 6px;
+/* Tablet Landscape Optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .availability-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.calendar-view::-webkit-scrollbar-track,
-.date-grid::-webkit-scrollbar-track,
-.time-grid::-webkit-scrollbar-track {
-  background: var(--bg-elevated);
+/* Large Desktop Optimizations */
+@media (min-width: 1400px) {
+  .dashboard-container {
+    max-width: 1400px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .availability-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.calendar-view::-webkit-scrollbar-thumb,
-.date-grid::-webkit-scrollbar-thumb,
-.time-grid::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
+/* Print Styles */
+@media print {
+  .filter-tabs,
+  .booking-actions,
+  .form-actions,
+  .modal-actions {
+    display: none;
+  }
+
+  .dashboard-container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .booking-card,
+  .student-booking-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #333;
+  }
 }
 
-.calendar-view::-webkit-scrollbar-thumb:hover,
-.date-grid::-webkit-scrollbar-thumb:hover,
-.time-grid::-webkit-scrollbar-thumb:hover {
-  background: var(--border-hover);
+/* Animation Utilities */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Focus Visible - Accessibility */
+*:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
