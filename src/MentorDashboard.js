@@ -417,8 +417,8 @@ return (
   <div className="dashboard-container">
     <div className="dashboard-header">
       <div className="mentor-welcome">
-        <h1>Hi, {mentorInfo.name?.split(' ')[0] || mentorInfo.name}!</h1>
-      </div>
+<h1>Hi, {mentorInfo.displayName?.split(' ')[0] || mentorInfo.displayName || 'there'}!</h1>
+  </div>
     </div>
 
 
