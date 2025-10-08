@@ -1,0 +1,1002 @@
+/* ============================================
+   MentorProfile.css - BLOCK 1 of 6
+   Profile Tabs & Header Styling
+   ============================================ */
+
+/* Profile Tabs Container */
+.mentor-profile-tabs {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-2xl);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0;
+}
+
+/* Individual Tab Button */
+.mentor-tab {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: var(--spacing-md) var(--spacing-lg);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  letter-spacing: 0.3px;
+}
+
+.mentor-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+/* Active Tab State */
+.mentor-tab.active {
+  color: var(--accent-blue);
+  background: var(--bg-card);
+  font-weight: 700;
+}
+
+.mentor-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-blue);
+}
+
+/* Profile Form Container */
+.profile-form {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2xl);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+/* Profile Section (for each tab content) */
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.profile-section h3 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-md) 0;
+  letter-spacing: -0.5px;
+}
+
+/* Availability Header */
+.availability-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.availability-header h3 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-sm) 0;
+  letter-spacing: -0.5px;
+}
+
+.availability-header .availability-description {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* END OF BLOCK 1 - Copy this entire block to your MentorProfile.css file */
+/* ============================================
+   MentorProfile.css - BLOCK 2 of 6
+   Form Groups & Input Styling
+   ============================================ */
+
+/* Form Grid Layout (2 columns for side-by-side inputs) */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Individual Form Group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.form-group label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* Text Inputs */
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"] {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 0.875rem 1rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input:hover:not(:focus) {
+  border-color: var(--border-hover);
+}
+
+.form-group input::placeholder {
+  color: var(--text-subtle);
+}
+
+/* Textarea */
+.form-group textarea {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 0.875rem 1rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea:hover:not(:focus) {
+  border-color: var(--border-hover);
+}
+
+.form-group textarea::placeholder {
+  color: var(--text-subtle);
+}
+
+/* Price Input with Dollar Sign */
+.price-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.price-input .currency {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.price-input input {
+  padding-left: 2.25rem !important;
+}
+
+/* Number Input Arrows (Style them to match theme) */
+.form-group input[type="number"]::-webkit-inner-spin-button,
+.form-group input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+  height: 40px;
+}
+
+/* END OF BLOCK 2 - Copy this entire block below Block 1 */
+/* ============================================
+   MentorProfile.css - BLOCK 3 of 6
+   Availability Grid & Day Cards
+   ============================================ */
+
+/* Availability Grid - Shows all 7 days */
+.availability-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Individual Day Card */
+.day-card {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  transition: all 0.3s ease;
+}
+
+.day-card.available {
+  border-color: var(--accent-green);
+  background: var(--bg-secondary);
+}
+
+.day-card.unavailable {
+  opacity: 0.6;
+}
+
+.day-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Day Card Header (Title + Toggle) */
+.day-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.day-title {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+/* Toggle Switch Styling */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 28px;
+}
+
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-hover);
+  transition: 0.3s;
+  border-radius: 28px;
+  border: 2px solid var(--border-color);
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-input:checked + .toggle-slider {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.toggle-input:checked + .toggle-slider:before {
+  transform: translateX(28px);
+}
+
+.toggle-input:focus + .toggle-slider {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+/* Unavailable Message */
+.unavailable-message {
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.unavailable-text {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Empty Slots State */
+.empty-slots {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-lg);
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--border-color);
+}
+
+.empty-slots-text {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+/* Preset Buttons Container */
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+.preset-btn {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.preset-btn:hover {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* END OF BLOCK 3 - Copy this entire block below Block 2 */
+/* ============================================
+   MentorProfile.css - BLOCK 4 of 6
+   Time Slots & Timeline Visualization
+   ============================================ */
+
+/* Time Slots Container */
+.time-slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Individual Time Slot List */
+.slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Time Slot Item */
+.time-slot-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--bg-primary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-color);
+}
+
+/* Time Inputs Container */
+.time-inputs {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.time-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 140px;
+}
+
+.time-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-select {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  padding: 0.625rem 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.time-select:hover {
+  border-color: var(--border-hover);
+}
+
+.time-select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.time-separator {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  align-self: flex-end;
+  padding-bottom: 0.625rem;
+}
+
+/* Remove Time Slot Button */
+.remove-slot-btn {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  color: var(--text-muted);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.remove-slot-btn:hover {
+  background: var(--error);
+  border-color: var(--error);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Timeline Visualization */
+.timeline-container {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+}
+
+.timeline-bar {
+  position: relative;
+  height: 24px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+}
+
+.timeline-block {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: var(--accent-green);
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+}
+
+.timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Slot Actions (Add + Copy buttons) */
+.slot-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.add-slot-btn {
+  background: var(--bg-secondary);
+  border: 2px solid var(--accent-blue);
+  color: var(--accent-blue);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  transition: all 0.2s ease;
+}
+
+.add-slot-btn:hover {
+  background: var(--accent-blue);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Copy Menu */
+.copy-menu-container {
+  position: relative;
+}
+
+.copy-slots-btn {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  transition: all 0.2s ease;
+}
+
+.copy-slots-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.copy-dropdown {
+  position: absolute;
+  top: calc(100% + var(--spacing-xs));
+  left: 0;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  min-width: 140px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.copy-option {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.copy-option:hover {
+  background: var(--accent-blue);
+  color: white;
+}
+
+/* END OF BLOCK 4 - Copy this entire block below Block 3 */
+/* ============================================
+   MentorProfile.css - BLOCK 5 of 6
+   Buttons, Form Actions & Tips Section
+   ============================================ */
+
+/* Form Actions Container (Save button area) */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-2xl);
+  padding-top: var(--spacing-xl);
+  border-top: 2px solid var(--border-color);
+}
+
+/* Save Profile Button */
+.save-profile-btn {
+  background: var(--accent-green);
+  border: none;
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  letter-spacing: 0.3px;
+  min-width: 180px;
+}
+
+.save-profile-btn:hover:not(:disabled) {
+  background: var(--accent-green-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.save-profile-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.save-profile-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Availability Tips Section */
+.availability-tips {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+}
+
+.tips-title {
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-md) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.tips-title::before {
+  content: '💡';
+  font-size: 1.25rem;
+}
+
+.tips-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.tips-list li {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  padding-left: var(--spacing-lg);
+  position: relative;
+}
+
+.tips-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--accent-blue);
+  font-weight: 700;
+}
+
+/* Success/Error Messages (already inline styled, but adding classes for consistency) */
+.success-message {
+  padding: 1rem;
+  margin: 1rem 0;
+  background-color: #d1fae5;
+  border: 2px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  color: #065f46;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.error-message {
+  padding: 1rem;
+  margin: 1rem 0;
+  background-color: #fee2e2;
+  border: 2px solid var(--error);
+  border-radius: var(--radius-md);
+  color: #991b1b;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* Loading State for Save Button */
+.save-profile-btn .button-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+/* Focus States for Accessibility */
+.save-profile-btn:focus-visible,
+.add-slot-btn:focus-visible,
+.copy-slots-btn:focus-visible,
+.preset-btn:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* END OF BLOCK 5 - Copy this entire block below Block 4 */
+/* ============================================
+   MentorProfile.css - BLOCK 6 of 6 (FINAL)
+   Responsive Design for Tablets & Mobile
+   ============================================ */
+
+/* Tablet Responsive (768px and below) */
+@media (max-width: 768px) {
+  /* Profile Form */
+  .profile-form {
+    padding: var(--spacing-xl);
+  }
+
+  /* Tabs */
+  .mentor-profile-tabs {
+    gap: var(--spacing-sm);
+  }
+
+  .mentor-tab {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9375rem;
+  }
+
+  /* Form Grid - Stack to single column */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Section Headings */
+  .profile-section h3,
+  .availability-header h3 {
+    font-size: 1.25rem;
+  }
+
+  /* Time Slot Item */
+  .time-slot-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .time-inputs {
+    flex-direction: column;
+  }
+
+  .time-input-group {
+    min-width: 100%;
+  }
+
+  .time-separator {
+    align-self: center;
+    padding: 0;
+    font-size: 0.8125rem;
+  }
+
+  .remove-slot-btn {
+    align-self: flex-end;
+  }
+
+  /* Slot Actions */
+  .slot-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-slot-btn,
+  .copy-slots-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Copy Dropdown */
+  .copy-dropdown {
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+
+  /* Form Actions */
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .save-profile-btn {
+    width: 100%;
+  }
+}
+
+/* Mobile Responsive (480px and below) */
+@media (max-width: 480px) {
+  /* Profile Form */
+  .profile-form {
+    padding: var(--spacing-lg);
+  }
+
+  /* Tabs - Stack if needed */
+  .mentor-profile-tabs {
+    flex-wrap: wrap;
+  }
+
+  .mentor-tab {
+    flex: 1;
+    min-width: 120px;
+    padding: var(--spacing-sm);
+    font-size: 0.875rem;
+  }
+
+  /* Section Headings */
+  .profile-section h3,
+  .availability-header h3 {
+    font-size: 1.125rem;
+  }
+
+  .availability-header .availability-description {
+    font-size: 0.9375rem;
+  }
+
+  /* Day Card */
+  .day-card {
+    padding: var(--spacing-lg);
+  }
+
+  .day-title {
+    font-size: 1.125rem;
+  }
+
+  /* Preset Buttons - Full width on mobile */
+  .preset-buttons {
+    flex-direction: column;
+  }
+
+  .preset-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Timeline */
+  .timeline-container {
+    padding: var(--spacing-sm);
+  }
+
+  .timeline-bar {
+    height: 20px;
+  }
+
+  /* Time Slot Item */
+  .time-slot-item {
+    padding: var(--spacing-sm);
+  }
+
+  .time-select {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Remove Button */
+  .remove-slot-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Availability Tips */
+  .availability-tips {
+    padding: var(--spacing-lg);
+  }
+
+  .tips-title {
+    font-size: 1rem;
+  }
+
+  .tips-list li {
+    font-size: 0.875rem;
+    padding-left: var(--spacing-md);
+  }
+
+  /* Save Button */
+  .save-profile-btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Extra Small Devices (360px and below) */
+@media (max-width: 360px) {
+  .profile-form {
+    padding: var(--spacing-md);
+  }
+
+  .day-card {
+    padding: var(--spacing-md);
+  }
+
+  .mentor-tab {
+    font-size: 0.8125rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .day-title {
+    font-size: 1rem;
+  }
+
+  .toggle-switch {
+    width: 48px;
+    height: 24px;
+  }
+
+  .toggle-slider:before {
+    height: 16px;
+    width: 16px;
+  }
+
+  .toggle-input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .mentor-profile-tabs {
+    display: none;
+  }
+
+  .form-actions {
+    display: none;
+  }
+
+  .profile-form {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  .day-card {
+    break-inside: avoid;
+  }
+}
+
+/* Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* END OF BLOCK 6 - COMPLETE! 🎉 
+   All 6 blocks are now done. Your MentorProfile.css is complete! */
