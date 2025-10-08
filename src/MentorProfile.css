@@ -216,8 +216,10 @@
 
 /* END OF BLOCK 2 - Copy this entire block below Block 1 */
 /* ============================================
-   MentorProfile.css - BLOCK 3 of 6
+   /* ============================================
+   MentorProfile.css - BLOCK 3 UPDATED
    Availability Grid & Day Cards
+   COPY THIS ENTIRE BLOCK - REPLACE YOUR EXISTING BLOCK 3
    ============================================ */
 
 /* Availability Grid - Shows all 7 days */
@@ -250,11 +252,12 @@
   box-shadow: var(--shadow-md);
 }
 
-/* Day Card Header (Title + Toggle) */
+/* Day Card Header (Title + Toggle) - UPDATED */
 .day-card-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
 }
 
@@ -264,14 +267,22 @@
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.3px;
+  flex-shrink: 0;
 }
 
-/* Toggle Switch Styling */
+/* Toggle Switch Styling - ENHANCED */
 .toggle-switch {
   position: relative;
   display: inline-block;
   width: 56px;
   height: 28px;
+  flex-shrink: 0;
+}
+
+/* Add visual emphasis to active toggle */
+.day-card.available .toggle-switch {
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+  border-radius: 28px;
 }
 
 .toggle-input {
@@ -376,7 +387,7 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* END OF BLOCK 3 - Copy this entire block below Block 2 */
+/* END OF BLOCK 3 - Copy this entire block and replace your existing Block 3 */
 /* ============================================
    MentorProfile.css - BLOCK 4 of 6
    Time Slots & Timeline Visualization
