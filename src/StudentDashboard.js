@@ -7,6 +7,11 @@ import {
   onSnapshot,
   orderBy
 } from 'firebase/firestore';
+import { 
+  ButtonSpinner, 
+  SkeletonGrid,
+  SkeletonStatsCard 
+} from './LoadingComponents';
 
 // Video access helper functions with error handling
 const canAccessVideoSession = (booking) => {
@@ -117,6 +122,8 @@ const UserIcon = () => (
 );
 // Student Booking Card Component (with Video Support and Error Handling)
 const StudentBookingCard = ({ booking }) => {
+  const [joiningVideo, setJoiningVideo] = useState(false);
+
   const formatDate = (timestamp) => {
     try {
       if (!timestamp) return 'Just now';
@@ -158,10 +165,14 @@ const StudentBookingCard = ({ booking }) => {
         alert('Video link is not available. Please contact your mentor.');
         return;
       }
+      setJoiningVideo(true);
       window.open(booking.videoRoom.meetingUrl, '_blank');
+      // Reset after a short delay
+      setTimeout(() => setJoiningVideo(false), 2000);
     } catch (error) {
       console.error('Error joining video:', error);
       alert('Unable to open video session. Please try again.');
+      setJoiningVideo(false);
     }
   };
 
@@ -275,9 +286,16 @@ const StudentBookingCard = ({ booking }) => {
               <button 
                 className="join-video-btn"
                 onClick={handleJoinVideo}
+                disabled={joiningVideo}
               >
-                <VideoIcon />
-                Join Video Session
+                {joiningVideo ? (
+                  <ButtonSpinner />
+                ) : (
+                  <>
+                    <VideoIcon />
+                    Join Video Session
+                  </>
+                )}
               </button>
             ) : (
               <div className="video-waiting">
@@ -465,10 +483,27 @@ const StudentDashboard = ({ user }) => {
   if (loading) {
     return (
       <div className="dashboard-container">
-        <div className="loading-bookings">Loading your bookings...</div>
+        <div className="dashboard-header">
+          <div className="student-welcome">
+            <h1>Your Music Learning Journey</h1>
+            <p>Track your mentorship sessions and learning progress</p>
+          </div>
+        </div>
+
+        <div className="stats-grid">
+          <SkeletonStatsCard />
+          <SkeletonStatsCard />
+          <SkeletonStatsCard />
+          <SkeletonStatsCard />
+        </div>
+
+        <div className="bookings-section">
+          <SkeletonGrid count={3} />
+        </div>
       </div>
     );
   }
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
