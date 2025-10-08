@@ -22,21 +22,21 @@ import {
 
 // Icons
 const ClockIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <circle cx="12" cy="12" r="10"></circle>
     <polyline points="12,6 12,12 16,14"></polyline>
   </svg>
 );
 
 const VideoIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <polygon points="23 7 16 12 23 17 23 7"></polygon>
     <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
   </svg>
 );
 
 const CheckIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <polyline points="20,6 9,17 4,12"></polyline>
   </svg>
 );
@@ -49,7 +49,7 @@ const XIcon = () => (
 );
 
 const CalendarIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
     <line x1="16" y1="2" x2="16" y2="6"></line>
     <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -58,7 +58,7 @@ const CalendarIcon = () => (
 );
 
 const TrendingUpIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
     <polyline points="17 6 23 6 23 12"></polyline>
   </svg>
@@ -259,36 +259,28 @@ const BookingCard = ({ booking, onAccept, onDecline }) => {
     </div>
   );
 };
-// Enhanced Stats Component with Progress Bar and Color Variety
-const StatsCard = ({ title, value, subtitle, icon, color, progress }) => (
-  <div className="stats-card" style={{ '--card-accent': color }}>
+// Clickable Stats Component - No subtitle, just clean number and title
+const StatsCard = ({ title, value, icon, color, onClick, isActive }) => (
+  <button 
+    className={`stats-card ${isActive ? 'active' : ''}`}
+    style={{ '--card-accent': color }}
+    onClick={onClick}
+  >
     <div className="stats-icon" style={{ background: color }}>
       {icon}
     </div>
     <div className="stats-content">
       <div className="stats-value">{value}</div>
       <div className="stats-title">{title}</div>
-      {subtitle && <div className="stats-subtitle">{subtitle}</div>}
-      {progress !== undefined && (
-        <div className="stats-progress">
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${progress}%`, background: color }}
-            ></div>
-          </div>
-          <span className="progress-label">{progress}%</span>
-        </div>
-      )}
     </div>
-  </div>
+  </button>
 );
 
 // Main Mentor Dashboard Component
 const MentorDashboard = ({ user, mentorInfo }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('pending');
+  const [activeFilter, setActiveFilter] = useState('pending');
 
   useEffect(() => {
     if (!user || !mentorInfo) {
@@ -372,11 +364,6 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     }
   };
 
-  const filteredBookings = bookings.filter(booking => {
-    if (filter === 'all') return true;
-    return booking.status === filter;
-  });
-
   const stats = {
     pending: bookings.filter(b => b.status === 'pending').length,
     confirmed: bookings.filter(b => b.status === 'confirmed').length,
@@ -390,14 +377,30 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     }).length
   };
 
-  // Calculate completion rate for progress bar
-  const completionRate = stats.total > 0 
-    ? Math.round((stats.confirmed / stats.total) * 100) 
-    : 0;
+  // Filter bookings based on active stat card
+  const filteredBookings = bookings.filter(booking => {
+    if (activeFilter === 'pending') return booking.status === 'pending';
+    if (activeFilter === 'confirmed') return booking.status === 'confirmed';
+    if (activeFilter === 'thisMonth') {
+      if (!booking.createdAt) return false;
+      const bookingDate = booking.createdAt.toDate ? booking.createdAt.toDate() : new Date(booking.createdAt);
+      const thisMonth = new Date();
+      return bookingDate.getMonth() === thisMonth.getMonth() && 
+             bookingDate.getFullYear() === thisMonth.getFullYear();
+    }
+    return true; // 'all' shows everything
+  });
 
-  const responseRate = stats.total > 0
-    ? Math.round(((stats.confirmed + bookings.filter(b => b.status === 'declined').length) / stats.total) * 100)
-    : 0;
+  // Get section title based on active filter
+  const getSectionTitle = () => {
+    const titles = {
+      pending: 'Pending Requests',
+      confirmed: 'Confirmed Sessions',
+      thisMonth: 'This Month\'s Bookings',
+      all: 'All Bookings'
+    };
+    return titles[activeFilter] || 'Bookings';
+  };
 
   if (!mentorInfo) {
     return (
@@ -419,7 +422,7 @@ const MentorDashboard = ({ user, mentorInfo }) => {
         </div>
       </div>
 
-      {/* Enhanced Stats Section with Different Colors */}
+      {/* Clickable Stats Grid */}
       {loading ? (
         <div className="stats-grid">
           <SkeletonStatsCard />
@@ -432,67 +435,47 @@ const MentorDashboard = ({ user, mentorInfo }) => {
           <StatsCard
             title="Pending Requests"
             value={stats.pending}
-            subtitle="Awaiting your response"
             icon={<ClockIcon />}
             color="#f59e0b"
-            progress={stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}
+            onClick={() => setActiveFilter('pending')}
+            isActive={activeFilter === 'pending'}
           />
           <StatsCard
             title="Confirmed Sessions"
             value={stats.confirmed}
-            subtitle="Ready to go"
             icon={<CheckIcon />}
             color="#10b981"
-            progress={completionRate}
+            onClick={() => setActiveFilter('confirmed')}
+            isActive={activeFilter === 'confirmed'}
           />
           <StatsCard
             title="This Month"
             value={stats.thisMonth}
-            subtitle="Total requests"
             icon={<TrendingUpIcon />}
             color="#8b5cf6"
-            progress={stats.total > 0 ? Math.round((stats.thisMonth / stats.total) * 100) : 0}
+            onClick={() => setActiveFilter('thisMonth')}
+            isActive={activeFilter === 'thisMonth'}
           />
           <StatsCard
             title="All Time"
             value={stats.total}
-            subtitle="Total bookings"
             icon={<CalendarIcon />}
             color="#3b82f6"
-            progress={responseRate}
+            onClick={() => setActiveFilter('all')}
+            isActive={activeFilter === 'all'}
           />
         </div>
       )}
 
-      {/* Filter Tabs */}
-      <div className="filter-tabs">
-        <button 
-          className={filter === 'pending' ? 'active' : ''}
-          onClick={() => setFilter('pending')}
-        >
-          Pending ({stats.pending})
-        </button>
-        <button 
-          className={filter === 'confirmed' ? 'active' : ''}
-          onClick={() => setFilter('confirmed')}
-        >
-          Confirmed ({stats.confirmed})
-        </button>
-        <button 
-          className={filter === 'all' ? 'active' : ''}
-          onClick={() => setFilter('all')}
-        >
-          All Bookings ({stats.total})
-        </button>
-      </div>
-
-      {/* Bookings List */}
+      {/* Bookings List - Filtered by active card */}
       <div className="bookings-section">
+        <h2 className="section-heading">{getSectionTitle()}</h2>
+        
         {loading ? (
           <SkeletonGrid count={3} />
         ) : filteredBookings.length === 0 ? (
           <div className="no-bookings">
-            <h3>No {filter === 'all' ? '' : filter} bookings yet</h3>
+            <h3>No {activeFilter === 'all' ? '' : getSectionTitle().toLowerCase()} yet</h3>
             <p>When students book sessions with you, they'll appear here.</p>
           </div>
         ) : (
