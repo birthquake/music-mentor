@@ -3,6 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { getMentorProfile, createMentorProfile, DEFAULT_MENTOR_PROFILE } from './profileHelpers';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
+import { 
+  ButtonSpinner, 
+  FullPageLoading 
+} from './LoadingComponents';
 
 const MentorProfile = ({ user, mentorInfo }) => {
   const [profile, setProfile] = useState(DEFAULT_MENTOR_PROFILE);
@@ -419,9 +423,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
 
   if (loading) {
     return (
-      <div className="dashboard-container">
-        <div className="loading-bookings">Loading your mentor profile...</div>
-      </div>
+      <FullPageLoading message="Loading your mentor profile..." />
     );
   }
   return (
@@ -743,7 +745,14 @@ const MentorProfile = ({ user, mentorInfo }) => {
             className="save-profile-btn"
             disabled={saving}
           >
-            {saving ? 'Saving...' : hasProfile ? 'Update Profile' : 'Create Profile'}
+            {saving ? (
+              <>
+                <ButtonSpinner />
+                Saving...
+              </>
+            ) : (
+              hasProfile ? 'Update Profile' : 'Create Profile'
+            )}
           </button>
         </div>
       </form>
