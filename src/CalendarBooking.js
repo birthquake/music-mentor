@@ -5,6 +5,10 @@ import { getMentorBookings, checkSlotAvailability } from './availabilitySystem';
 import { getMentorProfile } from './profileHelpers';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
+import { 
+  ButtonSpinner, 
+  FullPageLoading 
+} from './LoadingComponents';
 import './MentorDashboard.css';
 
 // Icons
@@ -133,7 +137,6 @@ const TimeSelection = ({ selectedDate, availableSlots, onSelectTime, onBack, sel
     </div>
   );
 };
-
 // Step 3: Booking Details Component
 const BookingDetails = ({ 
   selectedDate, 
@@ -205,7 +208,14 @@ const BookingDetails = ({
 
         <div className="booking-actions">
           <button type="submit" className="confirm-btn" disabled={loading || !message.trim()}>
-            {loading ? 'Requesting...' : `Request Session ($${mentor?.rate})`}
+            {loading ? (
+              <>
+                <ButtonSpinner />
+                Requesting...
+              </>
+            ) : (
+              `Request Session ($${mentor?.rate})`
+            )}
           </button>
         </div>
       </form>
@@ -477,7 +487,7 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
         )}
 
         {loading ? (
-          <div className="loading-slots">Loading available times...</div>
+          <FullPageLoading message="Loading available times..." />
         ) : (
           <>
             {step === 'dates' && (
