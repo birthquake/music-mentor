@@ -120,9 +120,9 @@ const MentorProfile = ({ user, mentorInfo }) => {
       } else {
         setProfile({
           ...DEFAULT_MENTOR_PROFILE,
-          displayName: mentorInfo?.name || '',
-          firstName: mentorInfo?.name?.split(' ')[0] || '',
-          lastName: mentorInfo?.name?.split(' ')[1] || '',
+          displayName: mentorInfo?.displayName || '',
+firstName: mentorInfo?.displayName?.split(' ')[0] || '',
+lastName: mentorInfo?.displayName?.split(' ')[1] || '',
           rate: mentorInfo?.rate || 35,
           experience: mentorInfo?.experience || 0
         });
