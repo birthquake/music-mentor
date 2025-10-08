@@ -412,15 +412,15 @@ const MentorDashboard = ({ user, mentorInfo }) => {
       </div>
     );
   }
-
-  return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <div className="mentor-welcome">
-          <h1>Welcome back, {mentorInfo.name}!</h1>
-          <p>Manage your mentorship sessions and help musicians grow</p>
-        </div>
+  
+return (
+  <div className="dashboard-container">
+    <div className="dashboard-header">
+      <div className="mentor-welcome">
+        <h1>Hi, {mentorInfo.name?.split(' ')[0] || mentorInfo.name}!</h1>
       </div>
+    </div>
+
 
       {/* Clickable Stats Grid */}
       {loading ? (
