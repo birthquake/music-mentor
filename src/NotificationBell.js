@@ -1,7 +1,6 @@
-// NotificationBell.js - In-App Notification System
+// NotificationBell.js - In-App Notification System (FIXED VERSION)
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  subscribeToUnreadCount, 
   subscribeToNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead
@@ -60,26 +59,15 @@ const MessageIcon = () => (
    ============================================ */
 
 const NotificationBell = ({ user }) => {
-  const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  // Subscribe to unread count
-  useEffect(() => {
-    if (!user?.uid) {
-      setUnreadCount(0);
-      return;
-    }
-
-    const unsubscribe = subscribeToUnreadCount(user.uid, (count) => {
-      setUnreadCount(count);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
+  // Calculate unread count directly from notifications array
+  // This is the SINGLE SOURCE OF TRUTH - fixes the "mark all read" button issue!
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Subscribe to notifications
   useEffect(() => {
