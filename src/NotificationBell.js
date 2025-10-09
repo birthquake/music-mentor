@@ -133,8 +133,21 @@ const NotificationBell = ({ user }) => {
   };
 
   const handleMarkAllRead = async () => {
-    if (user?.uid) {
-      await markAllNotificationsAsRead(user.uid);
+    if (!user?.uid) return;
+    
+    try {
+      console.log('Marking all notifications as read for user:', user.uid);
+      const result = await markAllNotificationsAsRead(user.uid);
+      
+      if (!result.success) {
+        console.error('Failed to mark notifications as read:', result.error);
+        alert('Failed to mark notifications as read. Please try again.');
+      } else {
+        console.log('Successfully marked all notifications as read');
+      }
+    } catch (error) {
+      console.error('Error in handleMarkAllRead:', error);
+      alert('Error marking notifications as read. Please try again.');
     }
   };
 
@@ -238,5 +251,3 @@ const NotificationBell = ({ user }) => {
 };
 
 export default NotificationBell;
-
-/* END OF SECTION 2 - Create this as: src/NotificationBell.js */
