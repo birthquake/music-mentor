@@ -215,44 +215,14 @@ export const sendMessage = async (messageData) => {
       createdAt: serverTimestamp()
     });
 
-    // In notificationHelpers.js, REPLACE the sendMessage function with this:
-
-export const sendMessage = async (messageData) => {
-  try {
-    const {
-      bookingId,
-      senderId,
-      senderName,
-      receiverId,
-      receiverName,
-      message
-    } = messageData;
-
-    if (!bookingId || !senderId || !receiverId || !message) {
-      throw new Error('Missing required fields for message');
-    }
-
-    // Create the message
-    const messageRef = await addDoc(collection(db, 'messages'), {
-      bookingId,
-      senderId,
-      senderName,
-      receiverId,
-      receiverName,
-      message: message.trim(),
-      read: false,
-      createdAt: serverTimestamp()
-    });
-
     // Create notification for receiver
-    // FIXED: Use /my-bookings for students, /mentor-dashboard for mentors
     await createNotification({
       userId: receiverId,
       type: 'new_message',
       title: 'New Message',
       message: `${senderName} sent you a message`,
       bookingId,
-      actionUrl: '/my-bookings'  // ← CHANGED: simplified URL
+      actionUrl: '/my-bookings'
     });
 
     return {
@@ -366,5 +336,3 @@ export const markMessagesAsRead = async (bookingId, userId) => {
     };
   }
 };
-
-/* END OF SECTION 1 - Create this as a new file: src/notificationHelpers.js */
