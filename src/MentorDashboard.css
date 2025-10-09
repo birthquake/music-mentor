@@ -869,3 +869,110 @@ body {
     border: 1px solid #333;
   }
 }
+
+/* ============================================
+   Section 9: Message Button CSS (FINAL!)
+   Add this to the end of MentorDashboard.css
+   ============================================ */
+
+/* Message Button Container */
+.booking-message-btn-container {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Message Booking Button */
+.message-booking-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--accent-blue);
+  color: var(--accent-blue);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.3px;
+  position: relative;
+}
+
+.message-booking-btn:hover {
+  background: var(--accent-blue);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.message-booking-btn:active {
+  transform: translateY(0);
+}
+
+.message-booking-btn svg {
+  flex-shrink: 0;
+}
+
+/* Message Badge (unread count) */
+.message-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--error, #ef4444);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .message-booking-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-message-btn-container {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+  }
+
+  .message-booking-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .message-badge {
+    top: -6px;
+    right: -6px;
+    font-size: 0.5625rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 18px;
+    height: 18px;
+  }
+}
+
