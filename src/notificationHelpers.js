@@ -215,14 +215,14 @@ export const sendMessage = async (messageData) => {
       createdAt: serverTimestamp()
     });
 
-    // Create notification for receiver
+    // UPDATED: Create notification with auto-open URL
     await createNotification({
       userId: receiverId,
       type: 'new_message',
       title: 'New Message',
       message: `${senderName} sent you a message`,
       bookingId,
-      actionUrl: '/my-bookings'
+      actionUrl: `/my-bookings?booking=${bookingId}&openMessages=true`  // ← CHANGED!
     });
 
     return {
