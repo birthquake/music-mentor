@@ -20,7 +20,8 @@ import {
   SkeletonStatsCard,
   FullPageLoading
 } from './LoadingComponents';
-import { createNotification } from './notificationHelpers';
+import { createNotification, subscribeToUnreadMessages } from './notificationHelpers';
+import MessagingComponent from './MessagingComponent';
 
 // Icons
 const ClockIcon = () => (
@@ -66,10 +67,17 @@ const TrendingUpIcon = () => (
   </svg>
 );
 
+const MessageIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+  </svg>
+);
+
 // Booking Card Component
-const BookingCard = ({ booking, onAccept, onDecline }) => {
+const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
   const [loading, setLoading] = useState(false);
   const [studentName, setStudentName] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const getStudentName = async () => {
@@ -91,6 +99,19 @@ const BookingCard = ({ booking, onAccept, onDecline }) => {
 
     getStudentName();
   }, [booking.studentId, booking.userId]);
+
+  // Subscribe to unread message count
+  useEffect(() => {
+    if (!booking.id || !booking.mentorId) return;
+
+    const unsubscribe = subscribeToUnreadMessages(
+      booking.id, 
+      booking.mentorId, 
+      (count) => setUnreadCount(count)
+    );
+
+    return () => unsubscribe();
+  }, [booking.id, booking.mentorId]);
 
   const displayName = studentName || booking.studentName || booking.userEmail?.split('@')[0] || 'Student';
   const displayInitials = studentName ? 
@@ -238,6 +259,22 @@ const BookingCard = ({ booking, onAccept, onDecline }) => {
         </div>
       )}
 
+      {/* Message Button for Confirmed Bookings */}
+      {booking.status === 'confirmed' && (
+        <div className="booking-message-btn-container">
+          <button 
+            onClick={() => onOpenMessages(booking)}
+            className="message-booking-btn"
+          >
+            <MessageIcon />
+            Message Student
+            {unreadCount > 0 && (
+              <span className="message-badge">{unreadCount}</span>
+            )}
+          </button>
+        </div>
+      )}
+
       {booking.status === 'pending' && (
         <div className="booking-actions">
           <button 
@@ -285,6 +322,8 @@ const MentorDashboard = ({ user, mentorInfo }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('pending');
+  const [messagingOpen, setMessagingOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   // ✅ 2. useEffect HOOKS
   useEffect(() => {
@@ -329,60 +368,65 @@ const MentorDashboard = ({ user, mentorInfo }) => {
   }, [user, mentorInfo]);
 
   // ✅ 3. EVENT HANDLER FUNCTIONS
-const handleAcceptBooking = async (bookingId) => {
-  try {
-    const bookingRef = doc(db, 'bookings', bookingId);
-    const bookingSnap = await getDoc(bookingRef);
-    
-    if (!bookingSnap.exists()) {
-      throw new Error('Booking not found');
+  const handleAcceptBooking = async (bookingId) => {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      const bookingSnap = await getDoc(bookingRef);
+      
+      if (!bookingSnap.exists()) {
+        throw new Error('Booking not found');
+      }
+
+      const bookingData = bookingSnap.data();
+
+      // Confirm booking with video
+      const result = await confirmBookingWithVideo(bookingId);
+      console.log('Booking confirmed:', result.message);
+
+      // Create notification for student
+      await createNotification({
+        userId: bookingData.userId,
+        type: 'booking_confirmed',
+        title: 'Session Confirmed! 🎉',
+        message: `${mentorInfo.displayName || 'Your mentor'} confirmed your session request`,
+        bookingId: bookingId,
+        actionUrl: '/my-bookings'
+      });
+
+      alert('Session confirmed! The student will see the update in their dashboard.');
+
+    } catch (error) {
+      console.error('Error confirming booking:', error);
+      throw error;
     }
-
-    const bookingData = bookingSnap.data();
-
-    // Confirm booking with video
-    const result = await confirmBookingWithVideo(bookingId);
-    console.log('Booking confirmed:', result.message);
-
-    // Create notification for student
-    await createNotification({
-      userId: bookingData.userId,
-      type: 'booking_declined',
-      title: 'Session Update',
-      message: `${mentorInfo.displayName || 'Your mentor'} is unavailable for your session request. Try booking another mentor!`,
-      bookingId: bookingId,
-      actionUrl: '/'
-    });
-
-    console.log('Booking declined successfully');
-    alert('Session declined. The student will be notified in their dashboard.');
-
-  } catch (error) {
-    console.error('Error declining booking:', error);
-    throw error;
-  }
-};
-
-
+  };
 
   const handleDeclineBooking = async (bookingId) => {
-  try {
-    const bookingRef = doc(db, 'bookings', bookingId);
-    const bookingSnap = await getDoc(bookingRef);
-    
-    if (!bookingSnap.exists()) {
-      throw new Error('Booking not found');
-    }
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      const bookingSnap = await getDoc(bookingRef);
+      
+      if (!bookingSnap.exists()) {
+        throw new Error('Booking not found');
+      }
 
-    const bookingData = bookingSnap.data();
+      const bookingData = bookingSnap.data();
 
-    // Decline the booking
-    await updateDoc(bookingRef, {
-      status: 'declined',
-      declinedAt: Timestamp.now()
-    });
+      // Decline the booking
+      await updateDoc(bookingRef, {
+        status: 'declined',
+        declinedAt: Timestamp.now()
+      });
 
-
+      // Create notification for student
+      await createNotification({
+        userId: bookingData.userId,
+        type: 'booking_declined',
+        title: 'Session Update',
+        message: `${mentorInfo.displayName || 'Your mentor'} is unavailable for your session request. Try booking another mentor!`,
+        bookingId: bookingId,
+        actionUrl: '/'
+      });
 
       console.log('Booking declined successfully');
       alert('Session declined. The student will be notified in their dashboard.');
@@ -391,6 +435,16 @@ const handleAcceptBooking = async (bookingId) => {
       console.error('Error declining booking:', error);
       throw error;
     }
+  };
+
+  const handleOpenMessages = (booking) => {
+    setSelectedBooking(booking);
+    setMessagingOpen(true);
+  };
+
+  const handleCloseMessages = () => {
+    setMessagingOpen(false);
+    setSelectedBooking(null);
   };
 
   // ✅ 4. ALL CALCULATIONS
@@ -508,11 +562,22 @@ const handleAcceptBooking = async (bookingId) => {
                 booking={booking}
                 onAccept={handleAcceptBooking}
                 onDecline={handleDeclineBooking}
+                onOpenMessages={handleOpenMessages}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Messaging Component */}
+      {selectedBooking && (
+        <MessagingComponent
+          booking={selectedBooking}
+          user={user}
+          isOpen={messagingOpen}
+          onClose={handleCloseMessages}
+        />
+      )}
     </div>
   );
 };
