@@ -7,6 +7,7 @@ import {
   markAllNotificationsAsRead
 } from './notificationHelpers';
 import { useNavigate } from 'react-router-dom';
+import './NotificationBell.css';
 
 /* ============================================
    SVG ICONS
