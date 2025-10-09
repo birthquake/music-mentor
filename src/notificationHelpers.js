@@ -104,6 +104,7 @@ export const subscribeToNotifications = (userId, callback) => {
     collection(db, 'notifications'),
     where('userId', '==', userId),
     orderBy('createdAt', 'desc')
+    limit(20)
   );
 
   return onSnapshot(q, (snapshot) => {
