@@ -1,4 +1,4 @@
-// NotificationBell.js - In-App Notification System (FIXED VERSION)
+// NotificationBell.js - In-App Notification System (WITH EVENT TRIGGER)
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   subscribeToNotifications,
@@ -66,7 +66,6 @@ const NotificationBell = ({ user }) => {
   const navigate = useNavigate();
 
   // Calculate unread count directly from notifications array
-  // This is the SINGLE SOURCE OF TRUTH - fixes the "mark all read" button issue!
   const unreadCount = notifications.filter(n => !n.read).length;
 
   // Subscribe to notifications
@@ -112,12 +111,35 @@ const NotificationBell = ({ user }) => {
       await markNotificationAsRead(notification.id);
     }
 
-    // Navigate if there's an action URL
-    if (notification.actionUrl) {
-      navigate(notification.actionUrl);
-    }
-
+    // Close dropdown
     setIsOpen(false);
+
+    // Handle navigation and event dispatch
+    if (notification.actionUrl) {
+      const currentPath = window.location.pathname;
+      const urlParts = notification.actionUrl.split('?');
+      const targetPath = urlParts[0];
+      const params = urlParts[1];
+
+      // If it's a message notification and has booking params
+      if (notification.type === 'new_message' && params) {
+        const searchParams = new URLSearchParams(params);
+        const bookingId = searchParams.get('booking');
+
+        if (currentPath === targetPath) {
+          // Already on the page - dispatch custom event to open modal
+          window.dispatchEvent(new CustomEvent('openBookingMessage', {
+            detail: { bookingId }
+          }));
+        } else {
+          // Navigate to the page - the URL params will trigger auto-open
+          navigate(notification.actionUrl);
+        }
+      } else {
+        // Regular navigation for non-message notifications
+        navigate(notification.actionUrl);
+      }
+    }
   };
 
   const handleMarkAllRead = async () => {
