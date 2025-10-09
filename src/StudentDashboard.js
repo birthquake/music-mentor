@@ -7,6 +7,7 @@ import {
   onSnapshot,
   orderBy
 } from 'firebase/firestore';
+import { useLocation } from 'react-router-dom';  // NEW IMPORT
 import { 
   ButtonSpinner, 
   SkeletonGrid,
@@ -16,6 +17,7 @@ import { subscribeToUnreadMessages } from './notificationHelpers';
 import MessagingComponent from './MessagingComponent';
 import './MentorDashboard.css';
 
+// CSS FIX for notification navigation
 if (typeof document !== 'undefined') {
   const styleSheet = document.createElement("style");
   styleSheet.textContent = `
@@ -33,7 +35,6 @@ if (typeof document !== 'undefined') {
     document.head.appendChild(styleSheet);
   }
 }
-
 
 // Video access helper functions with error handling
 const canAccessVideoSession = (booking) => {
@@ -433,6 +434,9 @@ const StudentDashboard = ({ user }) => {
   const [error, setError] = useState(null);
   const [messagingOpen, setMessagingOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  
+  // NEW: Get location to read URL parameters
+  const location = useLocation();
 
   useEffect(() => {
     if (!user) {
@@ -511,6 +515,30 @@ const StudentDashboard = ({ user }) => {
       setLoading(false);
     }
   }, [user]);
+
+  // NEW: Auto-open messages when navigating from notification
+  useEffect(() => {
+    if (!bookings.length || loading) return;
+
+    const searchParams = new URLSearchParams(location.search);
+    const bookingId = searchParams.get('booking');
+    const shouldOpenMessages = searchParams.get('openMessages');
+
+    if (bookingId && shouldOpenMessages === 'true') {
+      // Find the booking
+      const booking = bookings.find(b => b.id === bookingId);
+      
+      if (booking) {
+        console.log('Auto-opening messages for booking:', bookingId);
+        // Open the messaging modal
+        setSelectedBooking(booking);
+        setMessagingOpen(true);
+        
+        // Clean up URL (remove query params)
+        window.history.replaceState({}, '', '/my-bookings');
+      }
+    }
+  }, [bookings, loading, location.search]);
 
   const handleOpenMessages = (booking) => {
     setSelectedBooking(booking);
