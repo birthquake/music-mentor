@@ -26,6 +26,7 @@ import MentorDashboard from './MentorDashboard';
 import StudentDashboard from './StudentDashboard';
 import './App.css';
 import './MentorDashboard.css';
+import NotificationBell from './NotificationBell';
 
 // Icons
 const StarIcon = ({ filled = false }) => (
@@ -250,51 +251,57 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
           
           <div className="header-actions">
             {user ? (
-              <div className="user-menu">
-                <div className="user-menu-button" onClick={toggleDropdown}>
-                  <div className="hamburger-icon">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+              <>
+                {/* Notification Bell - NEW! */}
+                <NotificationBell user={user} />
+                
+                {/* User Menu */}
+                <div className="user-menu">
+                  <div className="user-menu-button" onClick={toggleDropdown}>
+                    <div className="hamburger-icon">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                  <div className={`user-dropdown ${dropdownOpen ? 'active' : ''}`}>
+                    <Link 
+                      to={mentorInfo ? "/mentor-profile" : "/profile"}
+                      className="dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                      {mentorInfo ? 'Mentor Profile' : 'My Profile'}
+                    </Link>
+                    
+                    <Link 
+                      to={mentorInfo ? "/mentor-dashboard" : "/my-bookings"}
+                      className="dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                      </svg>
+                      {mentorInfo ? 'Mentor Dashboard' : 'My Bookings'}
+                    </Link>
+                    
+                    <button 
+                      className="dropdown-item"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        onSignOut();
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2z"/>
+                      </svg>
+                      Sign Out
+                    </button>
                   </div>
                 </div>
-                <div className={`user-dropdown ${dropdownOpen ? 'active' : ''}`}>
-                  <Link 
-                    to={mentorInfo ? "/mentor-profile" : "/profile"}
-                    className="dropdown-item"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                    {mentorInfo ? 'Mentor Profile' : 'My Profile'}
-                  </Link>
-                  
-                  <Link 
-                    to={mentorInfo ? "/mentor-dashboard" : "/my-bookings"}
-                    className="dropdown-item"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-                    </svg>
-                    {mentorInfo ? 'Mentor Dashboard' : 'My Bookings'}
-                  </Link>
-                  
-                  <button 
-                    className="dropdown-item"
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      onSignOut();
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2z"/>
-                    </svg>
-                    Sign Out
-                  </button>
-                </div>
-              </div>
+              </>
             ) : (
               <button onClick={onAuthClick} className="sign-in-btn">
                 Sign In
