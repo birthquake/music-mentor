@@ -224,7 +224,7 @@ export const sendMessage = async (messageData) => {
       title: 'New Message',
       message: `${senderName} sent you a message`,
       bookingId,
-      actionUrl: '/my-bookings?booking=HARDCODED_TEST_12345&openMessages=true'
+      actionUrl: '/my-bookings?booking=' + bookingId + '&openMessages=true'
     });
 
     return {
