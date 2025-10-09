@@ -7,7 +7,7 @@ import {
   onSnapshot,
   orderBy
 } from 'firebase/firestore';
-import { useLocation } from 'react-router-dom';  // NEW IMPORT
+import { useLocation } from 'react-router-dom';
 import { 
   ButtonSpinner, 
   SkeletonGrid,
@@ -36,7 +36,7 @@ if (typeof document !== 'undefined') {
   }
 }
 
-// Video access helper functions with error handling
+// Video access helper functions
 const canAccessVideoSession = (booking) => {
   try {
     if (!booking.videoRoom || booking.status !== 'confirmed') {
@@ -160,7 +160,6 @@ const StudentBookingCard = ({ booking, onOpenMessages }) => {
   const [joiningVideo, setJoiningVideo] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Subscribe to unread message count
   useEffect(() => {
     if (!booking.id || !booking.userId) return;
 
@@ -390,7 +389,6 @@ const StudentBookingCard = ({ booking, onOpenMessages }) => {
         )}
       </div>
 
-      {/* Message Button for Confirmed Bookings */}
       {booking.status === 'confirmed' && (
         <div className="booking-message-btn-container">
           <button 
@@ -435,88 +433,39 @@ const StudentDashboard = ({ user }) => {
   const [messagingOpen, setMessagingOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   
-  // NEW: Get location to read URL parameters
   const location = useLocation();
 
+  // Load bookings
   useEffect(() => {
-    if (!user) {
-      console.log('No user found for student dashboard');
+    if (!user || !user.uid) {
       setLoading(false);
       return;
     }
 
-    if (!user.uid) {
-      console.error('User missing UID');
-      setError('User information is incomplete. Please log in again.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const q = collection(db, 'bookings');
-
-      const unsubscribe = onSnapshot(
-        q, 
-        (querySnapshot) => {
-          try {
-            const bookingData = [];
-            
-            querySnapshot.forEach((doc) => {
-              try {
-                const data = doc.data();
-                
-                if (data.userId === user.uid) {
-                  bookingData.push({
-                    id: doc.id,
-                    ...data
-                  });
-                }
-              } catch (docError) {
-                console.error('Error processing booking document:', doc.id, docError);
-              }
-            });
-            
-            try {
-              bookingData.sort((a, b) => {
-                const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
-                const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
-                return dateB - dateA;
-              });
-            } catch (sortError) {
-              console.error('Error sorting bookings:', sortError);
-            }
-            
-            setBookings(bookingData);
-            setError(null);
-            setLoading(false);
-          } catch (snapshotError) {
-            console.error('Error processing snapshot:', snapshotError);
-            setError('Error loading bookings. Please refresh the page.');
-            setLoading(false);
-          }
-        },
-        (error) => {
-          console.error('Error getting student bookings:', error);
-          setError('Unable to load bookings. Please check your connection and try again.');
-          setLoading(false);
+    const q = collection(db, 'bookings');
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const bookingData = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.userId === user.uid) {
+          bookingData.push({ id: doc.id, ...data });
         }
-      );
-
-      return () => {
-        try {
-          unsubscribe();
-        } catch (unsubError) {
-          console.error('Error unsubscribing:', unsubError);
-        }
-      };
-    } catch (error) {
-      console.error('Error setting up bookings listener:', error);
-      setError('Failed to connect to bookings. Please refresh the page.');
+      });
+      
+      bookingData.sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+        return dateB - dateA;
+      });
+      
+      setBookings(bookingData);
       setLoading(false);
-    }
+    });
+
+    return () => unsubscribe();
   }, [user]);
 
-  // NEW: Auto-open messages when navigating from notification
+  // Auto-open from URL params (first time navigation)
   useEffect(() => {
     if (!bookings.length || loading) return;
 
@@ -525,20 +474,34 @@ const StudentDashboard = ({ user }) => {
     const shouldOpenMessages = searchParams.get('openMessages');
 
     if (bookingId && shouldOpenMessages === 'true') {
-      // Find the booking
       const booking = bookings.find(b => b.id === bookingId);
       
       if (booking) {
-        console.log('Auto-opening messages for booking:', bookingId);
-        // Open the messaging modal
         setSelectedBooking(booking);
         setMessagingOpen(true);
-        
-        // Clean up URL (remove query params)
         window.history.replaceState({}, '', '/my-bookings');
       }
     }
   }, [bookings, loading, location.search]);
+
+  // Listen for custom event (when already on page) - THE FIX!
+  useEffect(() => {
+    const handleOpenMessage = (event) => {
+      const { bookingId } = event.detail;
+      
+      if (!bookingId || !bookings.length) return;
+      
+      const booking = bookings.find(b => b.id === bookingId);
+      
+      if (booking) {
+        setSelectedBooking(booking);
+        setMessagingOpen(true);
+      }
+    };
+
+    window.addEventListener('openBookingMessage', handleOpenMessage);
+    return () => window.removeEventListener('openBookingMessage', handleOpenMessage);
+  }, [bookings]);
 
   const handleOpenMessages = (booking) => {
     setSelectedBooking(booking);
@@ -557,20 +520,13 @@ const StudentDashboard = ({ user }) => {
     total: bookings.length
   };
 
-  // Filter bookings based on active stat card
   const filteredBookings = bookings.filter(booking => {
-    try {
-      if (activeFilter === 'pending') return booking.status === 'pending';
-      if (activeFilter === 'confirmed') return booking.status === 'confirmed';
-      if (activeFilter === 'completed') return booking.status === 'completed';
-      return true; // 'all' shows everything
-    } catch (error) {
-      console.error('Error filtering booking:', booking, error);
-      return false;
-    }
+    if (activeFilter === 'pending') return booking.status === 'pending';
+    if (activeFilter === 'confirmed') return booking.status === 'confirmed';
+    if (activeFilter === 'completed') return booking.status === 'completed';
+    return true;
   });
 
-  // Get section title based on active filter
   const getSectionTitle = () => {
     const titles = {
       pending: 'Awaiting Response',
@@ -600,14 +556,12 @@ const StudentDashboard = ({ user }) => {
             <h1>Hi, {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'there'}!</h1>
           </div>
         </div>
-
         <div className="stats-grid">
           <SkeletonStatsCard />
           <SkeletonStatsCard />
           <SkeletonStatsCard />
           <SkeletonStatsCard />
         </div>
-
         <div className="bookings-section">
           <SkeletonGrid count={3} />
         </div>
@@ -623,20 +577,6 @@ const StudentDashboard = ({ user }) => {
         </div>
       </div>
 
-      {error && (
-        <div style={{
-          padding: '1rem',
-          margin: '1rem 0',
-          backgroundColor: '#fee2e2',
-          border: '1px solid #ef4444',
-          borderRadius: '8px',
-          color: '#991b1b'
-        }}>
-          {error}
-        </div>
-      )}
-
-      {/* Clickable Stats Grid */}
       <div className="stats-grid">
         <StudentStatsCard
           title="Awaiting Response"
@@ -672,7 +612,6 @@ const StudentDashboard = ({ user }) => {
         />
       </div>
 
-      {/* Bookings List - Filtered by active card */}
       <div className="bookings-section">
         <h2 className="section-heading">{getSectionTitle()}</h2>
         
@@ -699,7 +638,6 @@ const StudentDashboard = ({ user }) => {
         )}
       </div>
 
-      {/* Messaging Component */}
       {selectedBooking && (
         <MessagingComponent
           booking={selectedBooking}
