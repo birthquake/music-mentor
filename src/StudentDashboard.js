@@ -12,7 +12,9 @@ import {
   SkeletonGrid,
   SkeletonStatsCard 
 } from './LoadingComponents';
-import './MentorDashboard.css';  // ← ADD THIS LINE
+import { subscribeToUnreadMessages } from './notificationHelpers';
+import MessagingComponent from './MessagingComponent';
+import './MentorDashboard.css';
 
 // Video access helper functions with error handling
 const canAccessVideoSession = (booking) => {
@@ -127,9 +129,29 @@ const TrendingUpIcon = () => (
   </svg>
 );
 
+const MessageIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+  </svg>
+);
+
 // Student Booking Card Component
-const StudentBookingCard = ({ booking }) => {
+const StudentBookingCard = ({ booking, onOpenMessages }) => {
   const [joiningVideo, setJoiningVideo] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Subscribe to unread message count
+  useEffect(() => {
+    if (!booking.id || !booking.userId) return;
+
+    const unsubscribe = subscribeToUnreadMessages(
+      booking.id, 
+      booking.userId, 
+      (count) => setUnreadCount(count)
+    );
+
+    return () => unsubscribe();
+  }, [booking.id, booking.userId]);
 
   const formatDate = (timestamp) => {
     try {
@@ -347,6 +369,22 @@ const StudentBookingCard = ({ booking }) => {
           </div>
         )}
       </div>
+
+      {/* Message Button for Confirmed Bookings */}
+      {booking.status === 'confirmed' && (
+        <div className="booking-message-btn-container">
+          <button 
+            onClick={() => onOpenMessages(booking)}
+            className="message-booking-btn"
+          >
+            <MessageIcon />
+            Message Mentor
+            {unreadCount > 0 && (
+              <span className="message-badge">{unreadCount}</span>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -374,6 +412,8 @@ const StudentDashboard = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('pending');
   const [error, setError] = useState(null);
+  const [messagingOpen, setMessagingOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -452,6 +492,16 @@ const StudentDashboard = ({ user }) => {
       setLoading(false);
     }
   }, [user]);
+
+  const handleOpenMessages = (booking) => {
+    setSelectedBooking(booking);
+    setMessagingOpen(true);
+  };
+
+  const handleCloseMessages = () => {
+    setMessagingOpen(false);
+    setSelectedBooking(null);
+  };
 
   const stats = {
     pending: bookings.filter(b => b.status === 'pending').length,
@@ -595,11 +645,22 @@ const StudentDashboard = ({ user }) => {
               <StudentBookingCard
                 key={booking.id}
                 booking={booking}
+                onOpenMessages={handleOpenMessages}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Messaging Component */}
+      {selectedBooking && (
+        <MessagingComponent
+          booking={selectedBooking}
+          user={user}
+          isOpen={messagingOpen}
+          onClose={handleCloseMessages}
+        />
+      )}
     </div>
   );
 };
