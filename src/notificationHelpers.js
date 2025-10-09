@@ -103,7 +103,7 @@ export const subscribeToNotifications = (userId, callback) => {
   const q = query(
     collection(db, 'notifications'),
     where('userId', '==', userId),
-    orderBy('createdAt', 'desc')
+    orderBy('createdAt', 'desc'),
     limit(20)
   );
 
