@@ -16,6 +16,25 @@ import { subscribeToUnreadMessages } from './notificationHelpers';
 import MessagingComponent from './MessagingComponent';
 import './MentorDashboard.css';
 
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = `
+    body {
+      background: var(--bg-primary, #0f172a) !important;
+      min-height: 100vh;
+    }
+    .App {
+      background: var(--bg-primary, #0f172a) !important;
+      min-height: 100vh;
+    }
+  `;
+  if (!document.head.querySelector('style[data-student-dashboard]')) {
+    styleSheet.setAttribute('data-student-dashboard', 'true');
+    document.head.appendChild(styleSheet);
+  }
+}
+
+
 // Video access helper functions with error handling
 const canAccessVideoSession = (booking) => {
   try {
