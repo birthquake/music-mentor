@@ -20,6 +20,7 @@ import {
   SkeletonStatsCard,
   FullPageLoading
 } from './LoadingComponents';
+import { createNotification } from './notificationHelpers';
 
 // Icons
 const ClockIcon = () => (
@@ -328,38 +329,60 @@ const MentorDashboard = ({ user, mentorInfo }) => {
   }, [user, mentorInfo]);
 
   // ✅ 3. EVENT HANDLER FUNCTIONS
-  const handleAcceptBooking = async (bookingId) => {
-    try {
-      const bookingRef = doc(db, 'bookings', bookingId);
-      const bookingSnap = await getDoc(bookingRef);
-      
-      if (!bookingSnap.exists()) {
-        throw new Error('Booking not found');
-      }
-
-      const result = await confirmBookingWithVideo(bookingId);
-      console.log('Booking confirmed:', result.message);
-      alert('Session confirmed! The student will see the update in their dashboard.');
-
-    } catch (error) {
-      console.error('Error confirming booking:', error);
-      throw error;
+const handleAcceptBooking = async (bookingId) => {
+  try {
+    const bookingRef = doc(db, 'bookings', bookingId);
+    const bookingSnap = await getDoc(bookingRef);
+    
+    if (!bookingSnap.exists()) {
+      throw new Error('Booking not found');
     }
-  };
+
+    const bookingData = bookingSnap.data();
+
+    // Confirm booking with video
+    const result = await confirmBookingWithVideo(bookingId);
+    console.log('Booking confirmed:', result.message);
+
+    // Create notification for student
+    await createNotification({
+      userId: bookingData.userId,
+      type: 'booking_declined',
+      title: 'Session Update',
+      message: `${mentorInfo.displayName || 'Your mentor'} is unavailable for your session request. Try booking another mentor!`,
+      bookingId: bookingId,
+      actionUrl: '/'
+    });
+
+    console.log('Booking declined successfully');
+    alert('Session declined. The student will be notified in their dashboard.');
+
+  } catch (error) {
+    console.error('Error declining booking:', error);
+    throw error;
+  }
+};
+
+
 
   const handleDeclineBooking = async (bookingId) => {
-    try {
-      const bookingRef = doc(db, 'bookings', bookingId);
-      const bookingSnap = await getDoc(bookingRef);
-      
-      if (!bookingSnap.exists()) {
-        throw new Error('Booking not found');
-      }
+  try {
+    const bookingRef = doc(db, 'bookings', bookingId);
+    const bookingSnap = await getDoc(bookingRef);
+    
+    if (!bookingSnap.exists()) {
+      throw new Error('Booking not found');
+    }
 
-      await updateDoc(bookingRef, {
-        status: 'declined',
-        declinedAt: Timestamp.now()
-      });
+    const bookingData = bookingSnap.data();
+
+    // Decline the booking
+    await updateDoc(bookingRef, {
+      status: 'declined',
+      declinedAt: Timestamp.now()
+    });
+
+
 
       console.log('Booking declined successfully');
       alert('Session declined. The student will be notified in their dashboard.');
