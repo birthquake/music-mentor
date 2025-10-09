@@ -12,7 +12,7 @@ import {
   serverTimestamp,
   getDocs,
   Timestamp,
-  limit  // ← ADDED THIS IMPORT
+  limit
 } from 'firebase/firestore';
 
 /* ============================================
@@ -104,8 +104,8 @@ export const subscribeToNotifications = (userId, callback) => {
   const q = query(
     collection(db, 'notifications'),
     where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),  // ← ADDED COMMA HERE
-    limit(20)  // ← Shows only 20 most recent notifications
+    orderBy('createdAt', 'desc'),
+    limit(20)
   );
 
   return onSnapshot(q, (snapshot) => {
@@ -217,14 +217,14 @@ export const sendMessage = async (messageData) => {
       createdAt: serverTimestamp()
     });
 
-    // Create notification with auto-open URL
+    // HARDCODED TEST - THIS SHOULD APPEAR IN FIREBASE!
     await createNotification({
       userId: receiverId,
       type: 'new_message',
       title: 'New Message',
       message: `${senderName} sent you a message`,
       bookingId,
-      actionUrl: `/my-bookings?booking=${bookingId}&openMessages=true`
+      actionUrl: '/my-bookings?booking=HARDCODED_TEST_12345&openMessages=true'
     });
 
     return {
