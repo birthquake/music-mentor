@@ -15,7 +15,9 @@ import {
   useToast
 } from './LoadingComponents';
 import { subscribeToUnreadMessages } from './notificationHelpers';
+import { getUserProfile } from './profileHelpers';
 import MessagingComponent from './MessagingComponent';
+import { ProfileCompletionBar } from './UserProfile';
 import './MentorDashboard.css';
 
 /* ============================================
@@ -470,8 +472,23 @@ const StudentDashboard = ({ user }) => {
   const [error, setError] = useState(null);
   const [messagingOpen, setMessagingOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   
   const location = useLocation();
+
+  // Load student profile for completion bar
+  useEffect(() => {
+    if (!user?.uid) return;
+    const loadProfile = async () => {
+      try {
+        const result = await getUserProfile(user.uid);
+        if (result.success) setUserProfile(result.profile);
+      } catch (err) {
+        console.error('Error loading user profile:', err);
+      }
+    };
+    loadProfile();
+  }, [user]);
 
   useEffect(() => {
     if (!user || !user.uid) {
@@ -609,6 +626,9 @@ const StudentDashboard = ({ user }) => {
           <h1>Hi, {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'there'}!</h1>
         </div>
       </div>
+
+      {/* Profile completion nudge */}
+      {userProfile && <ProfileCompletionBar profile={userProfile} compact />}
 
       <div className="stats-grid">
         <StudentStatsCard
