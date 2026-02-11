@@ -1142,3 +1142,69 @@ a:focus-visible {
   background: var(--accent-primary);
   color: white;
 }
+
+/* ============================================
+   TOUCH TARGET IMPROVEMENTS (Mobile)
+   Ensures minimum 44x44px tap targets
+   ============================================ */
+@media (max-width: 768px) {
+  /* Time slot buttons in CalendarBooking */
+  .time-option {
+    min-height: 44px;
+    min-width: 80px;
+    padding: 0.625rem 1rem;
+  }
+
+  /* Date option buttons */
+  .date-option {
+    min-height: 52px;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Stats cards used as filter buttons */
+  .stats-card {
+    min-height: 48px;
+  }
+
+  /* Filter pills / tags */
+  .detail-tag,
+  .mentor-tag {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+  }
+
+  /* All interactive buttons */
+  button, 
+  a.dropdown-item,
+  .back-button,
+  .preset-btn,
+  .add-slot-btn,
+  .copy-slots-btn {
+    min-height: 44px;
+  }
+
+  /* Booking action buttons — wider touch target */
+  .confirm-btn,
+  .decline-btn,
+  .sidebar-book-btn {
+    min-height: 48px;
+    padding: 0.75rem 1.25rem;
+  }
+
+  /* Toggle container */
+  .toggle-container {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Checkbox labels */
+  .checkbox-label {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+}
