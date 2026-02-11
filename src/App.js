@@ -26,6 +26,7 @@ import MentorProfile from './MentorProfile';
 import CalendarBooking from './CalendarBooking';
 import MentorDashboard from './MentorDashboard';
 import StudentDashboard from './StudentDashboard';
+import MentorDetailPage from './MentorDetailPage';
 import NotificationBell from './NotificationBell';
 import './App.css';
 import './MentorDashboard.css';
@@ -320,7 +321,11 @@ const MentorCard = ({ mentor, onBook, user }) => {
           {mentor.name.split(' ').map(n => n[0]).join('')}
         </div>
         <div className="mentor-basic-info">
-          <h3>{mentor.name}</h3>
+          <h3>
+              <Link to={`/mentor/${mentor.userId || mentor.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                {mentor.name}
+              </Link>
+            </h3>
           <div className="mentor-rating">
             {renderStars(mentor.rating)}
             <span className="rating-text">({mentor.reviewCount})</span>
@@ -712,6 +717,15 @@ function App() {
             <Route 
               path="/mentor-profile" 
               element={<MentorProfile user={user} mentorInfo={mentorInfo} />} 
+            />
+            <Route 
+              path="/mentor/:mentorId" 
+              element={
+                <MentorDetailPage 
+                  user={user} 
+                  onAuthClick={() => setShowAuthModal(true)} 
+                />
+              } 
             />
             <Route 
               path="/my-bookings" 
