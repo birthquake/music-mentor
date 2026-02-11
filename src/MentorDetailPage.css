@@ -1,0 +1,471 @@
+/* ============================================
+   MentorDetailPage.css
+   Public-facing mentor profile page
+   ============================================ */
+
+.mentor-detail-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-lg);
+  min-height: 80vh;
+}
+
+/* Back Link */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: var(--spacing-xl);
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--accent-blue);
+}
+
+/* Not Found */
+.mentor-not-found {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.mentor-not-found h2 {
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.mentor-not-found p {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xl);
+}
+
+.back-to-browse {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ============================================
+   TWO-COLUMN LAYOUT
+   ============================================ */
+.mentor-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+/* ============================================
+   LEFT COLUMN — PROFILE INFO
+   ============================================ */
+.mentor-detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* Hero */
+.mentor-detail-hero {
+  display: flex;
+  gap: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.mentor-detail-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-lg);
+}
+
+.mentor-detail-intro {
+  flex: 1;
+  min-width: 0;
+}
+
+.mentor-detail-intro h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.5px;
+}
+
+.mentor-tagline {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: 1.5;
+}
+
+.mentor-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.meta-item svg {
+  flex-shrink: 0;
+}
+
+.rating-value {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rating-count {
+  color: var(--text-muted);
+}
+
+/* Tags */
+.mentor-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.detail-tag {
+  padding: 0.375rem 0.875rem;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent-blue-light);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* Content Sections */
+.detail-section {
+  padding: var(--spacing-xl);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.detail-section h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+  letter-spacing: -0.25px;
+}
+
+.mentor-bio {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 0.9375rem;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Achievements */
+.achievements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.achievements-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.achievements-list li svg {
+  color: var(--accent-green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Availability Summary */
+.availability-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.avail-day {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.avail-day:last-child {
+  border-bottom: none;
+}
+
+.avail-day-name {
+  width: 40px;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.avail-day.unavailable .avail-day-name {
+  color: var(--text-subtle);
+}
+
+.avail-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.avail-time {
+  font-size: 0.8125rem;
+  color: var(--accent-green-light);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.avail-off {
+  font-size: 0.8125rem;
+  color: var(--text-subtle);
+}
+
+/* Social Links */
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.social-link:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue-light);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+/* ============================================
+   RIGHT COLUMN — STICKY BOOKING CARD
+   ============================================ */
+.mentor-detail-sidebar {
+  position: sticky;
+  top: calc(var(--spacing-xl) + 64px); /* below header */
+}
+
+.booking-sidebar-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.sidebar-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-rate {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -1px;
+}
+
+.sidebar-per {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.sidebar-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.sidebar-highlight-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.sidebar-highlight-item svg {
+  color: var(--accent-green);
+  flex-shrink: 0;
+}
+
+.sidebar-book-btn {
+  width: 100%;
+  padding: 1rem;
+  background: var(--accent-green);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.sidebar-book-btn:hover {
+  background: var(--accent-green-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.sidebar-book-btn:active {
+  transform: translateY(0);
+}
+
+.sidebar-guarantee {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+  margin: var(--spacing-md) 0 0 0;
+}
+
+/* ============================================
+   RESPONSIVE — TABLET
+   ============================================ */
+@media (max-width: 900px) {
+  .mentor-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .mentor-detail-sidebar {
+    position: static;
+  }
+
+  /* Move booking card to top on mobile */
+  .mentor-detail-sidebar {
+    order: -1;
+  }
+
+  .booking-sidebar-card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    align-items: center;
+  }
+
+  .sidebar-price {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+    flex: 1;
+  }
+
+  .sidebar-highlights {
+    display: none;
+  }
+
+  .sidebar-book-btn {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0.75rem 2rem;
+  }
+
+  .sidebar-guarantee {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — MOBILE
+   ============================================ */
+@media (max-width: 640px) {
+  .mentor-detail-container {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .mentor-detail-hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .mentor-detail-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 1.5rem;
+  }
+
+  .mentor-detail-intro h1 {
+    font-size: 1.5rem;
+  }
+
+  .mentor-detail-meta {
+    justify-content: center;
+  }
+
+  .mentor-detail-tags {
+    justify-content: center;
+  }
+
+  .booking-sidebar-card {
+    flex-direction: column;
+  }
+
+  .sidebar-book-btn {
+    width: 100%;
+  }
+
+  .detail-section {
+    padding: var(--spacing-lg);
+  }
+}
