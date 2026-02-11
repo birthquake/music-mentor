@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db } from './firebase';
 import { 
   collection, 
@@ -18,6 +18,7 @@ import { subscribeToUnreadMessages } from './notificationHelpers';
 import { getUserProfile } from './profileHelpers';
 import MessagingComponent from './MessagingComponent';
 import { ProfileCompletionBar } from './UserProfile';
+import { playConfirmSound, playDeclineSound, playNotificationSound } from './notificationSounds';
 import './MentorDashboard.css';
 
 /* ============================================
@@ -283,7 +284,7 @@ const StudentBookingCard = ({ booking, onOpenMessages }) => {
   };
 
   return (
-    <div className="student-booking-card" data-status={booking.status}>
+    <div className="student-booking-card" data-status={booking.status} data-status-card={booking.id}>
       <div className="booking-header">
         <div className="mentor-info">
           <div className="mentor-avatar">
@@ -473,6 +474,7 @@ const StudentDashboard = ({ user }) => {
   const [messagingOpen, setMessagingOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const prevStatusRef = useRef({});
   
   const location = useLocation();
 
@@ -513,6 +515,40 @@ const StudentDashboard = ({ user }) => {
       });
       
       setBookings(bookingData);
+      
+      // Detect status changes and play sounds/animations
+      if (!loading) {
+        bookingData.forEach(b => {
+          const prev = prevStatusRef.current[b.id];
+          if (prev && prev !== b.status) {
+            if (b.status === 'confirmed') {
+              playConfirmSound();
+              setTimeout(() => {
+                const card = document.querySelector(`[data-status-card="${b.id}"]`);
+                if (card) {
+                  card.classList.add('status-confirmed-flash');
+                  setTimeout(() => card.classList.remove('status-confirmed-flash'), 1000);
+                }
+              }, 100);
+            } else if (b.status === 'declined') {
+              playDeclineSound();
+              setTimeout(() => {
+                const card = document.querySelector(`[data-status-card="${b.id}"]`);
+                if (card) {
+                  card.classList.add('status-declined-fade');
+                  setTimeout(() => card.classList.remove('status-declined-fade'), 800);
+                }
+              }, 100);
+            }
+          }
+        });
+      }
+      
+      // Store current statuses for next comparison
+      const statusMap = {};
+      bookingData.forEach(b => { statusMap[b.id] = b.status; });
+      prevStatusRef.current = statusMap;
+      
       setLoading(false);
     });
 
