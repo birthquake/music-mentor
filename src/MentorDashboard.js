@@ -18,12 +18,15 @@ import {
   ButtonSpinner, 
   SkeletonGrid,
   SkeletonStatsCard,
-  FullPageLoading
+  FullPageLoading,
+  useToast
 } from './LoadingComponents';
 import { createNotification, subscribeToUnreadMessages } from './notificationHelpers';
 import MessagingComponent from './MessagingComponent';
 
-// Icons
+/* ============================================
+   ICONS
+   ============================================ */
 const ClockIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <circle cx="12" cy="12" r="10"></circle>
@@ -73,11 +76,21 @@ const MessageIcon = () => (
   </svg>
 );
 
-// Booking Card Component
+const InboxIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5 }}>
+    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+    <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+  </svg>
+);
+
+/* ============================================
+   BOOKING CARD
+   ============================================ */
 const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
   const [loading, setLoading] = useState(false);
   const [studentName, setStudentName] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const getStudentName = async () => {
@@ -100,7 +113,6 @@ const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
     getStudentName();
   }, [booking.studentId, booking.userId]);
 
-  // Subscribe to unread message count
   useEffect(() => {
     if (!booking.id || !booking.mentorId) return;
 
@@ -124,7 +136,7 @@ const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
       await onAccept(booking.id);
     } catch (error) {
       console.error('Error accepting booking:', error);
-      alert('Error accepting booking. Please try again.');
+      showToast('Error accepting booking. Please try again.', 'error');
     }
     setLoading(false);
   };
@@ -135,7 +147,7 @@ const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
       await onDecline(booking.id);
     } catch (error) {
       console.error('Error declining booking:', error);
-      alert('Error declining booking. Please try again.');
+      showToast('Error declining booking. Please try again.', 'error');
     }
     setLoading(false);
   };
@@ -148,10 +160,10 @@ const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
 
   const getStatusBadge = (status) => {
     const badges = {
-      pending: { color: '#f59e0b', bg: '#fef3c7', text: 'Pending Review' },
-      confirmed: { color: '#10b981', bg: '#d1fae5', text: 'Confirmed' },
-      declined: { color: '#ef4444', bg: '#fecaca', text: 'Declined' },
-      completed: { color: '#6b7280', bg: '#f3f4f6', text: 'Completed' }
+      pending: { color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.15)', border: 'rgba(245, 158, 11, 0.3)', text: 'Pending Review' },
+      confirmed: { color: '#34d399', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.3)', text: 'Confirmed' },
+      declined: { color: '#f87171', bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.3)', text: 'Declined' },
+      completed: { color: '#a78bfa', bg: 'rgba(139, 92, 246, 0.15)', border: 'rgba(139, 92, 246, 0.3)', text: 'Completed' }
     };
     
     const badge = badges[status] || badges.pending;
@@ -161,10 +173,12 @@ const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
         style={{
           color: badge.color,
           backgroundColor: badge.bg,
+          border: `1px solid ${badge.border}`,
           padding: '0.25rem 0.75rem',
           borderRadius: '9999px',
           fontSize: '0.75rem',
-          fontWeight: '500'
+          fontWeight: '600',
+          letterSpacing: '0.3px'
         }}
       >
         {badge.text}
@@ -173,7 +187,7 @@ const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
   };
 
   return (
-    <div className="booking-card">
+    <div className="booking-card" data-status={booking.status}>
       <div className="booking-header">
         <div className="booking-user">
           <div className="user-avatar">
@@ -299,7 +313,9 @@ const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
   );
 };
 
-// Clickable Stats Component
+/* ============================================
+   STATS CARD
+   ============================================ */
 const StatsCard = ({ title, value, icon, color, onClick, isActive }) => (
   <button 
     className={`stats-card ${isActive ? 'active' : ''}`}
@@ -316,16 +332,17 @@ const StatsCard = ({ title, value, icon, color, onClick, isActive }) => (
   </button>
 );
 
-// Main Mentor Dashboard Component
+/* ============================================
+   MAIN MENTOR DASHBOARD
+   ============================================ */
 const MentorDashboard = ({ user, mentorInfo }) => {
-  // ✅ 1. ALL HOOKS FIRST
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('pending');
   const [messagingOpen, setMessagingOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const { showToast } = useToast();
 
-  // ✅ 2. useEffect HOOKS
   useEffect(() => {
     if (!user || !mentorInfo) {
       console.log('No user or mentorInfo:', { user: !!user, mentorInfo: !!mentorInfo });
@@ -367,7 +384,6 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     return () => unsubscribe();
   }, [user, mentorInfo]);
 
-  // ✅ 3. EVENT HANDLER FUNCTIONS
   const handleAcceptBooking = async (bookingId) => {
     try {
       const bookingRef = doc(db, 'bookings', bookingId);
@@ -379,11 +395,9 @@ const MentorDashboard = ({ user, mentorInfo }) => {
 
       const bookingData = bookingSnap.data();
 
-      // Confirm booking with video
       const result = await confirmBookingWithVideo(bookingId);
       console.log('Booking confirmed:', result.message);
 
-      // Create notification for student
       await createNotification({
         userId: bookingData.userId,
         type: 'booking_confirmed',
@@ -393,7 +407,7 @@ const MentorDashboard = ({ user, mentorInfo }) => {
         actionUrl: '/my-bookings'
       });
 
-      alert('Session confirmed! The student will see the update in their dashboard.');
+      showToast('Session confirmed! The student has been notified.', 'success');
 
     } catch (error) {
       console.error('Error confirming booking:', error);
@@ -412,13 +426,11 @@ const MentorDashboard = ({ user, mentorInfo }) => {
 
       const bookingData = bookingSnap.data();
 
-      // Decline the booking
       await updateDoc(bookingRef, {
         status: 'declined',
         declinedAt: Timestamp.now()
       });
 
-      // Create notification for student
       await createNotification({
         userId: bookingData.userId,
         type: 'booking_declined',
@@ -428,8 +440,7 @@ const MentorDashboard = ({ user, mentorInfo }) => {
         actionUrl: '/'
       });
 
-      console.log('Booking declined successfully');
-      alert('Session declined. The student will be notified in their dashboard.');
+      showToast('Session declined. The student has been notified.', 'info');
 
     } catch (error) {
       console.error('Error declining booking:', error);
@@ -447,7 +458,6 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     setSelectedBooking(null);
   };
 
-  // ✅ 4. ALL CALCULATIONS
   const stats = {
     pending: bookings.filter(b => b.status === 'pending').length,
     confirmed: bookings.filter(b => b.status === 'confirmed').length,
@@ -484,7 +494,6 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     return titles[activeFilter] || 'Bookings';
   };
 
-  // ✅ 5. EARLY RETURNS (after all hooks & calculations)
   if (loading) {
     return <FullPageLoading message="Loading dashboard..." />;
   }
@@ -500,7 +509,6 @@ const MentorDashboard = ({ user, mentorInfo }) => {
     );
   }
 
-  // ✅ 6. MAIN JSX RETURN
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -509,7 +517,7 @@ const MentorDashboard = ({ user, mentorInfo }) => {
         </div>
       </div>
 
-      {/* Clickable Stats Grid */}
+      {/* Stats Grid */}
       <div className="stats-grid">
         <StatsCard
           title="Pending Requests"
@@ -545,14 +553,21 @@ const MentorDashboard = ({ user, mentorInfo }) => {
         />
       </div>
 
-      {/* Bookings List - Filtered by active card */}
+      {/* Bookings List */}
       <div className="bookings-section">
         <h2 className="section-heading">{getSectionTitle()}</h2>
         
         {filteredBookings.length === 0 ? (
           <div className="no-bookings">
-            <h3>No {activeFilter === 'all' ? '' : getSectionTitle().toLowerCase()} yet</h3>
-            <p>When students book sessions with you, they'll appear here.</p>
+            <InboxIcon />
+            <h3>No {activeFilter === 'all' ? 'bookings' : getSectionTitle().toLowerCase()} yet</h3>
+            <p>
+              {activeFilter === 'pending' 
+                ? 'New session requests from students will appear here.'
+                : activeFilter === 'confirmed'
+                ? 'Sessions you confirm will show up here with messaging and video options.'
+                : 'When students book sessions with you, they\'ll appear here.'}
+            </p>
           </div>
         ) : (
           <div className="bookings-grid">
@@ -569,7 +584,7 @@ const MentorDashboard = ({ user, mentorInfo }) => {
         )}
       </div>
 
-      {/* Messaging Component */}
+      {/* Messaging */}
       {selectedBooking && (
         <MessagingComponent
           booking={selectedBooking}
