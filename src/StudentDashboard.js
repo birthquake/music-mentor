@@ -7,36 +7,20 @@ import {
   onSnapshot,
   orderBy
 } from 'firebase/firestore';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { 
   ButtonSpinner, 
   SkeletonGrid,
-  SkeletonStatsCard 
+  SkeletonStatsCard,
+  useToast
 } from './LoadingComponents';
 import { subscribeToUnreadMessages } from './notificationHelpers';
 import MessagingComponent from './MessagingComponent';
 import './MentorDashboard.css';
 
-// CSS FIX for notification navigation
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = `
-    body {
-      background: var(--bg-primary, #0f172a) !important;
-      min-height: 100vh;
-    }
-    .App {
-      background: var(--bg-primary, #0f172a) !important;
-      min-height: 100vh;
-    }
-  `;
-  if (!document.head.querySelector('style[data-student-dashboard]')) {
-    styleSheet.setAttribute('data-student-dashboard', 'true');
-    document.head.appendChild(styleSheet);
-  }
-}
-
-// Video access helper functions
+/* ============================================
+   VIDEO ACCESS HELPERS
+   ============================================ */
 const canAccessVideoSession = (booking) => {
   try {
     if (!booking.videoRoom || booking.status !== 'confirmed') {
@@ -57,18 +41,11 @@ const canAccessVideoSession = (booking) => {
 
     if (now < accessStart) {
       const minutesUntil = Math.floor((accessStart - now) / 60000);
-      return { 
-        canAccess: false, 
-        reason: 'too_early',
-        minutesUntil 
-      };
+      return { canAccess: false, reason: 'too_early', minutesUntil };
     }
 
     if (now > accessEnd) {
-      return { 
-        canAccess: false, 
-        reason: 'expired' 
-      };
+      return { canAccess: false, reason: 'expired' };
     }
 
     return { canAccess: true };
@@ -81,10 +58,7 @@ const canAccessVideoSession = (booking) => {
 const getTimeUntilSession = (scheduledStart) => {
   try {
     const start = scheduledStart?.toDate ? scheduledStart.toDate() : new Date(scheduledStart);
-    
-    if (isNaN(start.getTime())) {
-      return 'Time unavailable';
-    }
+    if (isNaN(start.getTime())) return 'Time unavailable';
     
     const now = new Date();
     const diffMs = start - now;
@@ -105,7 +79,34 @@ const getTimeUntilSession = (scheduledStart) => {
   }
 };
 
-// Icons
+/* Friendly countdown for confirmed sessions */
+const getSessionCountdown = (scheduledStart) => {
+  try {
+    const start = scheduledStart?.toDate ? scheduledStart.toDate() : new Date(scheduledStart);
+    if (isNaN(start.getTime())) return null;
+    
+    const now = new Date();
+    const diffMs = start - now;
+    
+    if (diffMs < 0) return { label: 'Now', urgent: true };
+    
+    const minutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 1) return { label: `${days} days away`, urgent: false };
+    if (days === 1) return { label: 'Tomorrow', urgent: false };
+    if (hours > 1) return { label: `In ${hours} hours`, urgent: hours <= 3 };
+    if (minutes > 0) return { label: `In ${minutes} min`, urgent: true };
+    return { label: 'Starting now', urgent: true };
+  } catch {
+    return null;
+  }
+};
+
+/* ============================================
+   ICONS
+   ============================================ */
 const ClockIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <circle cx="12" cy="12" r="10"></circle>
@@ -135,13 +136,6 @@ const CalendarIcon = () => (
   </svg>
 );
 
-const UserIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
-);
-
 const TrendingUpIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
@@ -155,10 +149,21 @@ const MessageIcon = () => (
   </svg>
 );
 
-// Student Booking Card Component
+const MusicNoteIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.5 }}>
+    <path d="M9 18V5l12-2v13" />
+    <circle cx="6" cy="18" r="3" />
+    <circle cx="18" cy="16" r="3" />
+  </svg>
+);
+
+/* ============================================
+   STUDENT BOOKING CARD
+   ============================================ */
 const StudentBookingCard = ({ booking, onOpenMessages }) => {
   const [joiningVideo, setJoiningVideo] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!booking.id || !booking.userId) return;
@@ -210,7 +215,7 @@ const StudentBookingCard = ({ booking, onOpenMessages }) => {
   const handleJoinVideo = () => {
     try {
       if (!booking.videoRoom?.meetingUrl) {
-        alert('Video link is not available. Please contact your mentor.');
+        showToast('Video link is not available. Please contact your mentor.', 'warning');
         return;
       }
       setJoiningVideo(true);
@@ -218,36 +223,35 @@ const StudentBookingCard = ({ booking, onOpenMessages }) => {
       setTimeout(() => setJoiningVideo(false), 2000);
     } catch (error) {
       console.error('Error joining video:', error);
-      alert('Unable to open video session. Please try again.');
+      showToast('Unable to open video session. Please try again.', 'error');
       setJoiningVideo(false);
     }
   };
 
   const videoAccess = canAccessVideoSession(booking);
+  const countdown = booking.scheduledStart && booking.status === 'confirmed' 
+    ? getSessionCountdown(booking.scheduledStart) 
+    : null;
 
   const getStatusBadge = (status) => {
     const badges = {
       pending: { 
-        color: '#f59e0b', 
-        bg: '#fef3c7', 
+        color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.15)', border: 'rgba(245, 158, 11, 0.3)',
         text: 'Awaiting Response',
         description: 'Your mentor will respond soon!'
       },
       confirmed: { 
-        color: '#10b981', 
-        bg: '#d1fae5', 
+        color: '#34d399', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.3)',
         text: 'Confirmed',
         description: 'Session confirmed! Get ready to learn.'
       },
       declined: { 
-        color: '#ef4444', 
-        bg: '#fecaca', 
+        color: '#f87171', bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.3)',
         text: 'Declined',
-        description: 'This mentor isn\'t available. Try booking with someone else!'
+        description: "This mentor isn't available. Try booking with someone else!"
       },
       completed: { 
-        color: '#6b7280', 
-        bg: '#f3f4f6', 
+        color: '#a78bfa', bg: 'rgba(139, 92, 246, 0.15)', border: 'rgba(139, 92, 246, 0.3)',
         text: 'Completed',
         description: 'Hope you had a great session!'
       }
@@ -261,10 +265,12 @@ const StudentBookingCard = ({ booking, onOpenMessages }) => {
           style={{
             color: badge.color,
             backgroundColor: badge.bg,
+            border: `1px solid ${badge.border}`,
             padding: '0.25rem 0.75rem',
             borderRadius: '9999px',
             fontSize: '0.75rem',
-            fontWeight: '500'
+            fontWeight: '600',
+            letterSpacing: '0.3px'
           }}
         >
           {badge.text}
@@ -275,7 +281,7 @@ const StudentBookingCard = ({ booking, onOpenMessages }) => {
   };
 
   return (
-    <div className="student-booking-card">
+    <div className="student-booking-card" data-status={booking.status}>
       <div className="booking-header">
         <div className="mentor-info">
           <div className="mentor-avatar">
@@ -293,8 +299,36 @@ const StudentBookingCard = ({ booking, onOpenMessages }) => {
       </div>
 
       <div className="booking-content">
+        {/* Session countdown for confirmed bookings */}
+        {countdown && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--spacing-sm)',
+            padding: 'var(--spacing-md)',
+            background: countdown.urgent ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-secondary)',
+            border: countdown.urgent ? '1px solid var(--accent-green)' : '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-md)',
+            marginBottom: 'var(--spacing-md)'
+          }}>
+            <CalendarIcon />
+            <span style={{ 
+              fontSize: '1.125rem', 
+              fontWeight: '700', 
+              color: countdown.urgent ? 'var(--accent-green-light)' : 'var(--text-primary)'
+            }}>
+              {countdown.label}
+            </span>
+            {booking.scheduledStart && (
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginLeft: 'auto' }}>
+                {formatSessionTime(booking.scheduledStart, booking.scheduledEnd)}
+              </span>
+            )}
+          </div>
+        )}
+
         <div className="session-details">
-          {booking.scheduledStart && booking.status === 'confirmed' && (
+          {booking.scheduledStart && booking.status === 'confirmed' && !countdown && (
             <div className="detail-item session-time-highlight">
               <ClockIcon />
               <span>{formatSessionTime(booking.scheduledStart, booking.scheduledEnd)}</span>
@@ -407,7 +441,9 @@ const StudentBookingCard = ({ booking, onOpenMessages }) => {
   );
 };
 
-// Clickable Stats Component
+/* ============================================
+   STATS CARD
+   ============================================ */
 const StudentStatsCard = ({ title, value, icon, color, onClick, isActive }) => (
   <button 
     className={`stats-card ${isActive ? 'active' : ''}`}
@@ -424,7 +460,9 @@ const StudentStatsCard = ({ title, value, icon, color, onClick, isActive }) => (
   </button>
 );
 
-// Main Student Dashboard Component
+/* ============================================
+   MAIN STUDENT DASHBOARD
+   ============================================ */
 const StudentDashboard = ({ user }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -435,7 +473,6 @@ const StudentDashboard = ({ user }) => {
   
   const location = useLocation();
 
-  // Load bookings
   useEffect(() => {
     if (!user || !user.uid) {
       setLoading(false);
@@ -465,7 +502,6 @@ const StudentDashboard = ({ user }) => {
     return () => unsubscribe();
   }, [user]);
 
-  // Auto-open from URL params (first time navigation)
   useEffect(() => {
     if (!bookings.length || loading) return;
 
@@ -484,15 +520,12 @@ const StudentDashboard = ({ user }) => {
     }
   }, [bookings, loading, location.search]);
 
-  // Listen for custom event (when already on page) - THE FIX!
   useEffect(() => {
     const handleOpenMessage = (event) => {
       const { bookingId } = event.detail;
-      
       if (!bookingId || !bookings.length) return;
       
       const booking = bookings.find(b => b.id === bookingId);
-      
       if (booking) {
         setSelectedBooking(booking);
         setMessagingOpen(true);
@@ -617,13 +650,42 @@ const StudentDashboard = ({ user }) => {
         
         {filteredBookings.length === 0 ? (
           <div className="no-bookings">
-            <h3>No {activeFilter === 'all' ? '' : getSectionTitle().toLowerCase()} yet</h3>
-            <p>
+            <MusicNoteIcon />
+            <h3>
               {stats.total === 0 
-                ? "Ready to start learning? Browse mentors and book your first session!"
-                : `No ${activeFilter} sessions found. Try clicking a different stat card!`
+                ? 'Ready to start learning?' 
+                : `No ${activeFilter === 'all' ? '' : getSectionTitle().toLowerCase()} yet`}
+            </h3>
+            <p style={{ marginBottom: stats.total === 0 ? 'var(--spacing-lg)' : '0' }}>
+              {stats.total === 0 
+                ? 'Browse our mentors and book your first 15-minute session!'
+                : activeFilter === 'pending'
+                ? 'All your requests have been responded to.'
+                : activeFilter === 'confirmed'
+                ? 'No upcoming sessions right now. Book a new one!'
+                : `No ${activeFilter} sessions found. Try a different filter!`
               }
             </p>
+            {stats.total === 0 && (
+              <Link 
+                to="/" 
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.75rem 1.5rem',
+                  background: 'var(--accent-green)',
+                  color: 'white',
+                  borderRadius: 'var(--radius-md)',
+                  textDecoration: 'none',
+                  fontWeight: '600',
+                  fontSize: '0.9375rem',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Browse Mentors
+              </Link>
+            )}
           </div>
         ) : (
           <div className="bookings-grid">
