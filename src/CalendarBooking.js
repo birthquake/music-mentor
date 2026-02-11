@@ -1,4 +1,4 @@
-// CalendarBooking.js - Step-by-step calendar booking with error handling
+// CalendarBooking.js - Step-by-step calendar booking
 
 import React, { useState, useEffect } from 'react';
 import { getMentorBookings, checkSlotAvailability } from './availabilitySystem';
@@ -7,11 +7,14 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { 
   ButtonSpinner, 
-  FullPageLoading 
+  FullPageLoading,
+  useToast
 } from './LoadingComponents';
 import './MentorDashboard.css';
 
-// Icons
+/* ============================================
+   ICONS
+   ============================================ */
 const CalendarIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -40,7 +43,83 @@ const ArrowRightIcon = () => (
   </svg>
 );
 
-// Toggle Component
+/* ============================================
+   STEP PROGRESS BAR
+   ============================================ */
+const StepProgressBar = ({ currentStep }) => {
+  const steps = [
+    { key: 'dates', label: 'Date', num: 1 },
+    { key: 'times', label: 'Time', num: 2 },
+    { key: 'details', label: 'Details', num: 3 }
+  ];
+
+  const currentIndex = steps.findIndex(s => s.key === currentStep);
+
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0',
+      padding: '0 0.5rem',
+      marginTop: '0.75rem'
+    }}>
+      {steps.map((step, i) => {
+        const isCompleted = i < currentIndex;
+        const isActive = i === currentIndex;
+        const isFuture = i > currentIndex;
+
+        return (
+          <React.Fragment key={step.key}>
+            {/* Step circle + label */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '48px' }}>
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.75rem',
+                fontWeight: '700',
+                transition: 'all 0.3s ease',
+                background: isCompleted ? 'var(--accent-green)' : isActive ? 'var(--accent-blue)' : 'var(--bg-elevated)',
+                color: isCompleted || isActive ? 'white' : 'var(--text-muted)',
+                border: isFuture ? '2px solid var(--border-color)' : 'none',
+                boxShadow: isActive ? '0 0 0 3px rgba(59, 130, 246, 0.3)' : 'none'
+              }}>
+                {isCompleted ? '✓' : step.num}
+              </div>
+              <span style={{
+                fontSize: '0.6875rem',
+                marginTop: '4px',
+                fontWeight: isActive ? '600' : '400',
+                color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                letterSpacing: '0.3px'
+              }}>
+                {step.label}
+              </span>
+            </div>
+
+            {/* Connector line */}
+            {i < steps.length - 1 && (
+              <div style={{
+                flex: 1,
+                height: '2px',
+                background: isCompleted ? 'var(--accent-green)' : 'var(--border-color)',
+                transition: 'background 0.3s ease',
+                marginBottom: '18px'
+              }} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+};
+
+/* ============================================
+   TOGGLE
+   ============================================ */
 const Toggle = ({ checked, onChange, label }) => (
   <div className="toggle-container">
     <label className="toggle-label">
@@ -55,8 +134,11 @@ const Toggle = ({ checked, onChange, label }) => (
     </label>
   </div>
 );
-// Step 1: Date Selection Component
-const DateSelection = ({ availableDates, onSelectDate, onBack }) => {
+
+/* ============================================
+   STEP 1: DATE SELECTION
+   ============================================ */
+const DateSelection = ({ availableDates, onSelectDate }) => {
   return (
     <div className="step-content">
       <div className="step-header">
@@ -97,7 +179,9 @@ const DateSelection = ({ availableDates, onSelectDate, onBack }) => {
   );
 };
 
-// Step 2: Time Selection Component
+/* ============================================
+   STEP 2: TIME SELECTION
+   ============================================ */
 const TimeSelection = ({ selectedDate, availableSlots, onSelectTime, onBack, selectedTime }) => {
   const dayName = selectedDate.toLocaleDateString('en-US', { 
     weekday: 'long',
@@ -137,7 +221,12 @@ const TimeSelection = ({ selectedDate, availableSlots, onSelectTime, onBack, sel
     </div>
   );
 };
-// Step 3: Booking Details Component
+
+/* ============================================
+   STEP 3: BOOKING DETAILS
+   ============================================ */
+const MAX_MESSAGE_LENGTH = 500;
+
 const BookingDetails = ({ 
   selectedDate, 
   selectedTime, 
@@ -162,6 +251,9 @@ const BookingDetails = ({
     hour12: true 
   });
 
+  const charCount = message.length;
+  const charNearLimit = charCount > MAX_MESSAGE_LENGTH * 0.8;
+
   return (
     <div className="step-content">
       <div className="step-header">
@@ -174,14 +266,31 @@ const BookingDetails = ({
       
       <form onSubmit={onConfirm} className="booking-details-form">
         <div className="form-group">
-          <label>What specific challenge can {mentor?.name?.split(' ')[0]} help you with? <span style={{color: '#ef4444'}}>*</span></label>
+          <label>
+            What specific challenge can {mentor?.name?.split(' ')[0]} help you with?{' '}
+            <span style={{ color: 'var(--error)' }}>*</span>
+          </label>
           <textarea 
             value={message}
-            onChange={e => setMessage(e.target.value)}
+            onChange={e => {
+              if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
+                setMessage(e.target.value);
+              }
+            }}
             placeholder="Be specific about your question or challenge. This helps your mentor prepare for your session."
             rows="4"
             required
           />
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginTop: '0.25rem',
+            fontSize: '0.75rem',
+            color: charNearLimit ? 'var(--warning)' : 'var(--text-subtle)',
+            transition: 'color 0.2s ease'
+          }}>
+            {charCount}/{MAX_MESSAGE_LENGTH}
+          </div>
         </div>
         
         <div className="form-group">
@@ -201,7 +310,7 @@ const BookingDetails = ({
             </div>
             <div className="summary-item">
               <ClockIcon />
-              <span>15 minutes • ${mentor?.rate}</span>
+              <span>15 minutes &bull; ${mentor?.rate}</span>
             </div>
           </div>
         </div>
@@ -222,9 +331,11 @@ const BookingDetails = ({
     </div>
   );
 };
-// Main Step-by-Step Calendar Booking Component
+
+/* ============================================
+   MAIN CALENDAR BOOKING
+   ============================================ */
 const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
-  // All hooks at the top
   const [availableSlots, setAvailableSlots] = useState([]);
   const [step, setStep] = useState('dates');
   const [selectedDate, setSelectedDate] = useState(null);
@@ -234,14 +345,13 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { showToast } = useToast();
 
-  // Load mentor availability from Firestore with error handling
   const loadMentorAvailability = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // Validate mentor data
       if (!mentor?.userId && !mentor?.id) {
         throw new Error('Mentor information is missing');
       }
@@ -265,7 +375,6 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
         return;
       }
 
-      // Generate 15-minute slots for the next 3 weeks
       const slots = [];
       const today = new Date();
       const endDate = new Date(today);
@@ -316,7 +425,6 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
 
       const sortedSlots = slots.sort((a, b) => a.start - b.start);
       
-      // Check against existing bookings with error handling
       try {
         const existingBookings = await getMentorBookings(mentor.id.toString());
         const checkedSlots = checkSlotAvailability(sortedSlots, existingBookings);
@@ -325,7 +433,6 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
         setAvailableSlots(availableOnly);
       } catch (bookingError) {
         console.error('Error checking existing bookings:', bookingError);
-        // Still show slots even if we can't check bookings
         setAvailableSlots(sortedSlots);
       }
       
@@ -344,7 +451,6 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     }
   }, [mentor?.id]);
 
-  // Group available slots by date
   const availableDates = React.useMemo(() => {
     const grouped = {};
     availableSlots.forEach(slot => {
@@ -389,19 +495,18 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
   const handleBooking = async (e) => {
     e.preventDefault();
     
-    // Validation
     if (!selectedTime || !message.trim()) {
-      alert('Please fill in all required fields');
+      showToast('Please fill in all required fields.', 'warning');
       return;
     }
 
     if (!user?.uid || !user?.email) {
-      alert('User information is missing. Please log in again.');
+      showToast('Please log in again to continue.', 'error');
       return;
     }
 
     if (!mentor?.id || !mentor?.name) {
-      alert('Mentor information is missing. Please try again.');
+      showToast('Mentor information is missing. Please try again.', 'error');
       return;
     }
 
@@ -444,13 +549,12 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     } catch (error) {
       console.error('Error creating booking:', error);
       setError('Failed to create booking. Please check your connection and try again.');
-      alert('Error creating booking. Please try again.');
+      showToast('Error creating booking. Please try again.', 'error');
     }
     
     setBookingLoading(false);
   };
 
-  // Early return after all hooks
   if (!isOpen || !mentor || !user) return null;
 
   return (
@@ -458,29 +562,18 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
       <div className="modal-content booking-modal step-modal" onClick={e => e.stopPropagation()}>
         <div className="booking-header">
           <h2>Book Session with {mentor?.name}</h2>
-          <div className="step-indicator">
-            <span className={step === 'dates' ? 'active' : step !== 'dates' ? 'completed' : ''}>
-              1. Date
-            </span>
-            <ArrowRightIcon />
-            <span className={step === 'times' ? 'active' : step === 'details' ? 'completed' : ''}>
-              2. Time
-            </span>
-            <ArrowRightIcon />
-            <span className={step === 'details' ? 'active' : ''}>
-              3. Details
-            </span>
-          </div>
+          <StepProgressBar currentStep={step} />
         </div>
 
         {error && (
           <div style={{
             padding: '1rem',
-            margin: '1rem',
-            backgroundColor: '#fee2e2',
-            border: '1px solid #ef4444',
+            margin: '0 1rem 1rem',
+            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
             borderRadius: '8px',
-            color: '#991b1b'
+            color: '#fca5a5',
+            fontSize: '0.875rem'
           }}>
             {error}
           </div>
@@ -494,7 +587,6 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
               <DateSelection
                 availableDates={availableDates}
                 onSelectDate={handleSelectDate}
-                onBack={handleBackToDates}
               />
             )}
             
@@ -534,75 +626,85 @@ const CalendarBooking = ({ mentor, user, onClose, onConfirm, isOpen }) => {
     </div>
   );
 };
-// Toggle and button styling
-const toggleStyles = `
-.toggle-container {
-  margin: 1rem 0;
-}
 
-.toggle-label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 0.75rem;
-}
-
-.toggle-input {
-  display: none;
-}
-
-.toggle-slider {
-  position: relative;
-  width: 48px;
-  height: 24px;
-  background-color: #cbd5e0;
-  border-radius: 12px;
-  transition: background-color 0.2s ease;
-  flex-shrink: 0;
-}
-
-.toggle-slider::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  background-color: white;
-  border-radius: 50%;
-  transition: transform 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.toggle-input:checked + .toggle-slider {
-  background-color: #3b82f6;
-}
-
-.toggle-input:checked + .toggle-slider::before {
-  transform: translateX(24px);
-}
-
-.toggle-text {
-  font-size: 0.875rem;
-  line-height: 1.4;
-  color: #white;
-}
-
-.confirm-btn:disabled {
-  background-color: #9ca3af !important;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.confirm-btn:disabled:hover {
-  background-color: #9ca3af !important;
-}
-`;
-
+/* ============================================
+   INJECTED STYLES (toggle, disabled button)
+   ============================================ */
 if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = toggleStyles;
-  document.head.appendChild(styleSheet);
+  const id = 'calendar-booking-styles';
+  if (!document.getElementById(id)) {
+    const styleSheet = document.createElement('style');
+    styleSheet.id = id;
+    styleSheet.textContent = `
+      .toggle-container {
+        margin: 1rem 0;
+      }
+
+      .toggle-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        gap: 0.75rem;
+      }
+
+      .toggle-input {
+        display: none;
+      }
+
+      .toggle-slider {
+        position: relative;
+        width: 48px;
+        height: 24px;
+        background-color: var(--bg-elevated, #374151);
+        border: 1px solid var(--border-color, #4b5563);
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+      }
+
+      .toggle-slider::before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 18px;
+        height: 18px;
+        background-color: var(--text-muted, #9ca3af);
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle-input:checked + .toggle-slider {
+        background-color: var(--accent-blue, #3b82f6);
+        border-color: var(--accent-blue, #3b82f6);
+      }
+
+      .toggle-input:checked + .toggle-slider::before {
+        transform: translateX(24px);
+        background-color: white;
+      }
+
+      .toggle-text {
+        font-size: 0.875rem;
+        line-height: 1.4;
+        color: var(--text-secondary, #e5e7eb);
+      }
+
+      .confirm-btn:disabled {
+        background-color: var(--bg-elevated, #374151) !important;
+        color: var(--text-muted, #9ca3af) !important;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .confirm-btn:disabled:hover {
+        background-color: var(--bg-elevated, #374151) !important;
+        transform: none;
+      }
+    `;
+    document.head.appendChild(styleSheet);
+  }
 }
 
 export default CalendarBooking;
