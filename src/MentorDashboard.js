@@ -23,6 +23,7 @@ import {
 } from './LoadingComponents';
 import { createNotification, subscribeToUnreadMessages } from './notificationHelpers';
 import MessagingComponent from './MessagingComponent';
+import { playConfirmSound, playDeclineSound } from './notificationSounds';
 
 /* ============================================
    ICONS
@@ -187,7 +188,7 @@ const BookingCard = ({ booking, onAccept, onDecline, onOpenMessages }) => {
   };
 
   return (
-    <div className="booking-card" data-status={booking.status}>
+    <div className="booking-card" data-status={booking.status} data-booking-id={booking.id}>
       <div className="booking-header">
         <div className="booking-user">
           <div className="user-avatar">
@@ -408,6 +409,14 @@ const MentorDashboard = ({ user, mentorInfo }) => {
       });
 
       showToast('Session confirmed! The student has been notified.', 'success');
+      playConfirmSound();
+
+      // Flash the card green
+      const card = document.querySelector(`[data-booking-id="${bookingId}"]`);
+      if (card) {
+        card.classList.add('status-confirmed-flash');
+        setTimeout(() => card.classList.remove('status-confirmed-flash'), 1000);
+      }
 
     } catch (error) {
       console.error('Error confirming booking:', error);
@@ -441,6 +450,14 @@ const MentorDashboard = ({ user, mentorInfo }) => {
       });
 
       showToast('Session declined. The student has been notified.', 'info');
+      playDeclineSound();
+
+      // Fade the card briefly
+      const card = document.querySelector(`[data-booking-id="${bookingId}"]`);
+      if (card) {
+        card.classList.add('status-declined-fade');
+        setTimeout(() => card.classList.remove('status-declined-fade'), 800);
+      }
 
     } catch (error) {
       console.error('Error declining booking:', error);
