@@ -1,8 +1,15 @@
-// UserProfile.js - Create this new component
+// UserProfile.js - Student profile with completion indicator
 import React, { useState, useEffect } from 'react';
 import { getUserProfile, createUserProfile, DEFAULT_USER_PROFILE } from './profileHelpers';
+import { 
+  ButtonSpinner, 
+  FullPageLoading, 
+  useToast 
+} from './LoadingComponents';
 
-// Icons
+/* ============================================
+   ICONS
+   ============================================ */
 const UserIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -24,11 +31,169 @@ const TargetIcon = () => (
   </svg>
 );
 
+const CheckCircleIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+  </svg>
+);
+
+const CircleIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10" />
+  </svg>
+);
+
+/* ============================================
+   PROFILE COMPLETION CALCULATION
+   ============================================ */
+export const getProfileCompletion = (profile) => {
+  if (!profile) return { percent: 0, completed: [], missing: [], nextTip: '' };
+
+  const fields = [
+    { key: 'displayName', label: 'Display name', required: true },
+    { key: 'firstName', label: 'First name', required: true },
+    { key: 'lastName', label: 'Last name', required: true },
+    { key: 'instrument', label: 'Primary instrument', required: true },
+    { key: 'experienceLevel', label: 'Experience level', required: false },
+    { key: 'bio', label: 'Bio', required: false },
+    { key: 'learningGoals', label: 'Learning goals', required: false },
+  ];
+
+  const completed = [];
+  const missing = [];
+
+  fields.forEach(f => {
+    const val = profile[f.key];
+    const isFilled = val && typeof val === 'string' ? val.trim().length > 0 : !!val;
+    if (isFilled) {
+      completed.push(f);
+    } else {
+      missing.push(f);
+    }
+  });
+
+  const percent = Math.round((completed.length / fields.length) * 100);
+
+  const tips = {
+    bio: 'Adding a bio helps mentors understand your background.',
+    learningGoals: 'Sharing your goals helps mentors prepare better sessions.',
+    instrument: 'Select your primary instrument to get matched with the right mentors.',
+    displayName: 'Set a display name so mentors know who you are.',
+  };
+
+  const nextTip = missing.length > 0 ? (tips[missing[0].key] || `Complete your ${missing[0].label}.`) : '';
+
+  return { percent, completed, missing, nextTip };
+};
+
+/* ============================================
+   PROFILE COMPLETION BAR (exported for reuse)
+   ============================================ */
+export const ProfileCompletionBar = ({ profile, compact = false }) => {
+  const { percent, completed, missing, nextTip } = getProfileCompletion(profile);
+
+  if (percent === 100) {
+    if (compact) return null; // Don't show on dashboard if complete
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 'var(--spacing-sm)',
+        padding: 'var(--spacing-md)',
+        background: 'rgba(16, 185, 129, 0.1)',
+        border: '1px solid rgba(16, 185, 129, 0.3)',
+        borderRadius: 'var(--radius-md)',
+        marginBottom: 'var(--spacing-xl)',
+        color: 'var(--accent-green-light)',
+        fontSize: '0.875rem',
+        fontWeight: '600'
+      }}>
+        <CheckCircleIcon />
+        Profile complete! Mentors can see your full background.
+      </div>
+    );
+  }
+
+  const barColor = percent >= 75 ? 'var(--accent-green)' : percent >= 40 ? 'var(--accent-orange)' : 'var(--accent-blue)';
+
+  return (
+    <div style={{
+      padding: compact ? 'var(--spacing-md)' : 'var(--spacing-lg)',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border-color)',
+      borderRadius: 'var(--radius-lg)',
+      marginBottom: 'var(--spacing-xl)'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-sm)' }}>
+        <span style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+          Profile {percent}% complete
+        </span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          {completed.length}/{completed.length + missing.length} fields
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{
+        width: '100%',
+        height: '8px',
+        background: 'var(--bg-elevated)',
+        borderRadius: '4px',
+        overflow: 'hidden',
+        marginBottom: nextTip && !compact ? 'var(--spacing-sm)' : '0'
+      }}>
+        <div style={{
+          width: `${percent}%`,
+          height: '100%',
+          background: barColor,
+          borderRadius: '4px',
+          transition: 'width 0.5s ease'
+        }} />
+      </div>
+
+      {/* Next tip */}
+      {nextTip && !compact && (
+        <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: 0 }}>
+          {nextTip}
+        </p>
+      )}
+
+      {/* Checklist (full view only) */}
+      {!compact && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: 'var(--spacing-md)' }}>
+          {[...getProfileCompletion(profile).completed.map(f => ({ ...f, done: true })),
+            ...getProfileCompletion(profile).missing.map(f => ({ ...f, done: false }))
+          ].map(f => (
+            <span key={f.key} style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '0.75rem',
+              padding: '0.25rem 0.625rem',
+              borderRadius: 'var(--radius-full)',
+              background: f.done ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-elevated)',
+              color: f.done ? 'var(--accent-green-light)' : 'var(--text-muted)',
+              border: f.done ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid var(--border-color)'
+            }}>
+              {f.done ? <CheckCircleIcon /> : <CircleIcon />}
+              {f.label}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ============================================
+   MAIN COMPONENT
+   ============================================ */
 const UserProfile = ({ user }) => {
   const [profile, setProfile] = useState(DEFAULT_USER_PROFILE);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -43,7 +208,6 @@ const UserProfile = ({ user }) => {
         setProfile(result.profile);
         setHasProfile(true);
       } else {
-        // No profile exists yet, use defaults
         setProfile({
           ...DEFAULT_USER_PROFILE,
           displayName: user.displayName || '',
@@ -66,13 +230,13 @@ const UserProfile = ({ user }) => {
       const result = await createUserProfile(user.uid, profile);
       if (result.success) {
         setHasProfile(true);
-        alert('Profile saved successfully!');
+        showToast('Profile saved!', 'success');
       } else {
-        alert('Error saving profile: ' + result.error);
+        showToast('Error saving profile: ' + result.error, 'error');
       }
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Error saving profile');
+      showToast('Error saving profile. Please try again.', 'error');
     }
 
     setSaving(false);
@@ -86,11 +250,7 @@ const UserProfile = ({ user }) => {
   };
 
   if (loading) {
-    return (
-      <div className="dashboard-container">
-        <div className="loading-bookings">Loading your profile...</div>
-      </div>
-    );
+    return <FullPageLoading message="Loading your profile..." />;
   }
 
   return (
@@ -101,6 +261,9 @@ const UserProfile = ({ user }) => {
           <p>Tell us about your musical journey and learning goals</p>
         </div>
       </div>
+
+      {/* Profile Completion */}
+      <ProfileCompletionBar profile={profile} />
 
       <form onSubmit={handleSubmit} className="profile-form">
         {/* Basic Information */}
@@ -251,14 +414,21 @@ const UserProfile = ({ user }) => {
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <div className="form-actions">
           <button
             type="submit"
             className="save-profile-btn"
             disabled={saving}
           >
-            {saving ? 'Saving...' : hasProfile ? 'Update Profile' : 'Create Profile'}
+            {saving ? (
+              <>
+                <ButtonSpinner />
+                Saving...
+              </>
+            ) : (
+              hasProfile ? 'Update Profile' : 'Create Profile'
+            )}
           </button>
         </div>
       </form>
