@@ -892,3 +892,37 @@
     border: 1px solid #333;
   }
 }
+
+/* ============================================
+   STATUS CHANGE ANIMATIONS
+   Applied via JS: element.classList.add('status-confirmed-flash')
+   ============================================ */
+@keyframes confirmedFlash {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  20% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes declinedFade {
+  0% { opacity: 1; }
+  30% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@keyframes newBookingPulse {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  25% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.status-confirmed-flash {
+  animation: confirmedFlash 0.8s ease;
+}
+
+.status-declined-fade {
+  animation: declinedFade 0.6s ease;
+}
+
+.status-new-pulse {
+  animation: newBookingPulse 1s ease;
+}
