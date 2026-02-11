@@ -27,6 +27,7 @@ import CalendarBooking from './CalendarBooking';
 import MentorDashboard from './MentorDashboard';
 import StudentDashboard from './StudentDashboard';
 import MentorDetailPage from './MentorDetailPage';
+import MobileBottomNav from './MobileBottomNav';
 import NotificationBell from './NotificationBell';
 import './App.css';
 import './MentorDashboard.css';
@@ -739,6 +740,8 @@ function App() {
         </div>
 
         <Footer />
+
+        <MobileBottomNav user={user} mentorInfo={mentorInfo} />
 
         <AuthModal
           isOpen={showAuthModal}
