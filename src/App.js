@@ -1,6 +1,7 @@
 /* ============================================
-   App.js - SECTION 1 of 7
-   Imports & Icon Components
+   App.js — MusicMentor
+   Unified with toast notifications, footer,
+   brand icon, and skeleton loading
    ============================================ */
 
 import React, { useState, useEffect } from 'react';
@@ -19,18 +20,21 @@ import {
   getDoc
 } from 'firebase/firestore';
 import { createBookingWithProfiles, getEnhancedMentors } from './profileHelpers';
+import { ToastProvider, useToast, SkeletonMentorGrid } from './LoadingComponents';
 import UserProfile from './UserProfile';
 import MentorProfile from './MentorProfile';
 import CalendarBooking from './CalendarBooking';
 import MentorDashboard from './MentorDashboard';
 import StudentDashboard from './StudentDashboard';
+import NotificationBell from './NotificationBell';
 import './App.css';
 import './MentorDashboard.css';
-import NotificationBell from './NotificationBell';
 
-// Icons
+/* ============================================
+   ICONS
+   ============================================ */
 const StarIcon = ({ filled = false }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? "#FFA500" : "none"} stroke={filled ? "#FFA500" : "#CBD5E0"} strokeWidth="2">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? "#FFA500" : "none"} stroke={filled ? "#FFA500" : "#4b5563"} strokeWidth="2">
     <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2" />
   </svg>
 );
@@ -55,82 +59,24 @@ const CheckIcon = () => (
   </svg>
 );
 
-const UserIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
+const MusicNoteIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 18V5l12-2v13" />
+    <circle cx="6" cy="18" r="3" />
+    <circle cx="18" cy="16" r="3" />
   </svg>
 );
 
-/* END OF SECTION 1 - Copy this section to your App.js */
 /* ============================================
-   App.js - SECTION 2 of 7
-   Sample Mentors Data & Auth Modal Component
+   AUTH MODAL
    ============================================ */
-
-// Sample mentors data
-const SAMPLE_MENTORS = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    email: "sarah@musicmentor.com",
-    specialty: "Guitar & Songwriting",
-    experience: 8,
-    rate: 35,
-    rating: 4.9,
-    reviewCount: 127,
-    category: "guitar",
-    videoAvailable: true,
-    tags: ["Acoustic", "Electric", "Songwriting", "Theory"]
-  },
-  {
-    id: 2,
-    name: "Marcus Johnson", 
-    email: "marcus@musicmentor.com",
-    specialty: "Music Production & Mixing",
-    experience: 12,
-    rate: 55,
-    rating: 4.8,
-    reviewCount: 89,
-    category: "production",
-    videoAvailable: true,
-    tags: ["Logic Pro", "Ableton", "Mixing", "Mastering"]
-  },
-  {
-    id: 3,
-    name: "Elena Rodriguez",
-    email: "elena@musicmentor.com", 
-    specialty: "Vocal Technique & Performance",
-    experience: 6,
-    rate: 40,
-    rating: 5.0,
-    reviewCount: 203,
-    category: "vocals",
-    videoAvailable: true,
-    tags: ["Classical", "Pop", "Breathing", "Performance"]
-  },
-  {
-    id: 4,
-    name: "Your Test Mentor Profile",
-    email: "rashiedtyre@gmail.com", // YOUR EMAIL
-    specialty: "Music Business & Booking", 
-    experience: 15,
-    rate: 45,
-    rating: 4.7,
-    reviewCount: 156,
-    category: "business",
-    videoAvailable: false,
-    tags: ["Booking", "Contracts", "Marketing", "Revenue"]
-  }
-];
-
-// Auth Modal Component
 const AuthModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { showToast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -140,14 +86,17 @@ const AuthModal = ({ isOpen, onClose }) => {
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
+        showToast('Welcome back!', 'success');
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
+        showToast('Account created! Welcome to MusicMentor.', 'success');
       }
       onClose();
       setEmail('');
       setPassword('');
     } catch (error) {
       setError(error.message);
+      showToast('Sign in failed. Please check your credentials.', 'error');
     }
     
     setLoading(false);
@@ -164,7 +113,15 @@ const AuthModal = ({ isOpen, onClose }) => {
         </p>
         
         {error && (
-          <div style={{color: '#e53e3e', marginBottom: '1rem', padding: '0.75rem', background: '#fed7d7', borderRadius: '8px', fontSize: '0.875rem'}}>
+          <div style={{
+            color: '#fca5a5', 
+            marginBottom: '1rem', 
+            padding: '0.75rem', 
+            background: 'rgba(239, 68, 68, 0.15)', 
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '8px', 
+            fontSize: '0.875rem'
+          }}>
             {error}
           </div>
         )}
@@ -203,23 +160,14 @@ const AuthModal = ({ isOpen, onClose }) => {
             {isLogin ? 'Sign up' : 'Sign in'}
           </button>
         </p>
-
-        {/* Mentor login hint */}
-        <div style={{marginTop: '1rem', padding: '0.75rem', background: '#f0f9ff', borderRadius: '8px', fontSize: '0.875rem', color: '#0369a1'}}>
-          <strong>Mentors:</strong> Use sarah@musicmentor.com, marcus@musicmentor.com, elena@musicmentor.com with password "mentor123" to access dashboard
-        </div>
       </div>
     </div>
   );
 };
 
-/* END OF SECTION 2 - Copy this below Section 1 */
 /* ============================================
-   App.js - SECTION 3 of 7
-   Header Component & Dashboard Link Styles
+   HEADER
    ============================================ */
-
-// Header Component
 const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -227,7 +175,6 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownOpen && !event.target.closest('.user-menu-button') && !event.target.closest('.user-dropdown')) {
@@ -244,7 +191,10 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
       <div className="container">
         <div className="header-content">
           <div className="brand">
-            <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>
+            <Link to="/" style={{ color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--accent-primary)', display: 'flex' }}>
+                <MusicNoteIcon />
+              </span>
               <h1>MusicMentor</h1>
             </Link>
           </div>
@@ -252,10 +202,8 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
           <div className="header-actions">
             {user ? (
               <>
-                {/* Notification Bell - NEW! */}
                 <NotificationBell user={user} />
                 
-                {/* User Menu */}
                 <div className="user-menu">
                   <div className="user-menu-button" onClick={toggleDropdown}>
                     <div className="hamburger-icon">
@@ -314,67 +262,50 @@ const Header = ({ user, onSignOut, onAuthClick, mentorInfo }) => {
   );
 };
 
-// Dashboard Link Styles
-const dashboardLinkStyles = `
-.dashboard-link {
-  color: white;
-  text-decoration: none;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
-}
-
-.dashboard-link:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
-}
-
-.user-menu-button {
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.user-menu-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.hamburger-icon {
-  display: flex;
-  flex-direction: column;
-  width: 24px;
-  height: 18px;
-  justify-content: space-between;
-}
-
-.hamburger-icon span {
-  display: block;
-  height: 2px;
-  width: 100%;
-  background-color: white;
-  border-radius: 1px;
-  transition: all 0.2s ease;
-}
-`;
-
-// Inject the styles
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = dashboardLinkStyles;
-  document.head.appendChild(styleSheet);
-}
-
-/* END OF SECTION 3 - Copy this below Section 2 */
 /* ============================================
-   App.js - SECTION 4 of 7
-   Mentor Card & Booking Modal Components
+   FOOTER
    ============================================ */
+const Footer = () => (
+  <footer className="site-footer">
+    <div className="footer-content">
+      <div className="footer-top">
+        <div className="footer-brand">
+          <h3>MusicMentor</h3>
+          <p>Personalized advice from experienced musicians in focused 15-minute sessions.</p>
+        </div>
+        <div className="footer-links">
+          <div className="footer-column">
+            <h4>Platform</h4>
+            <ul>
+              <li><Link to="/">Browse Mentors</Link></li>
+              <li><a href="#how-it-works">How It Works</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+            </ul>
+          </div>
+          <div className="footer-column">
+            <h4>Support</h4>
+            <ul>
+              <li><a href="mailto:support@musicmentor.com">Contact Us</a></li>
+              <li><a href="#faq">FAQ</a></li>
+              <li><a href="#become-a-mentor">Become a Mentor</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div className="footer-bottom">
+        <p>&copy; {new Date().getFullYear()} MusicMentor. All rights reserved.</p>
+        <div className="footer-bottom-links">
+          <a href="#privacy">Privacy</a>
+          <a href="#terms">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+);
 
-// Mentor Card Component
+/* ============================================
+   MENTOR CARD
+   ============================================ */
 const MentorCard = ({ mentor, onBook, user }) => {
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
@@ -435,19 +366,22 @@ const MentorCard = ({ mentor, onBook, user }) => {
   );
 };
 
-// Booking Modal Component  
+/* ============================================
+   BOOKING MODAL (legacy fallback — CalendarBooking
+   is the primary booking flow)
+   ============================================ */
 const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
   const [selectedTime, setSelectedTime] = useState('');
   const [message, setMessage] = useState('');
   const [videoPreferred, setVideoPreferred] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      // Save booking to Firestore with profile integration
       const result = await createBookingWithProfiles({
         mentorId: mentor.id,
         mentorName: mentor.name,
@@ -466,13 +400,12 @@ const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
       
       onConfirm(selectedTime, message, videoPreferred);
       
-      // Reset form
       setSelectedTime('');
       setMessage('');
       setVideoPreferred(false);
     } catch (error) {
       console.error('Error creating booking:', error);
-      alert('Error creating booking. Please try again.');
+      showToast('Error creating booking. Please try again.', 'error');
     }
     
     setLoading(false);
@@ -486,7 +419,7 @@ const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
         <div className="booking-header">
           <h2>Book Session with {mentor.name}</h2>
           <p className="session-details">
-            <ClockIcon /> 15-minute session • ${mentor.rate}
+            <ClockIcon /> 15-minute session &bull; ${mentor.rate}
           </p>
         </div>
         
@@ -549,19 +482,16 @@ const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
   );
 };
 
-/* END OF SECTION 4 - Copy this below Section 3 */
 /* ============================================
-   App.js - SECTION 5 of 7
-   Homepage Component
+   HOMEPAGE
    ============================================ */
-
-// Homepage Component
 const Homepage = ({ user, onAuthClick }) => {
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);  
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [filter, setFilter] = useState('all');
+  const { showToast } = useToast();
 
   useEffect(() => {
     const loadMentors = async () => {
@@ -582,7 +512,7 @@ const Homepage = ({ user, onAuthClick }) => {
   };
 
   const handleConfirmBooking = (time, message, videoPreferred) => {
-    alert(`🎵 Session requested successfully!\n\nMentor: ${selectedMentor.name}\nTime preference: ${time}\nVideo: ${videoPreferred ? 'Yes' : 'Audio only'}\n\nYou can track your booking status in "My Bookings".`);
+    showToast(`Session requested with ${selectedMentor.name}! Check "My Bookings" for updates.`, 'success');
     setShowBookingModal(false);
     setSelectedMentor(null);
   };
@@ -601,42 +531,45 @@ const Homepage = ({ user, onAuthClick }) => {
 
         <section className="filters">
           <div className="filter-buttons">
-            <button 
-              className={filter === 'all' ? 'active' : ''} 
-              onClick={() => setFilter('all')}
-            >
-              All Specialties
-            </button>
-            <button 
-              className={filter === 'guitar' ? 'active' : ''} 
-              onClick={() => setFilter('guitar')}
-            >
-              Guitar
-            </button>
-            <button 
-              className={filter === 'production' ? 'active' : ''} 
-              onClick={() => setFilter('production')}
-            >
-              Production
-            </button>
-            <button 
-              className={filter === 'vocals' ? 'active' : ''} 
-              onClick={() => setFilter('vocals')}
-            >
-              Vocals
-            </button>
-            <button 
-              className={filter === 'business' ? 'active' : ''} 
-              onClick={() => setFilter('business')}
-            >
-              Business
-            </button>
+            {[
+              { key: 'all', label: 'All Specialties' },
+              { key: 'guitar', label: 'Guitar' },
+              { key: 'production', label: 'Production' },
+              { key: 'vocals', label: 'Vocals' },
+              { key: 'business', label: 'Business' }
+            ].map(({ key, label }) => (
+              <button 
+                key={key}
+                className={filter === key ? 'active' : ''} 
+                onClick={() => setFilter(key)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </section>
 
         <section className="mentors-grid">
           {loading ? (
-            <div>Loading mentors...</div>
+            <SkeletonMentorGrid count={4} />
+          ) : filteredMentors.length === 0 ? (
+            <div style={{
+              gridColumn: '1 / -1',
+              textAlign: 'center',
+              padding: '3rem 1rem',
+              color: 'var(--text-muted)'
+            }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: '1rem', opacity: 0.5 }}>
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem', fontSize: '1.125rem' }}>
+                No mentors found
+              </h3>
+              <p style={{ fontSize: '0.875rem' }}>
+                Try selecting a different specialty or check back soon for new mentors.
+              </p>
+            </div>
           ) : (
             filteredMentors.map(mentor => (
               <MentorCard 
@@ -661,30 +594,23 @@ const Homepage = ({ user, onAuthClick }) => {
   );
 };
 
-/* END OF SECTION 5 - Copy this below Section 4 */
 /* ============================================
-   App.js - SECTION 6 of 7
-   Main App Component with FIXED User Profile Loading
+   MAIN APP COMPONENT
    ============================================ */
-
-// Main App Component
 function App() {
   const [user, setUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mentorInfo, setMentorInfo] = useState(null);
 
-  // Auth state listener with FIXED student profile loading
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
       if (authUser) {
-        // First, try to load mentor profile
         try {
           const mentorProfileRef = doc(db, 'mentorProfiles', authUser.uid);
           const mentorProfileSnap = await getDoc(mentorProfileRef);
           
           if (mentorProfileSnap.exists()) {
-            // User is a mentor
             const profileData = mentorProfileSnap.data();
             setMentorInfo({
               id: authUser.uid,
@@ -692,13 +618,11 @@ function App() {
               ...profileData
             });
             
-            // Set user with mentor data
             setUser({
               ...authUser,
               displayName: profileData.displayName
             });
           } else {
-            // Not a mentor, try to load student profile
             setMentorInfo(null);
             
             try {
@@ -706,14 +630,12 @@ function App() {
               const userProfileSnap = await getDoc(userProfileRef);
               
               if (userProfileSnap.exists()) {
-                // User has a student profile
                 const profileData = userProfileSnap.data();
                 setUser({
                   ...authUser,
                   displayName: profileData.displayName || profileData.name || authUser.email
                 });
               } else {
-                // No profile exists yet
                 setUser(authUser);
               }
             } catch (error) {
@@ -727,7 +649,6 @@ function App() {
           setUser(authUser);
         }
       } else {
-        // User signed out
         setUser(null);
         setMentorInfo(null);
       }
@@ -756,7 +677,7 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
+      <div className="App" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header 
           user={user}
           onSignOut={handleSignOut}
@@ -764,42 +685,46 @@ function App() {
           mentorInfo={mentorInfo}
         />
         
-        <Routes>
-          <Route 
-            path="/" 
-            element={
-              <Homepage 
-                user={user} 
-                onAuthClick={() => setShowAuthModal(true)} 
-              />
-            } 
-          />
-          <Route 
-            path="/mentor-dashboard" 
-            element={
-              <MentorDashboard 
-                user={user} 
-                mentorInfo={mentorInfo} 
-              />
-            } 
-          />
-          <Route 
-            path="/profile" 
-            element={<UserProfile user={user} />} 
-          />
-          <Route 
-            path="/mentor-profile" 
-            element={<MentorProfile user={user} mentorInfo={mentorInfo} />} 
-          />
-          <Route 
-            path="/my-bookings" 
-            element={
-              <StudentDashboard 
-                user={user} 
-              />
-            } 
-          />
-        </Routes>
+        <div style={{ flex: 1 }}>
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <Homepage 
+                  user={user} 
+                  onAuthClick={() => setShowAuthModal(true)} 
+                />
+              } 
+            />
+            <Route 
+              path="/mentor-dashboard" 
+              element={
+                <MentorDashboard 
+                  user={user} 
+                  mentorInfo={mentorInfo} 
+                />
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={<UserProfile user={user} />} 
+            />
+            <Route 
+              path="/mentor-profile" 
+              element={<MentorProfile user={user} mentorInfo={mentorInfo} />} 
+            />
+            <Route 
+              path="/my-bookings" 
+              element={
+                <StudentDashboard 
+                  user={user} 
+                />
+              } 
+            />
+          </Routes>
+        </div>
+
+        <Footer />
 
         <AuthModal
           isOpen={showAuthModal}
@@ -810,35 +735,70 @@ function App() {
   );
 }
 
-/* END OF SECTION 6 - Copy this below Section 5 */
 /* ============================================
-   App.js - SECTION 7 of 7 (FINAL)
-   Export Statement
+   WRAPPED EXPORT WITH TOAST PROVIDER
    ============================================ */
+const AppWithProviders = () => (
+  <ToastProvider>
+    <App />
+  </ToastProvider>
+);
 
-export default App;
+export default AppWithProviders;
 
 /* ============================================
-   🎉 COMPLETE! All 7 sections done!
-   
-   Your App.js should now have:
-   ✅ Section 1: Imports & Icons
-   ✅ Section 2: Sample Mentors & Auth Modal
-   ✅ Section 3: Header Component & Styles
-   ✅ Section 4: Mentor Card & Booking Modal
-   ✅ Section 5: Homepage Component
-   ✅ Section 6: Main App Component (FIXED)
-   ✅ Section 7: Export
-   
-   KEY FIXES IN THIS VERSION:
-   - Student profile loading from userProfiles collection
-   - Uses displayName field for students
-   - Proper fallback handling
-   - Should fix "Hi, corktapp" issue
-   
-   DEPLOY & TEST:
-   1. Deploy to Vercel/your hosting
-   2. Hard refresh (Ctrl+Shift+R)
-   3. Check student dashboard name
-   4. Check if stats grid appears
+   INJECTED STYLES (hamburger menu, etc.)
    ============================================ */
+if (typeof document !== 'undefined') {
+  const id = 'app-injected-styles';
+  if (!document.getElementById(id)) {
+    const styleSheet = document.createElement("style");
+    styleSheet.id = id;
+    styleSheet.textContent = `
+      .dashboard-link {
+        color: white;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .dashboard-link:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-1px);
+      }
+
+      .user-menu-button {
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+      }
+
+      .user-menu-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .hamburger-icon {
+        display: flex;
+        flex-direction: column;
+        width: 24px;
+        height: 18px;
+        justify-content: space-between;
+      }
+
+      .hamburger-icon span {
+        display: block;
+        height: 2px;
+        width: 100%;
+        background-color: white;
+        border-radius: 1px;
+        transition: all 0.2s ease;
+      }
+    `;
+    document.head.appendChild(styleSheet);
+  }
+}
