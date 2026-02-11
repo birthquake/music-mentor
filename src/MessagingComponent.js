@@ -1,18 +1,17 @@
 // MessagingComponent.js - Real-time Chat for Bookings
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   subscribeToMessages, 
   sendMessage, 
   markMessagesAsRead,
   subscribeToUnreadMessages 
 } from './notificationHelpers';
-import { ButtonSpinner } from './LoadingComponents';
+import { ButtonSpinner, useToast } from './LoadingComponents';
 import './MessagingComponent.css';
 
 /* ============================================
-   SVG ICONS
+   ICONS
    ============================================ */
-
 const SendIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -33,9 +32,24 @@ const XIcon = () => (
   </svg>
 );
 
+/* Read receipt: single check = sent, double check = read */
+const CheckSingle = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"></polyline>
+  </svg>
+);
+
+const CheckDouble = () => (
+  <svg width="18" height="14" viewBox="0 0 28 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"></polyline>
+    <polyline points="26 6 15 17 12 14"></polyline>
+  </svg>
+);
+
 /* ============================================
    MESSAGING COMPONENT
    ============================================ */
+const MAX_MESSAGE_LENGTH = 500;
 
 const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
   const [messages, setMessages] = useState([]);
@@ -43,9 +57,9 @@ const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
-  const messageInputRef = useRef(null);
+  const textareaRef = useRef(null);
+  const { showToast } = useToast();
 
-  // Determine who the other person is
   const otherPersonId = user.uid === booking.mentorId ? booking.userId : booking.mentorId;
   const otherPersonName = user.uid === booking.mentorId ? 
     (booking.studentName || booking.userEmail?.split('@')[0] || 'Student') : 
@@ -65,7 +79,6 @@ const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
       setMessages(msgs);
       setLoading(false);
       
-      // Mark messages as read
       if (msgs.length > 0) {
         markMessagesAsRead(booking.id, user.uid);
       }
@@ -74,24 +87,34 @@ const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
     return () => unsubscribe();
   }, [isOpen, booking?.id, user.uid]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
-  // Focus input when opening
+  // Focus textarea when opening
   useEffect(() => {
-    if (isOpen && messageInputRef.current) {
-      setTimeout(() => {
-        messageInputRef.current.focus();
-      }, 100);
+    if (isOpen && textareaRef.current) {
+      setTimeout(() => textareaRef.current.focus(), 100);
     }
   }, [isOpen]);
 
+  // Auto-resize textarea
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }, []);
+
+  useEffect(() => {
+    autoResize();
+  }, [newMessage, autoResize]);
+
   const handleSendMessage = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     
     if (!newMessage.trim() || sending) return;
 
@@ -109,16 +132,28 @@ const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
 
       if (result.success) {
         setNewMessage('');
-        messageInputRef.current?.focus();
+        // Reset textarea height
+        if (textareaRef.current) {
+          textareaRef.current.style.height = 'auto';
+        }
+        textareaRef.current?.focus();
       } else {
-        alert('Failed to send message. Please try again.');
+        showToast('Failed to send message. Please try again.', 'error');
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Error sending message. Please try again.');
+      showToast('Error sending message. Please try again.', 'error');
     }
 
     setSending(false);
+  };
+
+  const handleKeyDown = (e) => {
+    // Enter sends, Shift+Enter adds newline
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   const formatTimestamp = (timestamp) => {
@@ -127,25 +162,23 @@ const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     const now = new Date();
     const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
+    const diffHours = Math.floor(diffMs / 3600000);
 
-    // Today - show time only
     if (diffHours < 24 && date.getDate() === now.getDate()) {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Yesterday
     if (diffHours < 48 && date.getDate() === now.getDate() - 1) {
       return 'Yesterday ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Older - show date and time
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + 
            ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   if (!isOpen) return null;
+
+  const charCount = newMessage.length;
 
   return (
     <div className="messaging-overlay" onClick={onClose}>
@@ -185,6 +218,7 @@ const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
             <div className="messages-list">
               {messages.map((msg) => {
                 const isOwn = msg.senderId === user.uid;
+                const isRead = msg.read || (msg.readBy && msg.readBy.includes(otherPersonId));
                 return (
                   <div 
                     key={msg.id} 
@@ -192,7 +226,14 @@ const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
                   >
                     <div className="message-bubble">
                       <div className="message-text">{msg.message}</div>
-                      <div className="message-time">{formatTimestamp(msg.createdAt)}</div>
+                      <div className="message-meta">
+                        <span className="message-time">{formatTimestamp(msg.createdAt)}</span>
+                        {isOwn && (
+                          <span className={`message-receipt ${isRead ? 'read' : 'sent'}`}>
+                            {isRead ? <CheckDouble /> : <CheckSingle />}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -204,15 +245,26 @@ const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
 
         {/* Input Area */}
         <form onSubmit={handleSendMessage} className="message-input-area">
-          <input
-            ref={messageInputRef}
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
-            disabled={sending}
-            maxLength={500}
-          />
+          <div className="message-input-wrapper">
+            <textarea
+              ref={textareaRef}
+              value={newMessage}
+              onChange={(e) => {
+                if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
+                  setNewMessage(e.target.value);
+                }
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="Type a message..."
+              disabled={sending}
+              rows={1}
+            />
+            {charCount > 0 && (
+              <span className={`message-char-count ${charCount > MAX_MESSAGE_LENGTH * 0.8 ? 'near-limit' : ''}`}>
+                {charCount}/{MAX_MESSAGE_LENGTH}
+              </span>
+            )}
+          </div>
           <button 
             type="submit" 
             className="send-btn"
@@ -227,5 +279,3 @@ const MessagingComponent = ({ booking, user, isOpen, onClose }) => {
 };
 
 export default MessagingComponent;
-
-/* END OF SECTION 6 - Create this as: src/MessagingComponent.js */
