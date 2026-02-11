@@ -1,74 +1,10 @@
-/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
-/* Section 1/5: Root Variables & Base Layout */
-
-:root {
-  /* Background Colors */
-  --bg-primary: #111827;
-  --bg-secondary: #1f2937;
-  --bg-elevated: #374151;
-  --bg-hover: #4b5563;
-  --bg-card: #1f2937;
-  
-  /* Text Colors */
-  --text-primary: #f9fafb;
-  --text-secondary: #e5e7eb;
-  --text-muted: #9ca3af;
-  --text-subtle: #6b7280;
-  
-  /* Accent Colors */
-  --accent-blue: #3b82f6;
-  --accent-blue-hover: #2563eb;
-  --accent-blue-light: #60a5fa;
-  --accent-green: #10b981;
-  --accent-green-hover: #059669;
-  --accent-green-light: #34d399;
-  --accent-purple: #8b5cf6;
-  --accent-purple-hover: #7c3aed;
-  --accent-orange: #f59e0b;
-  --accent-orange-hover: #d97706;
-  
-  /* Status Colors */
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
-  
-  /* Border & Shadow */
-  --border-color: #374151;
-  --border-hover: #4b5563;
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
-  
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  
-  /* Border Radius */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-full: 9999px;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* ============================================
+   MentorDashboard.css
+   Dashboard styles for both Mentor and Student views.
+   
+   All CSS variables (colors, spacing, radius, shadows)
+   are defined in App.css — do NOT redefine :root here.
+   ============================================ */
 
 /* Dashboard Container */
 .dashboard-container {
@@ -131,10 +67,9 @@ body {
   margin: 0;
 }
 
-/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
-/* Section 2/5: Stats Cards & Grid */
-
-/* Stats Grid */
+/* ============================================
+   STATS GRID & CARDS
+   ============================================ */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -142,29 +77,6 @@ body {
   margin-bottom: var(--spacing-2xl);
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
-  }
-}
-
-@media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-  }
-}
-
-@media (min-width: 1400px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 900px;
-  }
-}
-
-/* Clickable Stats Card */
 .stats-card {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
@@ -264,10 +176,10 @@ body {
   margin: 0 0 var(--spacing-xl) 0;
   letter-spacing: -0.5px;
 }
-/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
-/* Section 3/5: Bookings Section & Cards */
 
-/* Bookings Section */
+/* ============================================
+   BOOKINGS SECTION & CARDS
+   ============================================ */
 .bookings-section {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
@@ -342,6 +254,31 @@ body {
 
 .booking-card:hover::before,
 .student-booking-card:hover::before {
+  opacity: 1;
+}
+
+/* Status-based left border colors */
+.booking-card[data-status="pending"]::before,
+.student-booking-card[data-status="pending"]::before {
+  background: var(--warning);
+  opacity: 1;
+}
+
+.booking-card[data-status="confirmed"]::before,
+.student-booking-card[data-status="confirmed"]::before {
+  background: var(--accent-green);
+  opacity: 1;
+}
+
+.booking-card[data-status="declined"]::before,
+.student-booking-card[data-status="declined"]::before {
+  background: var(--error);
+  opacity: 1;
+}
+
+.booking-card[data-status="completed"]::before,
+.student-booking-card[data-status="completed"]::before {
+  background: var(--accent-purple);
   opacity: 1;
 }
 
@@ -500,10 +437,10 @@ body {
   margin: 0;
   font-size: 0.9375rem;
 }
-/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
-/* Section 4/5: Buttons, Actions & Video */
 
-/* Booking Actions */
+/* ============================================
+   BUTTONS, ACTIONS & VIDEO
+   ============================================ */
 .booking-actions {
   display: flex;
   gap: var(--spacing-md);
@@ -642,7 +579,9 @@ body {
   margin: var(--spacing-xs) 0 0 0;
 }
 
-/* Scrollbar Styling */
+/* ============================================
+   SCROLLBAR
+   ============================================ */
 .date-grid::-webkit-scrollbar,
 .time-grid::-webkit-scrollbar,
 .calendar-view::-webkit-scrollbar {
@@ -670,10 +609,79 @@ body {
 .calendar-view::-webkit-scrollbar-thumb:hover {
   background: var(--border-hover);
 }
-/* Complete Modern MentorDashboard.css - Fiverr-Inspired */
-/* Section 5/5: Responsive Design (FINAL) */
 
-/* Tablet Responsive */
+/* ============================================
+   MESSAGE BUTTON
+   ============================================ */
+.booking-message-btn-container {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+.message-booking-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--accent-blue);
+  color: var(--accent-blue);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.3px;
+  position: relative;
+}
+
+.message-booking-btn:hover {
+  background: var(--accent-blue);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.message-booking-btn:active {
+  transform: translateY(0);
+}
+
+.message-booking-btn svg {
+  flex-shrink: 0;
+}
+
+/* Message Badge (unread count) */
+.message-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--error);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-full);
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ============================================
+   RESPONSIVE — TABLET (768px)
+   ============================================ */
 @media (max-width: 768px) {
   .dashboard-container {
     padding: var(--spacing-xl) var(--spacing-md);
@@ -737,9 +745,16 @@ body {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .message-booking-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+  }
 }
 
-/* Mobile Responsive */
+/* ============================================
+   RESPONSIVE — MOBILE (480px)
+   ============================================ */
 @media (max-width: 480px) {
   .dashboard-container {
     padding: var(--spacing-lg) var(--spacing-sm);
@@ -805,157 +820,7 @@ body {
     padding: 0.75rem 1.25rem;
     font-size: 0.875rem;
   }
-}
 
-/* Extra Small Devices */
-@media (max-width: 360px) {
-  .dashboard-container {
-    padding: var(--spacing-md) var(--spacing-xs);
-  }
-
-  .mentor-welcome h1,
-  .student-welcome h1 {
-    font-size: 1.5rem;
-  }
-
-  .stats-value {
-    font-size: 2rem;
-  }
-}
-
-/* Large Desktop */
-@media (min-width: 1400px) {
-  .dashboard-container {
-    max-width: 1400px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* Focus & Accessibility */
-*:focus-visible {
-  outline: 2px solid var(--accent-blue);
-  outline-offset: 2px;
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .booking-actions {
-    display: none;
-  }
-
-  .dashboard-container {
-    max-width: 100%;
-    padding: 0;
-  }
-
-  .booking-card,
-  .student-booking-card {
-    break-inside: avoid;
-    box-shadow: none;
-    border: 1px solid #333;
-  }
-}
-
-/* ============================================
-   Section 9: Message Button CSS (FINAL!)
-   Add this to the end of MentorDashboard.css
-   ============================================ */
-
-/* Message Button Container */
-.booking-message-btn-container {
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--border-color);
-}
-
-/* Message Booking Button */
-.message-booking-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  width: 100%;
-  padding: 0.875rem 1.5rem;
-  background: var(--bg-secondary);
-  border: 2px solid var(--accent-blue);
-  color: var(--accent-blue);
-  border-radius: var(--radius-md);
-  font-weight: 700;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: 0.3px;
-  position: relative;
-}
-
-.message-booking-btn:hover {
-  background: var(--accent-blue);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.message-booking-btn:active {
-  transform: translateY(0);
-}
-
-.message-booking-btn svg {
-  flex-shrink: 0;
-}
-
-/* Message Badge (unread count) */
-.message-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: var(--error, #ef4444);
-  color: white;
-  font-size: 0.625rem;
-  font-weight: 700;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  min-width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  animation: badgePulse 2s ease-in-out infinite;
-}
-
-@keyframes badgePulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-  .message-booking-btn {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.875rem;
-  }
-}
-
-@media (max-width: 480px) {
   .booking-message-btn-container {
     margin-top: var(--spacing-md);
     padding-top: var(--spacing-md);
@@ -976,3 +841,54 @@ body {
   }
 }
 
+/* ============================================
+   RESPONSIVE — EXTRA SMALL (360px)
+   ============================================ */
+@media (max-width: 360px) {
+  .dashboard-container {
+    padding: var(--spacing-md) var(--spacing-xs);
+  }
+
+  .mentor-welcome h1,
+  .student-welcome h1 {
+    font-size: 1.5rem;
+  }
+
+  .stats-value {
+    font-size: 2rem;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — LARGE DESKTOP (1400px+)
+   ============================================ */
+@media (min-width: 1400px) {
+  .dashboard-container {
+    max-width: 1400px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ============================================
+   PRINT
+   ============================================ */
+@media print {
+  .booking-actions {
+    display: none;
+  }
+
+  .dashboard-container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .booking-card,
+  .student-booking-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #333;
+  }
+}
