@@ -907,6 +907,16 @@ body {
    RESPONSIVE — TABLET (768px)
    ============================================ */
 @media (max-width: 768px) {
+  /* Space for bottom nav so content isn't hidden */
+  body {
+    padding-bottom: 72px;
+  }
+
+  /* Hide full footer on mobile — bottom nav replaces it */
+  .site-footer {
+    display: none;
+  }
+
   .container {
     padding: 0 16px;
   }
@@ -1155,10 +1165,18 @@ a:focus-visible {
     padding: 0.625rem 1rem;
   }
 
+  .time-grid {
+    gap: 0.625rem;
+  }
+
   /* Date option buttons */
   .date-option {
     min-height: 52px;
     padding: 0.75rem 1rem;
+  }
+
+  .date-grid {
+    gap: 0.625rem;
   }
 
   /* Stats cards used as filter buttons */
