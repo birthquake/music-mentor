@@ -315,10 +315,29 @@ const MentorCard = ({ mentor, onBook, user }) => {
     ));
   };
 
+  // Generate a unique gradient from the mentor's name
+  const getAvatarGradient = (name) => {
+    const gradients = [
+      'linear-gradient(135deg, #8b5cf6, #3b82f6)',  // purple → blue
+      'linear-gradient(135deg, #ec4899, #f59e0b)',  // pink → amber
+      'linear-gradient(135deg, #10b981, #06b6d4)',  // green → cyan
+      'linear-gradient(135deg, #f43f5e, #8b5cf6)',  // rose → purple
+      'linear-gradient(135deg, #3b82f6, #10b981)',  // blue → green
+      'linear-gradient(135deg, #f59e0b, #ef4444)',  // amber → red
+      'linear-gradient(135deg, #06b6d4, #8b5cf6)',  // cyan → purple
+      'linear-gradient(135deg, #84cc16, #06b6d4)',  // lime → cyan
+    ];
+    let hash = 0;
+    for (let i = 0; i < (name || '').length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return gradients[Math.abs(hash) % gradients.length];
+  };
+
   return (
     <div className="mentor-card">
       <div className="mentor-header">
-        <div className="mentor-avatar">
+        <div className="mentor-avatar" style={{ background: getAvatarGradient(mentor.name) }}>
           {mentor.name.split(' ').map(n => n[0]).join('')}
         </div>
         <div className="mentor-basic-info">
