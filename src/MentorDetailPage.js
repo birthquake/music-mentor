@@ -134,6 +134,25 @@ const MentorDetailPage = ({ user, onAuthClick }) => {
   const [showBooking, setShowBooking] = useState(false);
   const { showToast } = useToast();
 
+  // Unique gradient per mentor name
+  const getAvatarGradient = (name) => {
+    const gradients = [
+      'linear-gradient(135deg, #8b5cf6, #3b82f6)',
+      'linear-gradient(135deg, #ec4899, #f59e0b)',
+      'linear-gradient(135deg, #10b981, #06b6d4)',
+      'linear-gradient(135deg, #f43f5e, #8b5cf6)',
+      'linear-gradient(135deg, #3b82f6, #10b981)',
+      'linear-gradient(135deg, #f59e0b, #ef4444)',
+      'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+      'linear-gradient(135deg, #84cc16, #06b6d4)',
+    ];
+    let hash = 0;
+    for (let i = 0; i < (name || '').length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return gradients[Math.abs(hash) % gradients.length];
+  };
+
   useEffect(() => {
     const loadMentor = async () => {
       setLoading(true);
@@ -213,7 +232,7 @@ const MentorDetailPage = ({ user, onAuthClick }) => {
         <div className="mentor-detail-main">
           {/* Hero */}
           <div className="mentor-detail-hero">
-            <div className="mentor-detail-avatar">
+            <div className="mentor-detail-avatar" style={{ background: getAvatarGradient(mentor.displayName) }}>
               {mentor.displayName?.split(' ').map(n => n[0]).join('') || '?'}
             </div>
             <div className="mentor-detail-intro">
