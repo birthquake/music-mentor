@@ -1,6 +1,8 @@
 // MobileBottomNav.js — Sticky bottom navigation for mobile
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { db } from './firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import './MobileBottomNav.css';
 
 /* ============================================
@@ -58,11 +60,54 @@ const MusicNoteIcon = ({ active }) => (
 );
 
 /* ============================================
+   UNREAD BADGE
+   ============================================ */
+const UnreadBadge = ({ count }) => {
+  if (!count || count <= 0) return null;
+  return (
+    <span className="bottom-nav-badge">
+      {count > 9 ? '9+' : count}
+    </span>
+  );
+};
+
+/* ============================================
    COMPONENT
    ============================================ */
 const MobileBottomNav = ({ user, mentorInfo }) => {
   const location = useLocation();
   const path = location.pathname;
+  const [pendingCount, setPendingCount] = useState(0);
+
+  // Live listener for pending booking count
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const isMentor = !!mentorInfo;
+    const q = collection(db, 'bookings');
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      let count = 0;
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.status === 'pending') {
+          if (isMentor && data.mentorId === user.uid) {
+            count++; // Mentor sees incoming requests
+          }
+        }
+        // Students see recently confirmed sessions
+        if (!isMentor && data.userId === user.uid && data.status === 'confirmed') {
+          const confirmedAt = data.confirmedAt?.toDate ? data.confirmedAt.toDate() : null;
+          if (confirmedAt && (Date.now() - confirmedAt.getTime()) < 86400000) {
+            count++;
+          }
+        }
+      });
+      setPendingCount(count);
+    });
+
+    return () => unsubscribe();
+  }, [user?.uid, mentorInfo]);
 
   if (!user) return null;
 
@@ -71,12 +116,12 @@ const MobileBottomNav = ({ user, mentorInfo }) => {
   const navItems = isMentor
     ? [
         { to: '/', label: 'Browse', icon: HomeIcon, match: ['/'] },
-        { to: '/mentor-dashboard', label: 'Dashboard', icon: SessionsIcon, match: ['/mentor-dashboard'] },
+        { to: '/mentor-dashboard', label: 'Dashboard', icon: SessionsIcon, match: ['/mentor-dashboard'], badge: pendingCount },
         { to: '/mentor-profile', label: 'Profile', icon: ProfileIcon, match: ['/mentor-profile'] },
       ]
     : [
         { to: '/', label: 'Browse', icon: HomeIcon, match: ['/'] },
-        { to: '/my-bookings', label: 'Sessions', icon: MusicNoteIcon, match: ['/my-bookings'] },
+        { to: '/my-bookings', label: 'Sessions', icon: MusicNoteIcon, match: ['/my-bookings'], badge: pendingCount },
         { to: '/profile', label: 'Profile', icon: ProfileIcon, match: ['/profile'] },
       ];
 
@@ -93,8 +138,11 @@ const MobileBottomNav = ({ user, mentorInfo }) => {
             className={`bottom-nav-item ${isActive ? 'active' : ''}`}
             aria-current={isActive ? 'page' : undefined}
           >
-            <Icon active={isActive} />
-            <span>{item.label}</span>
+            <span className="bottom-nav-icon">
+              <Icon active={isActive} />
+              {item.badge > 0 && <UnreadBadge count={item.badge} />}
+            </span>
+            <span className="bottom-nav-label">{item.label}</span>
           </Link>
         );
       })}
