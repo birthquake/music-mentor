@@ -361,13 +361,26 @@ body {
   transition: all 0.25s ease;
   border: 1px solid var(--border-color);
   animation: fadeInUp 0.4s ease-out both;
+  cursor: default;
 }
 
 .mentor-card:hover {
   background: var(--bg-elevated);
   border-color: var(--accent-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-primary);
+}
+
+/* Name link turns blue on card hover */
+.mentor-card:hover .mentor-basic-info h3 a {
+  color: var(--accent-blue-light) !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Book button lifts on card hover */
+.mentor-card:hover .book-btn:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 
 .mentor-card:nth-child(1) { animation-delay: 0.05s; }
@@ -383,17 +396,24 @@ body {
 }
 
 .mentor-avatar {
-  width: 40px;
-  height: 40px;
-  background: var(--accent-primary);
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
   color: white;
-  border-radius: 50%;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 800;
+  font-size: 15px;
   flex-shrink: 0;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.mentor-card:hover .mentor-avatar {
+  transform: scale(1.05);
 }
 
 .mentor-basic-info {
