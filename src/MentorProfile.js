@@ -59,6 +59,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
   };
 
   // Parse various time input formats and convert to 24-hour format
+  // eslint-disable-next-line no-unused-vars
   const parseTimeInput = (input) => {
     try {
       if (!input) return null;
@@ -102,6 +103,7 @@ const MentorProfile = ({ user, mentorInfo }) => {
       setLoading(false);
       setError('Please log in to manage your mentor profile');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadProfile = async () => {
