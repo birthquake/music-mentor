@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMentorProfile } from './profileHelpers';
-import { db } from './firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
 import { FullPageLoading, useToast } from './LoadingComponents';
 import CalendarBooking from './CalendarBooking';
 import './MentorDetailPage.css';
