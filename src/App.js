@@ -16,7 +16,7 @@ import {
   doc,
   getDoc
 } from 'firebase/firestore';
-import { createBookingWithProfiles, getEnhancedMentors } from './profileHelpers';
+import { getEnhancedMentors } from './profileHelpers';
 import { ToastProvider, useToast, SkeletonMentorGrid } from './LoadingComponents';
 import UserProfile from './UserProfile';
 import MentorProfile from './MentorProfile';
@@ -52,11 +52,6 @@ const ClockIcon = () => (
   </svg>
 );
 
-const CheckIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="20,6 9,17 4,12"></polyline>
-  </svg>
-);
 
 const MusicNoteIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
