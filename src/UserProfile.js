@@ -199,6 +199,7 @@ const UserProfile = ({ user }) => {
     if (user) {
       loadProfile();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadProfile = async () => {
