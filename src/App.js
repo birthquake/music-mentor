@@ -13,9 +13,6 @@ import {
   signOut
 } from 'firebase/auth';
 import { 
-  collection, 
-  addDoc,
-  serverTimestamp,
   doc,
   getDoc
 } from 'firebase/firestore';
@@ -386,122 +383,6 @@ const MentorCard = ({ mentor, onBook, user }) => {
         >
           {user ? 'Book Session' : 'Sign in to Book'}
         </button>
-      </div>
-    </div>
-  );
-};
-
-/* ============================================
-   BOOKING MODAL (legacy fallback — CalendarBooking
-   is the primary booking flow)
-   ============================================ */
-const BookingModal = ({ mentor, isOpen, onClose, onConfirm, user }) => {
-  const [selectedTime, setSelectedTime] = useState('');
-  const [message, setMessage] = useState('');
-  const [videoPreferred, setVideoPreferred] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { showToast } = useToast();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const result = await createBookingWithProfiles({
-        mentorId: mentor.id,
-        mentorName: mentor.name,
-        userId: user.uid,
-        userEmail: user.email,
-        preferredTime: selectedTime,
-        message,
-        videoPreferred,
-        status: 'pending',
-        rate: mentor.rate
-      });
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      
-      onConfirm(selectedTime, message, videoPreferred);
-      
-      setSelectedTime('');
-      setMessage('');
-      setVideoPreferred(false);
-    } catch (error) {
-      console.error('Error creating booking:', error);
-      showToast('Error creating booking. Please try again.', 'error');
-    }
-    
-    setLoading(false);
-  };
-
-  if (!isOpen || !mentor) return null;
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content booking-modal" onClick={e => e.stopPropagation()}>
-        <div className="booking-header">
-          <h2>Book Session with {mentor.name}</h2>
-          <p className="session-details">
-            <ClockIcon /> 15-minute session &bull; ${mentor.rate}
-          </p>
-        </div>
-        
-        <form onSubmit={handleSubmit} className="booking-form">
-          <div className="form-group">
-            <label>Preferred Time Slot</label>
-            <select 
-              value={selectedTime} 
-              onChange={e => setSelectedTime(e.target.value)}
-              required
-            >
-              <option value="">Choose your preferred time</option>
-              <option value="morning">Morning (9AM - 12PM)</option>
-              <option value="afternoon">Afternoon (12PM - 5PM)</option>
-              <option value="evening">Evening (5PM - 9PM)</option>
-              <option value="flexible">I'm flexible</option>
-            </select>
-          </div>
-          
-          <div className="form-group">
-            <label>What specific challenge can {mentor.name.split(' ')[0]} help you with?</label>
-            <textarea 
-              value={message}
-              onChange={e => setMessage(e.target.value)}
-              placeholder="Be specific about your question or challenge. This helps your mentor prepare and give you the best advice in your 15 minutes together."
-              rows="4"
-              required
-            />
-          </div>
-          
-          {mentor.videoAvailable && (
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={videoPreferred}
-                  onChange={e => setVideoPreferred(e.target.checked)}
-                />
-                <CheckIcon />
-                <span>I'd prefer video for this session (recommended for technique questions)</span>
-              </label>
-            </div>
-          )}
-          
-          <div className="booking-actions">
-            <button type="button" onClick={onClose} className="cancel-btn">
-              Cancel
-            </button>
-            <button 
-              type="submit"
-              className="confirm-btn"
-              disabled={loading || !selectedTime || !message.trim()}
-            >
-              {loading ? 'Requesting...' : `Request Session ($${mentor.rate})`}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );
