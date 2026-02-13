@@ -32,12 +32,14 @@ class DailyVideoService {
     console.log('🔍 Domain:', this.domain);
     console.log('🔍 Booking details:', bookingDetails);
 
-    const { scheduledStart, scheduledEnd, mentorName: _mentorName, studentName: _studentName } = bookingDetails;
+    // eslint-disable-next-line no-unused-vars
+    const { scheduledStart, scheduledEnd, mentorName, studentName } = bookingDetails;
     
     // Calculate session duration (add 5 minutes buffer)
     const startTime = new Date(scheduledStart.seconds * 1000);
     const endTime = new Date(scheduledEnd.seconds * 1000);
-    const _durationMinutes = Math.ceil((endTime - startTime) / (1000 * 60)) + 5;
+    // eslint-disable-next-line no-unused-vars
+    const durationMinutes = Math.ceil((endTime - startTime) / (1000 * 60)) + 5;
 
     // Public room config - explicitly set to public so anyone with link can join
     const roomConfig = {
