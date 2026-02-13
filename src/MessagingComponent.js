@@ -3,8 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   subscribeToMessages, 
   sendMessage, 
-  markMessagesAsRead,
-  subscribeToUnreadMessages 
+  markMessagesAsRead
 } from './notificationHelpers';
 import { ButtonSpinner, useToast } from './LoadingComponents';
 import './MessagingComponent.css';
