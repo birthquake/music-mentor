@@ -5,6 +5,7 @@ import { collection, doc, getDoc, setDoc, query, where, getDocs } from 'firebase
 import { db } from './firebase';
 
 // 1. Mentor Availability Data Structure (stored in Firestore)
+// eslint-disable-next-line no-unused-vars
 const mentorAvailabilityExample = {
   mentorId: "mentor_123",
   mentorEmail: "sarah@musicmentor.com",
