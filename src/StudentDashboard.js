@@ -2,10 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { db } from './firebase';
 import { 
   collection, 
-  query, 
-  where, 
-  onSnapshot,
-  orderBy
+  onSnapshot
 } from 'firebase/firestore';
 import { useLocation, Link } from 'react-router-dom';
 import { 
@@ -18,7 +15,7 @@ import { subscribeToUnreadMessages } from './notificationHelpers';
 import { getUserProfile } from './profileHelpers';
 import MessagingComponent from './MessagingComponent';
 import { ProfileCompletionBar } from './UserProfile';
-import { playConfirmSound, playDeclineSound, playNotificationSound } from './notificationSounds';
+import { playConfirmSound, playDeclineSound } from './notificationSounds';
 import './MentorDashboard.css';
 
 /* ============================================
@@ -470,7 +467,6 @@ const StudentDashboard = ({ user }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('pending');
-  const [error, setError] = useState(null);
   const [messagingOpen, setMessagingOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -553,6 +549,7 @@ const StudentDashboard = ({ user }) => {
     });
 
     return () => unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {
