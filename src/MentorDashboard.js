@@ -2,22 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { db } from './firebase';
 import { 
   collection, 
-  query, 
-  where, 
   onSnapshot,
   doc,
   updateDoc,
-  orderBy,
   Timestamp,
-  getDoc,
-  addDoc
+  getDoc
 } from 'firebase/firestore';
 import { confirmBookingWithVideo } from './bookingVideoHelpers';
-import { getVideoRoomStatus, canAccessVideoSession, getSessionTimeStatus } from './bookingVideoHelpers';
+import { getVideoRoomStatus, canAccessVideoSession } from './bookingVideoHelpers';
 import { 
   ButtonSpinner, 
-  SkeletonGrid,
-  SkeletonStatsCard,
   FullPageLoading,
   useToast
 } from './LoadingComponents';
@@ -359,7 +353,7 @@ const MentorDashboard = ({ user, mentorInfo }) => {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           
-          if (data.mentorId == mentorInfo.id || data.mentorId === user.uid || data.mentorId == user.uid) {
+          if (data.mentorId === mentorInfo.id || data.mentorId === user.uid || data.mentorId === user.uid) {
             bookingData.push({
               id: doc.id,
               ...data
