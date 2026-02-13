@@ -32,12 +32,12 @@ class DailyVideoService {
     console.log('🔍 Domain:', this.domain);
     console.log('🔍 Booking details:', bookingDetails);
 
-    const { scheduledStart, scheduledEnd, mentorName, studentName } = bookingDetails;
+    const { scheduledStart, scheduledEnd, mentorName: _mentorName, studentName: _studentName } = bookingDetails;
     
     // Calculate session duration (add 5 minutes buffer)
     const startTime = new Date(scheduledStart.seconds * 1000);
     const endTime = new Date(scheduledEnd.seconds * 1000);
-    const durationMinutes = Math.ceil((endTime - startTime) / (1000 * 60)) + 5;
+    const _durationMinutes = Math.ceil((endTime - startTime) / (1000 * 60)) + 5;
 
     // Public room config - explicitly set to public so anyone with link can join
     const roomConfig = {
